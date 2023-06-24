@@ -1,0 +1,4 @@
+.get-files-container {
+    display: flex;
+    flex-direction: row;
+}

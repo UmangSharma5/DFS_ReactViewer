@@ -1,0 +1,20 @@
+.render-file-container {
+    display: flex;
+    width: 100vw;
+}
+  
+
+.button-container {
+    flex: 35%;
+    display: flex;
+    flex-wrap: wrap;
+    /* background-color: red; */
+    justify-content: space-around;
+}
+
+.viewer-container {
+    flex: 65%;
+    /* background-color: blue; */
+    flex-grow: 1;
+   
+}
