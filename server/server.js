@@ -17,6 +17,15 @@ var minioClient = new Minio.Client({
 });
 
 
+// app.get("/delete",function(req,res){
+//   minioClient.removeBucket('umangsstudentsiiitacin', function(err) {
+//     if (err) return console.log('unable to remove bucket.')
+//     console.log('Bucket removed successfully.')
+//   })
+//   res.send("done");
+// })
+
+
 app.get("/buckets",function(req,res){    
     minioClient.listBuckets(function(err, buckets) {
         if (err) return console.log(err)
