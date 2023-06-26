@@ -2,17 +2,20 @@ import React, { useEffect, useState } from "react";
 import axios, { all } from 'axios';
 import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
+import BarLoader from "react-spinners/BarLoader";
 
 function RenderFile(props) {
     const [viewerImage,setViewerImage] =useState();
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
-    
+    const [loading,setLoading] = useState(false);
+
     useEffect(()=>{
         getAllImageLinks();
     },[]);
 
     async function getAllImageLinks() {
+        setLoading(true);
         try {
             const response = await Promise.all(
                 props.info.map((image) => {
@@ -25,7 +28,7 @@ function RenderFile(props) {
                         });
                 })
             );
-
+            setLoading(false);
             setAllImages(response);
         } catch (error) {
             console.log(error);
@@ -40,11 +43,16 @@ function RenderFile(props) {
         setImageName(props.info[num]);
     }
     
+    if(loading){
+        return(
+            <BarLoader color="#36d7b7" />
+        )
+    }
    
     return(
-        <div className="render-file-container">
-            <div className="button-container">
-            {props.info.map((file, i) => {
+       <div className="render-file-container">
+         <div className="button-container">
+                {props.info.map((file, i) => {
                     const buttonStyles = {
                         margin: '10px',
                         backgroundImage:allImages[i] ? `url(${allImages[i]})` : 'none',
@@ -58,13 +66,16 @@ function RenderFile(props) {
                         width: '150px', 
                     };
                     return (
+                        <div>
                         <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
+                        <p id="image-name">{file}</p>
+                        </div>
                     );
                 })}
             </div>
             <div className="viewer-container">
-                {viewerImage && <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName}/>}
-            </div>
+                {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} /> : <p>Select an image to view</p>}
+            </div> 
         </div>
     )
 }
