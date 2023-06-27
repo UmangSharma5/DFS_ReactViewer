@@ -32,9 +32,9 @@ app.get("/buckets",function(req,res){
         res.json(buckets);
       })
 });
-
+// /getMyBucket 
 app.get("/objects/:url",function(req,res){
-    const bucketName = req.params.url;
+    const bucketName = req.params.url; // get this from database (sql)
     console.log(bucketName);
     minioClient.bucketExists(bucketName, function(err, exists) {
         if(err){

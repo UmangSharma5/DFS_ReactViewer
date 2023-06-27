@@ -7,6 +7,7 @@ import GetFiles from './components/GetFiles';
 function App(props) {
   const [fileName,setFileName] = useState();
   const [countSubmit,setCountSubmit] =useState(0);
+  // {curr_count:0,objInfo:objInfo}
 
   
   const email = localStorage.getItem("email").toLowerCase();
@@ -37,9 +38,12 @@ function App(props) {
     
     try {
       console.log("Initiating upload")
-      await axios.post(bucketURL, formData);
+      const response = await axios.post(bucketURL, formData);
+      // check what all we get here. (objInfo.name)
+      // const objInfo = response.data.data
       console.log("Upload complete");
       setCountSubmit((preValue) => preValue+1);
+      
       // window.location.reload();
     } catch (error) {
       console.log(error);

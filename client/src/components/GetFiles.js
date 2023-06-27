@@ -4,9 +4,21 @@ import './GetFiles.css'
 
 function GetFiles(props){
     const [backendData,setBackendData] = useState([{}]);
-
+    // const isFirstRender = React.useRef(true);
     useEffect(() => {
+        // if(isFirstRender.current){
+        //     getFiles();
+        //     isFirstRender.current = false;
+        //     return;
+        // }
+        // else{
+        //     const latest_obj = props.id.objInfo.name
+        //     const newnBackendData = [...backendData,latest_obj]
+        // }
         getFiles();
+
+
+      
     }, [props.id]);
 
     function getFiles() {
@@ -19,6 +31,8 @@ function GetFiles(props){
         )
         console.log(backendData);
     }
+
+
 
     return (
         <div className="get-files-container">
