@@ -7,7 +7,7 @@ function GetFiles(props){
 
     useEffect(() => {
         getFiles();
-    }, []);
+    }, [props.id]);
 
     function getFiles() {
         fetch("/objects/"+props.email)
@@ -22,7 +22,7 @@ function GetFiles(props){
 
     return (
         <div className="get-files-container">
-            {backendData.objects!== undefined ? <RenderFile info ={backendData.objects} email={props.email}/> : null} 
+            {backendData.objects!== undefined ? <RenderFile submitCount={props.id} info ={backendData.objects} email={props.email}/> : null} 
         </div>
     )
 }

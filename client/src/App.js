@@ -28,6 +28,7 @@ function App(props) {
     setFileName(e.target.files[0]);
   };
 
+  
   async function uploadFile(e) {
     e.preventDefault();
     const formData = new FormData();
@@ -35,16 +36,17 @@ function App(props) {
     let bucketURL = "http://localhost:5000/objects/" + shortEmail;
     
     try {
-      axios.post(bucketURL, formData);
+      console.log("Initiating upload")
+      await axios.post(bucketURL, formData);
       console.log("Upload complete");
       setCountSubmit((preValue) => preValue+1);
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.log(error);
     }
 
   }
-
+   
   
   return (
     <div className="App">

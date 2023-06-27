@@ -90,9 +90,10 @@ app.post("/objects/:url",upload.single('file'),function(req,res){
   let file = path;
   minioClient.fPutObject(bucketName, fileName, file, function(err, objInfo) {
     if(err) {
-        return console.log(err)
+        res.status(400).json({error:"Failed to upload"})
     }
     console.log("Success", objInfo.etag, objInfo.versionId)
+    res.status(200).json({data:objInfo})
   })
 });
 

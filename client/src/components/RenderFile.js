@@ -11,8 +11,9 @@ function RenderFile(props) {
     const [loading,setLoading] = useState(false);
 
     useEffect(()=>{
+        console.log("Getting image links")
         getAllImageLinks();
-    },[]);
+    },[props.info]);
 
     async function getAllImageLinks() {
         setLoading(true);
