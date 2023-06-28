@@ -5,10 +5,10 @@ import GetFiles from './components/GetFiles';
 
 
 function App(props) {
-  const [fileName,setFileName] = useState();
-  const [countSubmit,setCountSubmit] =useState(0);
-  // {curr_count:0,objInfo:objInfo}
-
+  const [currentFile,setCurrentFile] =useState({
+    count: 0,
+    name: ""
+  });
   
   const email = localStorage.getItem("email").toLowerCase();
   let shortEmail ='';
@@ -19,32 +19,36 @@ function App(props) {
     }
   }
   
-  console.log(shortEmail);
 
   function handleClick(){
     props.logout();
   }
 
   function handleChange(e){
-    setFileName(e.target.files[0]);
+    const file =  e.target.files[0];
+    setCurrentFile((prevValue)=>({
+      ...prevValue,
+      name : file
+    }))
   };
 
   
   async function uploadFile(e) {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('file', fileName);
+    formData.append('file', currentFile.name);
     let bucketURL = "http://localhost:5000/objects/" + shortEmail;
-    
     try {
       console.log("Initiating upload")
+      console.log(formData);
       const response = await axios.post(bucketURL, formData);
-      // check what all we get here. (objInfo.name)
-      // const objInfo = response.data.data
+      console.log(response);
       console.log("Upload complete");
-      setCountSubmit((preValue) => preValue+1);
+      setCurrentFile((prevValue) => ({
+        ...prevValue,
+        count: prevValue.count+1
+      }))
       
-      // window.location.reload();
     } catch (error) {
       console.log(error);
     }
@@ -64,7 +68,7 @@ function App(props) {
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
-        <GetFiles id={countSubmit} email={shortEmail}/>
+        <GetFiles fileObj={currentFile} email={shortEmail}/>
       </div>
     </div>
   );

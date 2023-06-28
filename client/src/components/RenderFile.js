@@ -9,14 +9,35 @@ function RenderFile(props) {
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
     const [loading,setLoading] = useState(false);
+    const isFirstRender = React.useRef(true);
 
     useEffect(()=>{
         console.log("Getting image links")
-        getAllImageLinks();
+        console.log(props);
+        console.log(isFirstRender.current);
+        if(isFirstRender.current){
+            getAllImageLinks();
+            console.log(allImages);
+            if (props.info.length > 0) {
+                isFirstRender.current = false;
+            }
+            return;
+        }else{
+            let imageObj = { imageName: props.currFile };
+            axios.get("http://localhost:5000/getURL/"+props.email, { params: imageObj })
+            .then((response) => response.data.image)
+            .then((image) => {
+                setAllImages((prevValue) => [...prevValue, image]);
+            })
+            .catch((error) => {
+                console.log(error);
+                return null;
+            });
+            console.log(allImages);
+        }
     },[props.info]);
 
     async function getAllImageLinks() {
-        setLoading(true);
         try {
             const response = await Promise.all(
                 props.info.map((image) => {
@@ -29,25 +50,18 @@ function RenderFile(props) {
                         });
                 })
             );
-            setLoading(false);
             setAllImages(response);
+            console.log(allImages)
         } catch (error) {
             console.log(error);
         }
     }
-
 
     function handleClick(e){
         console.log(allImages);
         let num = e.target.id;
         setViewerImage(allImages[num]);
         setImageName(props.info[num]);
-    }
-    
-    if(loading){
-        return(
-            <BarLoader color="#36d7b7" />
-        )
     }
    
     return(

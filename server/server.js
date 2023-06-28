@@ -1,101 +1,21 @@
-const express = require('express');
+import express from 'express';
 const app = express();
-var Minio = require('minio');
-var cors = require('cors');
-var bodyParser = require('body-parser');
-const multer = require('multer');
+import cors from 'cors';
+import bodyParser from 'body-parser';
 app.use(cors());
 app.use(bodyParser.json());
-const upload = multer({ dest: 'uploads/' });
 
-var minioClient = new Minio.Client({
-    endPoint: 'play.min.io',
-    port: 9000,
-    useSSL: true,
-    accessKey: 'Q3AM3UQ867SPQQA43P2F',
-    secretKey: 'zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG'
-});
+// const objectsRoute = require("./routes/objects");
+// const getURL = require("./routes/getURL");
+import objectsRoute from './routes/objects.js';
+import getURL from './routes/getURL.js';
 
+// import objectsRoute from "./routes/objects";
+// import getURL from "./routes/getURL";
 
-// app.get("/delete",function(req,res){
-//   minioClient.removeBucket('umangsstudentsiiitacin', function(err) {
-//     if (err) return console.log('unable to remove bucket.')
-//     console.log('Bucket removed successfully.')
-//   })
-//   res.send("done");
-// })
+app.use('/objects',objectsRoute);
+app.use('/getURL',getURL);
 
-
-app.get("/buckets",function(req,res){    
-    minioClient.listBuckets(function(err, buckets) {
-        if (err) return console.log(err)
-        res.json(buckets);
-      })
-});
-// /getMyBucket 
-app.get("/objects/:url",function(req,res){
-    const bucketName = req.params.url; // get this from database (sql)
-    console.log(bucketName);
-    minioClient.bucketExists(bucketName, function(err, exists) {
-        if(err){
-            console.log("here");
-        }
-        if(exists){
-            //
-        }
-        else{
-          minioClient.makeBucket(bucketName,(err) =>{
-            if(err){
-                console.error('Error creating bucket:', err);
-                res.status(500).json({ error: 'Failed to create bucket' });
-            } else{
-                console.log('Bucket created successfully.');
-            }
-          })
-        }
-        const objects = [];
-        const stream = minioClient.listObjects(bucketName, '', true);
-    
-        stream.on('data', (obj) => {
-          objects.push(obj.name);
-        });
-    
-        stream.on('error', (err) => {
-          console.error('Error listing objects:', err);
-          res.status(500).json({ error: 'Failed to list objects' });
-        });
-    
-        stream.on('end', () => {
-          console.log('Listing objects completed.');
-          res.json({ objects });
-        });
-    })
-    
-    
-});
-
-app.get("/getURL/:url",async function(req,res){
-  const bucketName = req.params.url;
-    const {imageName} = req.query;
-    const imageUrl = await minioClient.presignedGetObject(bucketName, imageName, 60*60);
-    const imageURL = {image : imageUrl};
-    res.json(imageURL);
-})
-
-
-app.post("/objects/:url",upload.single('file'),function(req,res){
-  const { originalname, mimetype, size, path } = req.file;
-  const bucketName = req.params.url;
-  let fileName = originalname;
-  let file = path;
-  minioClient.fPutObject(bucketName, fileName, file, function(err, objInfo) {
-    if(err) {
-        res.status(400).json({error:"Failed to upload"})
-    }
-    console.log("Success", objInfo.etag, objInfo.versionId)
-    res.status(200).json({data:objInfo})
-  })
-});
 
 app.listen(5000,function(){
     console.log("Server started on port 5000");
