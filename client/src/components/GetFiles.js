@@ -21,11 +21,9 @@ function GetFiles(props){
     }, [props.fileObj.count]);
 
     function getFiles() {
-        console.log(`${config.BASE_URL}/objects/${props.email}`);
         axios.get(`${config.BASE_URL}/objects/${props.email}`)
         .then(response => {
           setBackendData(response.data.objects);
-          console.log("done");
         })
         .catch(error => {
           console.log(error);

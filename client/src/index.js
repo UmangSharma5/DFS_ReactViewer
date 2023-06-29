@@ -13,11 +13,10 @@ var tokenId = localStorage.getItem("token");
 function logoutUser () {
   localStorage.clear();
   const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render( <React.StrictMode>
-          <BrowserRouter basename= "/hv">
+    root.render( 
+          <BrowserRouter basename='/hv'>
             <Login checkUser={checkUser} />
           </BrowserRouter>
-      </React.StrictMode>
     );
 }
 
@@ -27,22 +26,20 @@ async function checkAuth(email) {
   try {
     const response = await axios.get(GET_URL);
     // ReactDOM.render(<App logout={logoutUser} />, document.getElementById("root"));
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render( <React.StrictMode>
-          <BrowserRouter basename= "/hv">
-            <App />
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render( 
+          <BrowserRouter basename='/hv'>
+            <App logout={logoutUser}/>
           </BrowserRouter>
-      </React.StrictMode>
     );
 
   } catch (error) {
     console.log("Incorrect token!!!");
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render( <React.StrictMode>
-          <BrowserRouter basename= "/hv">
+    root.render( 
+          <BrowserRouter basename='/hv' >
             <Login checkUser={checkUser} />
           </BrowserRouter>
-      </React.StrictMode>
     );
   }
 }
