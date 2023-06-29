@@ -18,7 +18,7 @@ var minioClient = new Minio.Client({
 
 router.get("/:url",async function(req,res){
     const bucketName = req.params.url;
-    console.log(req.query);
+    // console.log(req.query);
       const {imageName} = req.query;
       const imageUrl = await minioClient.presignedGetObject(bucketName, imageName, 60*60);
       const imageURL = {image : imageUrl};

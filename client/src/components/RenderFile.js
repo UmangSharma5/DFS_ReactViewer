@@ -3,18 +3,16 @@ import axios, { all } from 'axios';
 import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
 import BarLoader from "react-spinners/BarLoader";
+import { config } from "../config";
 
 function RenderFile(props) {
     const [viewerImage,setViewerImage] =useState();
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
-    const [loading,setLoading] = useState(false);
     const isFirstRender = React.useRef(true);
 
     useEffect(()=>{
         console.log("Getting image links")
-        console.log(props);
-        console.log(isFirstRender.current);
         if(isFirstRender.current){
             getAllImageLinks();
             console.log(allImages);
@@ -24,7 +22,7 @@ function RenderFile(props) {
             return;
         }else{
             let imageObj = { imageName: props.currFile };
-            axios.get("http://localhost:5000/getURL/"+props.email, { params: imageObj })
+            axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj })
             .then((response) => response.data.image)
             .then((image) => {
                 setAllImages((prevValue) => [...prevValue, image]);
@@ -33,7 +31,6 @@ function RenderFile(props) {
                 console.log(error);
                 return null;
             });
-            console.log(allImages);
         }
     },[props.info]);
 
@@ -42,7 +39,7 @@ function RenderFile(props) {
             const response = await Promise.all(
                 props.info.map((image) => {
                     let imageObj = { imageName: image };
-                    return axios.get("http://localhost:5000/getURL/"+props.email, { params: imageObj })
+                    return axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj })
                         .then((response) => response.data.image)
                         .catch((error) => {
                             console.log(error);
@@ -51,7 +48,6 @@ function RenderFile(props) {
                 })
             );
             setAllImages(response);
-            console.log(allImages)
         } catch (error) {
             console.log(error);
         }
@@ -62,6 +58,7 @@ function RenderFile(props) {
         let num = e.target.id;
         setViewerImage(allImages[num]);
         setImageName(props.info[num]);
+        console.log(allImages[num]);
     }
    
     return(
@@ -84,9 +81,11 @@ function RenderFile(props) {
                         <div>
                         <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                         <p id="image-name">{file}</p>
-                        </div>
+                        </div> 
                     );
                 })}
+                {/* {console.log(props.uploadStatus)}
+                {!props.uploadStatus ? <BarLoader/> : null} */}
             </div>
             <div className="viewer-container">
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} /> : <p>Select an image to view</p>}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import GetFiles from './components/GetFiles';
+import { config } from './config'; 
 
 
 function App(props) {
@@ -9,6 +10,7 @@ function App(props) {
     count: 0,
     name: ""
   });
+  const [isUploaded,setIsUploaded] = useState(false);
   
   const email = localStorage.getItem("email").toLowerCase();
   let shortEmail ='';
@@ -37,13 +39,14 @@ function App(props) {
     e.preventDefault();
     const formData = new FormData();
     formData.append('file', currentFile.name);
-    let bucketURL = "http://localhost:5000/objects/" + shortEmail;
+    let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
       console.log("Initiating upload")
       console.log(formData);
       const response = await axios.post(bucketURL, formData);
       console.log(response);
       console.log("Upload complete");
+      setIsUploaded(true);
       setCurrentFile((prevValue) => ({
         ...prevValue,
         count: prevValue.count+1
@@ -68,7 +71,7 @@ function App(props) {
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
-        <GetFiles fileObj={currentFile} email={shortEmail}/>
+        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail}/>
       </div>
     </div>
   );

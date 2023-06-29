@@ -2,20 +2,25 @@ import express from 'express';
 const app = express();
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 app.use(cors());
 app.use(bodyParser.json());
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'build')));
 
-// const objectsRoute = require("./routes/objects");
-// const getURL = require("./routes/getURL");
 import objectsRoute from './routes/objects.js';
 import getURL from './routes/getURL.js';
 
-// import objectsRoute from "./routes/objects";
-// import getURL from "./routes/getURL";
+app.use('/hv/objects',objectsRoute);
+app.use('/hv/getURL',getURL);
 
-app.use('/objects',objectsRoute);
-app.use('/getURL',getURL);
 
+app.get('/*', function (req, res) {
+    console.log("here")
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 app.listen(5000,function(){
     console.log("Server started on port 5000");

@@ -8,11 +8,14 @@
   cursor: pointer;
   font-family: Montserrat,sans-serif;
   font-size: .9em;
-  margin: 5px;
+  margin: 3px;
   padding: 10px 15px;
   text-align: center;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: manipulation;
-  
+  touch-action: manipulation;  
+}
+
+#openseadragon-viewer {
+  height:calc(100vh - 2 * 50px);
 }

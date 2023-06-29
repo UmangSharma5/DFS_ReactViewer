@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import Login from './Login';
 import axios from 'axios';
+import {BrowserRouter} from 'react-router-dom';
 
 const LOGIN_URL = "https://datafoundation.iiit.ac.in/api/login";
 var tokenId = localStorage.getItem("token");
@@ -11,34 +12,53 @@ var tokenId = localStorage.getItem("token");
 
 function logoutUser () {
   localStorage.clear();
-  ReactDOM.render(<Login checkUser = {checkUser} />, document.getElementById("root")); 
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render( <React.StrictMode>
+          <BrowserRouter basename= "/hv">
+            <Login checkUser={checkUser} />
+          </BrowserRouter>
+      </React.StrictMode>
+    );
 }
 
 
-function checkAuth(email) {
+async function checkAuth(email) {
   const GET_URL = "https://datafoundation.iiit.ac.in/api/detokn?token="+tokenId;
-  axios.get(GET_URL)
-  .then((response) => {
-    ReactDOM.render(<App logout={logoutUser} />, document.getElementById("root"));
-  })
-  .catch(error => {
+  try {
+    const response = await axios.get(GET_URL);
+    // ReactDOM.render(<App logout={logoutUser} />, document.getElementById("root"));
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render( <React.StrictMode>
+          <BrowserRouter basename= "/hv">
+            <App />
+          </BrowserRouter>
+      </React.StrictMode>
+    );
+
+  } catch (error) {
     console.log("Incorrect token!!!");
-    ReactDOM.render(<Login checkUser = {checkUser} />, document.getElementById("root")); 
-  })
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render( <React.StrictMode>
+          <BrowserRouter basename= "/hv">
+            <Login checkUser={checkUser} />
+          </BrowserRouter>
+      </React.StrictMode>
+    );
+  }
 }
 
 
-function checkUser(email,password) {
-  axios.post(LOGIN_URL,{email,password})
-    .then ((response) => {
-      localStorage.setItem("token",response.data.data.token);
-      tokenId = localStorage.getItem("token");
-      checkAuth(email);
-    })
-    .catch(error => {
-      console.log("Incorrect Username or password!!!");
-    })
-    return false; // For the toast in Login
+async function checkUser(email, password) {
+  try {
+    const response = await axios.post(LOGIN_URL, { email, password });
+    localStorage.setItem("token", response.data.data.token);
+    tokenId = localStorage.getItem("token");
+    await checkAuth(email);
+    return true;
+  } catch (error) {
+    console.log("Incorrect Username or password!!!");
+    return false;
+  }
 }
 
 checkAuth();

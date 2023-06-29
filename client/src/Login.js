@@ -21,12 +21,13 @@ function Login(props) {
     })
   };
 
-  function handleClick (e) {
+async function handleClick (e) {
     e.preventDefault();
     const email = input.username;
     const password = input.password;
     localStorage.setItem("email",email);
-    const isValid =  props.checkUser(email,password);
+    const isValid = await props.checkUser(email,password);
+    console.log(isValid);
     if(isValid === false)
       toast("Username or Password was Incorrect !!!!");
   };

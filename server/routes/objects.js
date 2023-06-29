@@ -39,7 +39,7 @@ router.get("/:url",function(req,res){
         }
         const objects = [];
         const stream = minioClient.listObjects(bucketName, '', true);
-    
+        console.log("stream collected");
         stream.on('data', (obj) => {
           objects.push(obj.name);
         });

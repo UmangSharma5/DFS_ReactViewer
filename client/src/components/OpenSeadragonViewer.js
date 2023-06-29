@@ -1,11 +1,12 @@
 import React, {useState,useEffect} from "react";
 import OpenSeadragon from "openseadragon";
-import './OpenSeadragon.css'
+import './OpenSeadragon.css';
+import GeoTIFF from "geotiff";
 
 function OpenSeadragonViewer(props) {
   
       useEffect(() => {
-        const viewer = OpenSeadragon({
+        let viewer = OpenSeadragon({
           id: 'openseadragon-viewer',
           prefixUrl:'openseadragon-images/' ,
           tileSources: [{
@@ -22,13 +23,18 @@ function OpenSeadragonViewer(props) {
           showNavigator:  true,
           crossOriginPolicy: "Anonymous"
         });
-    
+      //   setupImage(props.imageUrl);
+
+      //   function setupImage(tileSourceInput){
+      //     viewer.close();
+      //     let tiffTileSources = OpenSeadragon.GeoTIFFTileSource.getAllTileSources(tileSourceInput, {logLatency: true});
+      //     tiffTileSources.then(ts=>viewer.open(ts));
+      // }
         return () => {
           viewer && viewer.destroy();
         };
-      }, [props.imageUrl]);   
-
-      
+      }, [props.imageUrl]);
+    
       
       function takeSS(){
         var current_view = document.getElementsByTagName("canvas");
@@ -47,11 +53,54 @@ function OpenSeadragonViewer(props) {
 
     return ( 
       <div>
-        <div id="openseadragon-viewer" style={{ height:'500px'}} ></div>
         <button onClick={takeSS} id="print-view" >Print View</button>
+        <div id="openseadragon-viewer" ></div>
       </div>
     )
 }
 
 export default OpenSeadragonViewer;
+
+
+
+// useEffect(() => {
+//   let viewer;
+  
+//   const loadGeoTIFF = async (tiffUrl) => {
+//     // const response = await fetch(tiffUrl);
+//     // const arrayBuffer = await response.arrayBuffer();
+//     // const tiff = await fromUrl(tiffUrl);
+//     const tiff = await fromUrl(props.imageUrl, { byteOrder: 1 });
+//     const image = await tiff.getImage();
+//     const width = image.getWidth();
+//     const height = image.getHeight();
+//     const tileSource = new OpenSeadragon.GeoTIFFTileSource(image, width, height);
+//     return tileSource;
+//   };
+
+//   const initializeViewer = async () => {
+//     const tileSource = await loadGeoTIFF(props.imageUrl);
+
+//     viewer = OpenSeadragon({
+//       id: "openseadragon-viewer",
+//       prefixUrl: "openseadragon-images/",
+//       tileSources: [tileSource],
+//       animationTime: 0.5,
+//       blendTime: 0.1,
+//       constrainDuringPan: true,
+//       maxZoomPixelRatio: 2,
+//       minZoomLevel: 1,
+//       visibilityRatio: 1,
+//       zoomPerScroll: 2,
+//       showNavigator: true,
+//       crossOriginPolicy: "Anonymous",
+//     });
+//   };
+
+//   initializeViewer();
+
+//   return () => {
+//     viewer && viewer.destroy();
+//   };
+// }, [props.imageUrl]);
 
