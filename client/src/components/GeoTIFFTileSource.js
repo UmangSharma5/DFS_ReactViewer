@@ -1,4 +1,4 @@
-import GeoTIFF, { fromUrl, fromUrls, fromArrayBuffer, fromBlob } from 'geotiff';
+import GeoTIFF, { fromUrl, fromUrls, fromArrayBuffer, fromBlob ,Pool} from 'geotiff';
 import OpenSeadragon from "openseadragon";
 // export default class GeoTIFFTileSource {
   
@@ -32,7 +32,7 @@ function GeoTIFFTileSource ( $ ){
         // $.TileSource.apply( this, [ {width:1,height:1} ] );
         $.TileSource.apply( this );
         this._ready=false;
-        this._pool = new GeoTIFF.Pool();
+        this._pool = new Pool();
 
         this._setupComplete=function(){
             this._ready=true;
@@ -87,7 +87,7 @@ function GeoTIFFTileSource ( $ ){
                    .then(c=>Promise.all([...Array(c).keys()].map(index=>tiff.getImage(index))))
                    .then(images=>{
                         // Filter out images with photometricInterpretation.TransparencyMask
-                        images = images.filter(image=>image.fileDirectory.photometricInterpretation!==GeoTIFF.globals.photometricInterpretations.TransparencyMask)
+                        // images = images.filter(image=>image.fileDirectory.photometricInterpretation!==GeoTIFF.globals.photometricInterpretations.TransparencyMask)
                         // Sort by width (largest first), then detect pyramids
                         images.sort((a,b)=>b.getWidth() - a.getWidth());
                         // find unique aspect ratios (with tolerance to account for rounding) 
@@ -224,6 +224,8 @@ function GeoTIFFTileSource ( $ ){
                 let ctx = canvas.getContext('2d');
 
                 let photometricInterpretation = level.image.fileDirectory.PhotometricInterpretation;
+                // let photometricInterpretation = GeoTIFF.globals.photometricInterpretations.WhiteIsZero;
+
                 let arr;
                 switch(photometricInterpretation){
                     case GeoTIFF.globals.photometricInterpretations.WhiteIsZero:  // grayscale, white is zero

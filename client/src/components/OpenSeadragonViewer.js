@@ -4,6 +4,8 @@ import './OpenSeadragon.css';
 import GeoTIFF from "geotiff";
 import GeoTIFFTileSource from './GeoTIFFTileSource'
 
+// GeoTIFFTileSource(OpenSeadragon);
+
 function OpenSeadragonViewer({image,imageUrl}) {
   
       useEffect(() => {
@@ -20,11 +22,19 @@ function OpenSeadragonViewer({image,imageUrl}) {
           showNavigator:  true,
           ajaxWithCredentials: true,
           sequenceMode:true,
-          crossOriginPolicy: "Anonymous"
+          crossOriginPolicy: "Anonymous",
+          tileSources: {
+              type: 'image',
+              url:  imageUrl,
+              buildPyramid: false
+          }
         });
-
-        let tiffTileSources =GeoTIFFTileSource.getAllTileSources(imageUrl);
-        tiffTileSources.then(ts=>viewer.open(ts));  
+        // let tiffTileSources = OpenSeadragon.GeoTIFFTileSource.getAllTileSources(imageUrl);
+        // tiffTileSources.then(ts=>viewer.open(ts));  
+        return () => {
+          viewer && viewer.destroy();
+        };
+        
       }, [imageUrl]);
 
     
