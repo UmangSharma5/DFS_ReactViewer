@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import Login from './Login';
@@ -51,7 +51,6 @@ async function checkAuth(email) {
 async function checkUser(email, password) {
   try {
     const response = await axios.post(LOGIN_URL, { email, password });
-    console.log(response);
 
     let dfs_user={
       user:  response.data.data.user,

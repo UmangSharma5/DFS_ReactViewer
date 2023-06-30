@@ -15,29 +15,34 @@ var minioClient = new Minio.Client({
     secretKey: 'zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG'
 });
 
-router.get("/:url",function(req,res){
+router.get("/:url",async function(req,res){
     const bucketName = req.params.url;
     async function emptyBucket(bucketName) {
-        const objects = await minioClient.listObjects(bucketName).catch((err) => {
-          console.error('Failed to list objects:', err);
-          throw err;
-        });
-      
-        const objectNames = objects.map((obj) => obj.name);
-      
-        for (const objectName of objectNames) {
-          await minioClient.removeObject(bucketName, objectName).catch((err) => {
-            console.error(`Failed to delete object "${objectName}":`, err);
-            throw err;
-          });
-        }
-      
-        console.log('Bucket emptied successfully:', bucketName);
-      }
+      var data = []
+      var stream = await minioClient.listObjects(bucketName,'', true)
+      stream.on('data', function(obj) { 
+        data.push(obj) 
+        data.map((file) => {
+          minioClient.removeObject(bucketName, file.name,function(err) {
+            if (err) {
+              return console.log('Unable to remove object', err)
+            }
+            console.log('Removed the object')
+            res.status(200);
+          })
+          console.log("done");
+        })
+  
+      })
+      stream.on("end", function (obj) { console.log(data) })
+      stream.on('error', function(err) { console.log(err) } )
+
+    }
       
       // Usage
       emptyBucket(bucketName).catch((err) => {
         console.error('Failed to empty bucket:', err);
+        res.status(400);
       });
     
 })

@@ -42,9 +42,7 @@ function App(props) {
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
       console.log("Initiating upload")
-      console.log(formData);
       const response = await axios.post(bucketURL, formData);
-      console.log(response);
       console.log("Upload complete");
       setIsUploaded(true);
       setCurrentFile((prevValue) => ({
