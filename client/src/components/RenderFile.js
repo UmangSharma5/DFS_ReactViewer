@@ -6,6 +6,7 @@ import BarLoader from "react-spinners/BarLoader";
 import { config } from "../config";
 
 function RenderFile(props) {
+    console.log(props);
     const [viewerImage,setViewerImage] =useState();
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
@@ -88,7 +89,7 @@ function RenderFile(props) {
                 {!props.uploadStatus ? <BarLoader/> : null} */}
             </div>
             <div className="viewer-container">
-                {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} /> : <p>Select an image to view</p>}
+                {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} image={imageName} /> : <p>Select an image to view</p>}
             </div> 
         </div>
     )

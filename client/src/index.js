@@ -7,7 +7,10 @@ import axios from 'axios';
 import {BrowserRouter} from 'react-router-dom';
 
 const LOGIN_URL = "https://datafoundation.iiit.ac.in/api/login";
-var tokenId = localStorage.getItem("token");
+var tokenId;
+if(JSON.parse(localStorage.getItem("dfs-user")) !=null){
+  tokenId = JSON.parse(localStorage.getItem("dfs-user")).token
+}
 
 
 function logoutUser () {
@@ -48,8 +51,17 @@ async function checkAuth(email) {
 async function checkUser(email, password) {
   try {
     const response = await axios.post(LOGIN_URL, { email, password });
-    localStorage.setItem("token", response.data.data.token);
-    tokenId = localStorage.getItem("token");
+    console.log(response);
+
+    let dfs_user={
+      user:  response.data.data.user,
+      token: response.data.data.token
+    }
+
+    var jsonString = JSON.stringify(dfs_user);
+
+    localStorage.setItem("dfs-user", jsonString);
+    tokenId = JSON.parse(localStorage.getItem("dfs-user")).token;
     await checkAuth(email);
     return true;
   } catch (error) {

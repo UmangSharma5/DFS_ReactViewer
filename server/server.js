@@ -12,13 +12,15 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 import objectsRoute from './routes/objects.js';
 import getURL from './routes/getURL.js';
+import deleteBucket from './routes/deleteBucket.js';
 
 app.use('/hv/objects',objectsRoute);
 app.use('/hv/getURL',getURL);
+app.use('/hv/deleteBucket',deleteBucket);
 
 
 app.get('/*', function (req, res) {
-    console.log("here")
+    console.log("here i am")
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 

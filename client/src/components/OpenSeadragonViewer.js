@@ -2,17 +2,14 @@ import React, {useState,useEffect} from "react";
 import OpenSeadragon from "openseadragon";
 import './OpenSeadragon.css';
 import GeoTIFF from "geotiff";
+import GeoTIFFTileSource from './GeoTIFFTileSource'
 
-function OpenSeadragonViewer(props) {
+function OpenSeadragonViewer({image,imageUrl}) {
   
       useEffect(() => {
-        let viewer = OpenSeadragon({
+        let viewer =OpenSeadragon({
           id: 'openseadragon-viewer',
           prefixUrl:'openseadragon-images/' ,
-          tileSources: [{
-            type: 'image',
-            url: props.imageUrl
-          }],
           animationTime: 0.5,
           blendTime: 0.1,
           constrainDuringPan: true,
@@ -21,19 +18,15 @@ function OpenSeadragonViewer(props) {
           visibilityRatio: 1,
           zoomPerScroll: 2,
           showNavigator:  true,
+          ajaxWithCredentials: true,
+          sequenceMode:true,
           crossOriginPolicy: "Anonymous"
         });
-      //   setupImage(props.imageUrl);
 
-      //   function setupImage(tileSourceInput){
-      //     viewer.close();
-      //     let tiffTileSources = OpenSeadragon.GeoTIFFTileSource.getAllTileSources(tileSourceInput, {logLatency: true});
-      //     tiffTileSources.then(ts=>viewer.open(ts));
-      // }
-        return () => {
-          viewer && viewer.destroy();
-        };
-      }, [props.imageUrl]);
+        let tiffTileSources =GeoTIFFTileSource.getAllTileSources(imageUrl);
+        tiffTileSources.then(ts=>viewer.open(ts));  
+      }, [imageUrl]);
+
     
       
       function takeSS(){
@@ -44,7 +37,7 @@ function OpenSeadragonViewer(props) {
           var img = my_view.toDataURL("image/png");
           const link = document.createElement('a')
           link.href = img
-          link.download = props.imageName
+          link.download = image
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)

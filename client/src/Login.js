@@ -25,7 +25,6 @@ async function handleClick (e) {
     e.preventDefault();
     const email = input.username;
     const password = input.password;
-    localStorage.setItem("email",email);
     const isValid = await props.checkUser(email,password);
     console.log(isValid);
     if(isValid === false)

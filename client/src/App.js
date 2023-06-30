@@ -12,7 +12,7 @@ function App(props) {
   });
   const [isUploaded,setIsUploaded] = useState(false);
   
-  const email = localStorage.getItem("email").toLowerCase();
+  const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
   let shortEmail ='';
   for (let i = 0; i < email.length; i++) {
     const charCode = email.charCodeAt(i);   
