@@ -11,7 +11,7 @@ function OpenSeadragonViewer({image,imageUrl}) {
       useEffect(() => {
         let viewer =OpenSeadragon({
           id: 'openseadragon-viewer',
-          prefixUrl:'openseadragon-images/' ,
+          prefixUrl:' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
           animationTime: 0.5,
           blendTime: 0.1,
           constrainDuringPan: true,
