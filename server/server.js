@@ -13,10 +13,12 @@ app.use(express.static(path.join(__dirname, 'build')));
 import objectsRoute from './routes/objects.js';
 import getURL from './routes/getURL.js';
 import deleteBucket from './routes/deleteBucket.js';
+import deleteObject from './routes/deleteObject.js';
 
 app.use('/hv/objects',objectsRoute);
 app.use('/hv/getURL',getURL);
 app.use('/hv/deleteBucket',deleteBucket);
+app.use('/hv/deleteObject',deleteObject);
 
 
 app.get('/*', function (req, res) {

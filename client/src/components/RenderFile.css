@@ -19,7 +19,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px;
+    max-width: 125px;
+    margin-right: 10px;
+    font-size: 18px;
 }
 
 #image-name:hover {
@@ -36,8 +38,16 @@
 }
 
 .viewer-container p {
-    text-align: center; /* Align the text to the center */
-    font-size: 18px; /* Set the font size */
+    text-align: center; 
+    font-size: 25px; /* Set the font size */
     color: #333; /* Set the text color */
     margin: 20px 0; /* Add some margin around the paragraph */
+}
+
+.name-del {
+    display: flex;
+}
+
+.del-btn {
+    /* border-radius: 60px; */
 }
