@@ -49,5 +49,6 @@
 }
 
 .del-btn {
-    /* border-radius: 60px; */
+    border-radius: 60px;
+    color: red;
 }

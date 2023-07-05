@@ -4,7 +4,7 @@ import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
 import BarLoader from "react-spinners/BarLoader";
 import { config } from "../config";
-import DeleteIcon from '@material-ui/icons/Delete';
+
 
 function RenderFile(props) {
     const [viewerImage,setViewerImage] =useState();
@@ -104,7 +104,7 @@ function RenderFile(props) {
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
                                 <p id="image-name">{file}</p>
-                                <button className="del-btn" value={file} onClick={event => handleDelete(event,file)}> <DeleteIcon fontSize="small"/></button>
+                                <button className="del-btn"  value={file} onClick={event => handleDelete(event,file)}> <i className="bi bi-archive"></i></button>
                             </div>
                         </div> 
                     );
