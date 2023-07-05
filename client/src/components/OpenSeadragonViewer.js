@@ -30,14 +30,14 @@ function OpenSeadragonViewer({imageName,imageUrl}) {
           };
           
         }, [imageUrl]);
-  
-      
+
       function takeSS(){
+        let extension = imageName.split('.').pop();
         var current_view = document.getElementsByTagName("canvas");
         if (current_view){
           console.log(current_view.length);
           var my_view = current_view[0];
-          var img = my_view.toDataURL("image/png");
+          var img = my_view.toDataURL("image/"+extension);
           const link = document.createElement('a')
           link.href = img
           link.download = imageName
