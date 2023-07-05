@@ -105,7 +105,6 @@ router.post("/:url",async function(req,res){
            
             const bucketName = req.params.url;
             let fileName = files.file[0].originalFilename;
-            // console.log(path)
 
             minioClient.fPutObject(bucketName, fileName, path, function(err, objInfo) {
                 if(err) {
