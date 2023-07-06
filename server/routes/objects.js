@@ -9,6 +9,7 @@ app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import ConvertTiff from 'tiff-to-png'
+import sharp from "sharp";
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -65,54 +66,67 @@ router.get("/:url",function(req,res){
 router.post("/:url",async function(req,res){
     try{
         const form = formidable({ multiples: false });
-
         form.parse(req, async (err, fields, files) => {
             if (err) {
                 res.status(400).json({ error: "Failed to parse form data" });
                 return;
             }
-
-            let path  = files.file[0].filepath;
-            let temp_dir_path = null
-            // console.log(files.file[0])
-            // if file type is tiff
-            if(files.file[0].mimetype ==='image/tiff'){
-                let converter = new ConvertTiff(convert_tiff_options);
-                let destination_path = __dirname+'/../tmp';
-                const res1 = await converter.convertOne(path, destination_path);
-                // console.log(res1,res1.filename)
-                path = res1.converted.filename
-                path = path.split('/')
-                path.pop();
-                temp_dir_path = path.join('/')
-                path =  temp_dir_path+ '/0.png'
-
-
-                setTimeout(()=>{
-                    fs.rmdir(temp_dir_path,
-                        { recursive: true, force: true }
-                        ,(err)=>{
-                        if(err){
-                            console.log("Directory delete from tmp failed: ",err.message);
-                            return;
-                        }
-                        console.log("Directory delete successful",temp_dir_path)
-                    })
-                },1000*10)
-    
-            }
-
-           
+            let filePath  = files.file[0].filepath;
             const bucketName = req.params.url;
             let fileName = files.file[0].originalFilename;
+            const parts = fileName.split('.');
+            let tempName = parts[0];
+            let pngFileName = tempName+'.png';
+            if (files.file[0].mimetype === 'image/tiff') {
+                let tiffFilePath = filePath;
+                let pngFilePath = __dirname+'/../tmp/'+files.file[0].newFilename+'0.png';
+                let tempDirPath = path.resolve(__dirname, '../tmp');
+        
+                try {
 
-            minioClient.fPutObject(bucketName, fileName, path, function(err, objInfo) {
-                if(err) {
-                    res.status(400).json({error:"Failed to upload"})
+                    if (!fs.existsSync(tempDirPath)) {
+                        fs.mkdirSync(tempDirPath, { recursive: true });
+                    }
+
+                    await sharp(tiffFilePath).toFile(pngFilePath);
+                    console.log('Conversion completed successfully!');
+                    console.log('Output file:', pngFilePath);
+            
+                    await minioClient.fPutObject(bucketName, pngFileName, pngFilePath, function(err, objInfo) {
+                        if (err) {
+                            res.status(400).json({ error: "Failed to upload" });
+                        }
+                        console.log("Success");
+                        console.log(objInfo);
+                        res.status(200).json({ data: objInfo, filename:pngFileName });
+                    });
+
+                    setTimeout(()=>{
+                        fs.rmdir(tempDirPath,
+                            { recursive: true, force: true }
+                            ,(err)=>{
+                            if(err){
+                                console.log("Directory delete from tmp failed: ",err.message);
+                                return;
+                            }
+                            console.log("Directory delete successful",tempDirPath)
+                        })
+                    },1000*1000)
+
+                } catch (err) {
+                    console.error('An error occurred:', err);
+                    res.status(500).json({ error: "Conversion failed" });
                 }
-                console.log("Success", objInfo.etag, objInfo.versionId)
-                res.status(200).json({data:objInfo})
-            })
+            }
+            else{
+                minioClient.fPutObject(bucketName, fileName, filePath, function(err, objInfo) {
+                    if(err) {
+                        res.status(400).json({error:"Failed to upload"})
+                    }
+                    console.log("Success")
+                    res.status(200).json({data:objInfo, filename:pngFileName})
+                })
+            }
         })
     } catch(err){
         console.log(err.message);

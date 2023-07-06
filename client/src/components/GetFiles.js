@@ -10,13 +10,14 @@ function GetFiles(props){
     const [deletedFileName,setDeletedFileName] = useState();
     const [currFileName,setCurrFileName] = useState();
     useEffect(() => {
+        console.log(props);
         if(isFirstRender.current){
             getFiles();
             isFirstRender.current = false;
             return;
         }else{
-            const latest_file = props.fileObj.name.name;
-            setCurrFileName(props.fileObj.name.name);
+            const latest_file = props.fileObj.name;
+            setCurrFileName(props.fileObj.name);
             setBackendData((preValue)=>
                 [...preValue,latest_file]
             )

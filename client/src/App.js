@@ -44,9 +44,11 @@ function App(props) {
       console.log("Initiating upload")
       const response = await axios.post(bucketURL, formData);
       console.log("Upload complete");
+      console.log(response.data.filename);
       setIsUploaded(true);
       setCurrentFile((prevValue) => ({
         ...prevValue,
+        name:response.data.filename,
         count: prevValue.count+1
       }))
       

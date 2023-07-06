@@ -3,7 +3,8 @@ import OpenSeadragon from "openseadragon";
 import './OpenSeadragon.css';
 
 function OpenSeadragonViewer({imageName,imageUrl}) {
-  
+        
+        console.log(imageUrl);
         useEffect(() => {
           let viewer =OpenSeadragon({
             id: 'openseadragon-viewer',
@@ -33,6 +34,7 @@ function OpenSeadragonViewer({imageName,imageUrl}) {
 
       function takeSS(){
         let extension = imageName.split('.').pop();
+        if(extension === 'tif') extension ='png';
         var current_view = document.getElementsByTagName("canvas");
         if (current_view){
           console.log(current_view.length);
@@ -46,6 +48,9 @@ function OpenSeadragonViewer({imageName,imageUrl}) {
           document.body.removeChild(link)
         }
       }
+
+      
+      
 
     return ( 
       <div>
