@@ -119,12 +119,13 @@ router.post("/:url",async function(req,res){
                 }
             }
             else{
+                // console.log(fileName);
                 minioClient.fPutObject(bucketName, fileName, filePath, function(err, objInfo) {
                     if(err) {
                         res.status(400).json({error:"Failed to upload"})
                     }
                     console.log("Success")
-                    res.status(200).json({data:objInfo, filename:pngFileName})
+                    res.status(200).json({data:objInfo, filename:fileName})
                 })
             }
         })
