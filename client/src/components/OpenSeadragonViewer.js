@@ -9,12 +9,12 @@ function OpenSeadragonViewer({imageName,imageUrl}) {
           let viewer =OpenSeadragon({
             id: 'openseadragon-viewer',
             prefixUrl:' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
-            // tileSources: {
-            //     type: 'image',
-            //     url:  imageUrl,
-            //     buildPyramid: false
-            // },
-            tileSources: "india.dzi",
+            tileSources: {
+                type: 'image',
+                url:  imageUrl,
+                buildPyramid: false
+            },
+            // tileSources: "india.dzi",
             animationTime: 0.5,
             blendTime: 0.1,
             constrainDuringPan: true,
