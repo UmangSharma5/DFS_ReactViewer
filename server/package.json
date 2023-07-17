@@ -19,7 +19,8 @@
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.32.1",
     "tiff-to-png": "^2.0.2",
-    "tiff.js": "^1.0.0"
+    "tiff.js": "^1.0.0",
+    "walk": "^2.3.15"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

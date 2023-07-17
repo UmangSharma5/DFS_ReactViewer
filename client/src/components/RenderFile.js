@@ -75,7 +75,7 @@ function RenderFile(props) {
     function handleClick(e){
         let num = e.target.id;
         setViewerImage(allImages[num]);
-        setImageName(props.info[num]);
+        setImageName(props.info[num]);      
     }
 
     function handleDelete(event,file){
