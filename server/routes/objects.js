@@ -17,10 +17,37 @@ let convert_tiff_options = {
   logLevel: 1
 };
 
+const success = (message, data, statusCode) => {
+    return {
+      message:message,
+      error: false,
+      code: statusCode,
+      data: data
+    };
+   
+};
+
+const error = (message, statusCode) => {
+    const codes = [200, 201, 400, 401, 404, 403, 422, 500];
+    const findCode = codes.find((code) => code == statusCode);
+ 
+    if (!findCode) statusCode = 500;
+    else statusCode = findCode;
+ 
+    return {
+      message:message,
+      code: statusCode,
+      error: true
+    };
+  };
+ 
 
 router.get("/:url",function(req,res){
     try{
         const bucketName = req.params.url; // get this from database (sql)
+        
+        console.log(req);
+
         minioClient.bucketExists(bucketName, function(err, exists) {
             if(err){
                 console.log("here");
@@ -40,6 +67,7 @@ router.get("/:url",function(req,res){
             }
             const objects = [];
             const stream = minioClient.listObjects(bucketName, '', true);
+            
             console.log("stream collected");
             stream.on('data', (obj) => {
             objects.push(obj.name);
@@ -71,6 +99,8 @@ router.post("/:url",async function(req,res){
                 res.status(400).json({ error: "Failed to parse form data" });
                 return;
             }
+
+            console.log(files.file[0]);
 
             let path  = files.file[0].filepath;
             let temp_dir_path = null

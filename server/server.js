@@ -21,6 +21,31 @@ app.use('/hv/deleteBucket',deleteBucket);
 app.use('/hv/deleteObject',deleteObject);
 
 
+const success = (message, data, statusCode) => {
+    return {
+      message:message,
+      error: false,
+      code: statusCode,
+      data: data
+    };
+   
+};
+
+const error = (message, statusCode) => {
+    const codes = [200, 201, 400, 401, 404, 403, 422, 500];
+    const findCode = codes.find((code) => code == statusCode);
+ 
+    if (!findCode) statusCode = 500;
+    else statusCode = findCode;
+ 
+    return {
+      message:message,
+      code: statusCode,
+      error: true
+    };
+  };
+
+
 app.get('/*', function (req, res) {
     console.log("here i am")
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
