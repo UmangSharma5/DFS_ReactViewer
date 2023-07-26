@@ -25,7 +25,12 @@ function GetFiles(props){
     }, [props.fileObj.count]);
 
     function getFiles() {
-        axios.get(`${config.BASE_URL}/objects/${props.email}`)
+        axios.get(`${config.BASE_URL}/objects/${props.email}`,
+        {
+            headers: {
+                'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            }
+        })
         .then(response => {
           setBackendData(response.data.objects);
         })
@@ -39,7 +44,12 @@ function GetFiles(props){
         setDeletedFileName(file);
         try {
             axios
-            .post(config.BASE_URL + "/deleteObject/" + props.email, { fileName: delFileName })
+            .post(config.BASE_URL + "/deleteObject/" + props.email, { fileName: delFileName },
+            {
+                headers: {
+                    'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+                }
+            })
             .then(response => {
                 const updatedData = backendData.filter(currFile => currFile !== delFileName);
                 setBackendData(updatedData);

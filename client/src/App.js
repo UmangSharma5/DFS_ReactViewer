@@ -42,7 +42,12 @@ function App(props) {
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
       console.log("Initiating upload")
-      const response = await axios.post(bucketURL, formData);
+      const response = await axios.post(bucketURL, formData,
+      {
+          headers: {
+              'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+          }
+      });
       console.log("Upload complete");
       console.log(response.data.filename);
       setIsUploaded(true);

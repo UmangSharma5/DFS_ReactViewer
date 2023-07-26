@@ -4,6 +4,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import require_auth from './middleware/Auth.js';
+
 app.use(cors());
 app.use(bodyParser.json());
 const __filename = fileURLToPath(import.meta.url);
@@ -15,10 +17,15 @@ import getURL from './routes/getURL.js';
 import deleteBucket from './routes/deleteBucket.js';
 import deleteObject from './routes/deleteObject.js';
 
-app.use('/hv/objects',objectsRoute);
-app.use('/hv/getURL',getURL);
-app.use('/hv/deleteBucket',deleteBucket);
-app.use('/hv/deleteObject',deleteObject);
+app.use('/hv/objects',require_auth,objectsRoute);
+app.use('/hv/getURL',require_auth,getURL);
+app.use('/hv/deleteBucket',require_auth,deleteBucket);
+app.use('/hv/deleteObject',require_auth,deleteObject);
+
+// app.use('/hv/objects',objectsRoute);
+// app.use('/hv/getURL',getURL);
+// app.use('/hv/deleteBucket',deleteBucket);
+// app.use('/hv/deleteObject',deleteObject);
 
 
 app.get('/*', function (req, res) {

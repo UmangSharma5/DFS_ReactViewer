@@ -34,7 +34,12 @@ function RenderFile(props) {
                 return;
             }else{
                 let imageObj = { imageName: props.currFile };
-                axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj })
+                axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj },
+                {
+                    headers: {
+                        'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+                    }
+                })
                 .then((response) => response.data.image)
                 .then((image) => {
                     setAllImages((prevValue) => [...prevValue, image]);
@@ -58,7 +63,13 @@ function RenderFile(props) {
             const response = await Promise.all(
                 props.info.map((image) => {
                     let imageObj = { imageName: image };
-                    return axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj })
+                    return axios.get(config.BASE_URL+"/getURL/"+props.email,
+                        { 
+                            params: imageObj,
+                            headers: {
+                                'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+                            }
+                        })
                         .then((response) => response.data.image)
                         .catch((error) => {
                             console.log(error);
