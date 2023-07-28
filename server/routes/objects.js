@@ -5,6 +5,9 @@ import formidable from "formidable";
 import cors from 'cors';
 import fs from 'fs';
 import bodyParser from "body-parser";
+import {execSql} from '../db.js'
+import { map_user_to_bucket, get_user_bucket, remove_user_bucket } from '../Database_queries/queries.js'
+
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
@@ -19,10 +22,20 @@ let convert_tiff_options = {
 };
 
 
-router.get("/:url",function(req,res){
+router.get("/:url",async (req,res) => {
     try{
-        const bucketName = req.params.url; // get this from database (sql)
-        minioClient.bucketExists(bucketName, function(err, exists) {
+        let bucketName = await get_user_bucket(req.user.user_email); // get this from database (sql)
+        if(bucketName == undefined){
+            bucketName = req.params.url;
+        }
+        else if(bucketName != req.params.url)
+        {
+            res.send({
+                error: true,
+                message: "BucketName Invalid"
+            })
+        }
+        minioClient.bucketExists(bucketName, async (err, exists) => {
             if(err){
                 console.log("here");
             }
@@ -30,11 +43,14 @@ router.get("/:url",function(req,res){
                 //
             }
             else{
-            minioClient.makeBucket(bucketName,(err) =>{
+            console.log('ok')
+            minioClient.makeBucket(bucketName,async (err) =>{
                 if(err){
                     console.error('Error creating bucket:', err);
                     res.status(500).json({ error: 'Failed to create bucket' });
                 } else{
+                    const new_bucket = await map_user_to_bucket(req.user.user_email,bucketName)
+                    console.log("new bucket" ,new_bucket)
                     console.log('Bucket created successfully.');
                 }
             })
