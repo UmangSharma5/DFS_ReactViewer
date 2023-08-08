@@ -10,13 +10,14 @@ function GetFiles(props){
     const [deletedFileName,setDeletedFileName] = useState();
     const [currFileName,setCurrFileName] = useState();
     useEffect(() => {
+        console.log(props);
         if(isFirstRender.current){
             getFiles();
             isFirstRender.current = false;
             return;
         }else{
-            const latest_file = props.fileObj.name.name;
-            setCurrFileName(props.fileObj.name.name);
+            const latest_file = props.fileObj.name;
+            setCurrFileName(props.fileObj.name);
             setBackendData((preValue)=>
                 [...preValue,latest_file]
             )
@@ -24,7 +25,12 @@ function GetFiles(props){
     }, [props.fileObj.count]);
 
     function getFiles() {
-        axios.get(`${config.BASE_URL}/objects/${props.email}`)
+        axios.get(`${config.BASE_URL}/objects/${props.email}`,
+        {
+            headers: {
+                'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            }
+        })
         .then(response => {
           setBackendData(response.data.objects);
         })
@@ -38,7 +44,12 @@ function GetFiles(props){
         setDeletedFileName(file);
         try {
             axios
-            .post(config.BASE_URL + "/deleteObject/" + props.email, { fileName: delFileName })
+            .post(config.BASE_URL + "/deleteObject/" + props.email, { fileName: delFileName },
+            {
+                headers: {
+                    'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+                }
+            })
             .then(response => {
                 const updatedData = backendData.filter(currFile => currFile !== delFileName);
                 setBackendData(updatedData);

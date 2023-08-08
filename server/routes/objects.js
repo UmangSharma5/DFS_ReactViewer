@@ -5,10 +5,14 @@ import formidable from "formidable";
 import cors from 'cors';
 import fs from 'fs';
 import bodyParser from "body-parser";
+import {execSql} from '../db.js'
+import { map_user_to_bucket, get_user_bucket, remove_user_bucket } from '../Database_queries/queries.js'
+
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import ConvertTiff from 'tiff-to-png'
+import sharp from "sharp";
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -18,10 +22,20 @@ let convert_tiff_options = {
 };
 
 
-router.get("/:url",function(req,res){
+router.get("/:url",async (req,res) => {
     try{
-        const bucketName = req.params.url; // get this from database (sql)
-        minioClient.bucketExists(bucketName, function(err, exists) {
+        let bucketName = await get_user_bucket(req.user.user_email); // get this from database (sql)
+        if(bucketName == undefined){
+            bucketName = req.params.url;
+        }
+        else if(bucketName != req.params.url)
+        {
+            res.send({
+                error: true,
+                message: "BucketName Invalid"
+            })
+        }
+        minioClient.bucketExists(bucketName, async (err, exists) => {
             if(err){
                 console.log("here");
             }
@@ -29,11 +43,14 @@ router.get("/:url",function(req,res){
                 //
             }
             else{
-            minioClient.makeBucket(bucketName,(err) =>{
+            console.log('ok')
+            minioClient.makeBucket(bucketName,async (err) =>{
                 if(err){
                     console.error('Error creating bucket:', err);
                     res.status(500).json({ error: 'Failed to create bucket' });
                 } else{
+                    const new_bucket = await map_user_to_bucket(req.user.user_email,bucketName)
+                    console.log("new bucket" ,new_bucket)
                     console.log('Bucket created successfully.');
                 }
             })
@@ -65,54 +82,68 @@ router.get("/:url",function(req,res){
 router.post("/:url",async function(req,res){
     try{
         const form = formidable({ multiples: false });
-
         form.parse(req, async (err, fields, files) => {
             if (err) {
                 res.status(400).json({ error: "Failed to parse form data" });
                 return;
             }
-
-            let path  = files.file[0].filepath;
-            let temp_dir_path = null
-            // console.log(files.file[0])
-            // if file type is tiff
-            if(files.file[0].mimetype ==='image/tiff'){
-                let converter = new ConvertTiff(convert_tiff_options);
-                let destination_path = __dirname+'/../tmp';
-                const res1 = await converter.convertOne(path, destination_path);
-                // console.log(res1,res1.filename)
-                path = res1.converted.filename
-                path = path.split('/')
-                path.pop();
-                temp_dir_path = path.join('/')
-                path =  temp_dir_path+ '/0.png'
-
-
-                setTimeout(()=>{
-                    fs.rmdir(temp_dir_path,
-                        { recursive: true, force: true }
-                        ,(err)=>{
-                        if(err){
-                            console.log("Directory delete from tmp failed: ",err.message);
-                            return;
-                        }
-                        console.log("Directory delete successful",temp_dir_path)
-                    })
-                },1000*10)
-    
-            }
-
-           
+            let filePath  = files.file[0].filepath;
             const bucketName = req.params.url;
             let fileName = files.file[0].originalFilename;
+            const parts = fileName.split('.');
+            let tempName = parts[0];
+            let pngFileName = tempName+'.png';
+            if (files.file[0].mimetype === 'image/tiff') {
+                let tiffFilePath = filePath;
+                let pngFilePath = __dirname+'/../tmp/'+files.file[0].newFilename+'0.png';
+                let tempDirPath = path.resolve(__dirname, '../tmp');
+        
+                try {
 
-            minioClient.fPutObject(bucketName, fileName, path, function(err, objInfo) {
-                if(err) {
-                    res.status(400).json({error:"Failed to upload"})
+                    if (!fs.existsSync(tempDirPath)) {
+                        fs.mkdirSync(tempDirPath, { recursive: true });
+                    }
+
+                    await sharp(tiffFilePath).toFile(pngFilePath);
+                    console.log('Conversion completed successfully!');
+                    console.log('Output file:', pngFilePath);
+            
+                    await minioClient.fPutObject(bucketName, pngFileName, pngFilePath, function(err, objInfo) {
+                        if (err) {
+                            res.status(400).json({ error: "Failed to upload" });
+                        }
+                        console.log("Success");
+                        console.log(objInfo);
+                        res.status(200).json({ data: objInfo, filename:pngFileName });
+                    });
+
+                    setTimeout(()=>{
+                        fs.rmdir(tempDirPath,
+                            { recursive: true, force: true }
+                            ,(err)=>{
+                            if(err){
+                                console.log("Directory delete from tmp failed: ",err.message);
+                                return;
+                            }
+                            console.log("Directory delete successful",tempDirPath)
+                        })
+                    },1000*1000)
+
+                } catch (err) {
+                    console.error('An error occurred:', err);
+                    res.status(500).json({ error: "Conversion failed" });
                 }
-                console.log("Success", objInfo.etag, objInfo.versionId)
-                res.status(200).json({data:objInfo})
-            })
+            }
+            else{
+                // console.log(fileName);
+                minioClient.fPutObject(bucketName, fileName, filePath, function(err, objInfo) {
+                    if(err) {
+                        res.status(400).json({error:"Failed to upload"})
+                    }
+                    console.log("Success")
+                    res.status(200).json({data:objInfo, filename:fileName})
+                })
+            }
         })
     } catch(err){
         console.log(err.message);
