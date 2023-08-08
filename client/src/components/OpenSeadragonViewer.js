@@ -3,18 +3,41 @@ import OpenSeadragon from "openseadragon";
 import './OpenSeadragon.css';
 
 function OpenSeadragonViewer({imageName,imageUrl}) {
-        
+        const imageType = imageName.split('.').pop();
+
+
+
         console.log(imageUrl);
         useEffect(() => {
           let viewer =OpenSeadragon({
             id: 'openseadragon-viewer',
             prefixUrl:' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
-            tileSources: {
-                type: 'image',
-                url:  imageUrl,
-                buildPyramid: false
+            tileSources: function() {
+              if(imageType === 'png' || imageType === 'jpeg'){
+                return{
+                  type: 'image',
+                  url:  imageUrl,
+                  buildPyramid: false
+                };
+              } else{
+                return {
+                  width: 28480,
+                  height: 28760,
+                  tileSize: 512,
+                  tileOverlap: 0,
+                  // getTileUrl: function(level, x, y) {
+                  //   if(props.info[level+"/"+x+"_"+y] != undefined){
+                  //     let signature = props.info[level+"/"+x+"_"+y][0];
+                  //     let date = props.info[level+"/"+x+"_"+y][1];
+
+                      // console.log("https://play.min.io:9000/umangsstudentsiiitacin/test/tmp/bigimage1_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=Q3AM3UQ867SPQQA43P2F%2F20230729%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
+       
+                  //     return ["https://play.min.io:9000/umangsstudentsiiitacin/test/tmp/bigimage1_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=Q3AM3UQ867SPQQA43P2F%2F20230729%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
+                  //   }
+                  // }
+                }
+              }
             },
-            // tileSources: "india.dzi",
             animationTime: 0.5,
             blendTime: 0.1,
             constrainDuringPan: true,
@@ -27,10 +50,10 @@ function OpenSeadragonViewer({imageName,imageUrl}) {
             sequenceMode:true,
             crossOriginPolicy: "Anonymous"
           });
+   
           return () => {
             viewer && viewer.destroy();
           };
-          
         }, [imageUrl]);
 
       function takeSS(){

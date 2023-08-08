@@ -7,6 +7,8 @@ import { config } from "../config";
 
 
 function RenderFile(props) {
+    console.log(props);
+    const imageType = props.currFile.split('.').pop();
     const [viewerImage,setViewerImage] =useState();
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
@@ -33,16 +35,22 @@ function RenderFile(props) {
                 }
                 return;
             }else{
-                let imageObj = { imageName: props.currFile };
-                axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj })
-                .then((response) => response.data.image)
-                .then((image) => {
-                    setAllImages((prevValue) => [...prevValue, image]);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    return null;
-                });
+                if(imageType === 'png' || imageType === 'jpeg'){
+                    let imageObj = { imageName: props.currFile };
+                    axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj })
+                    .then((response) => response.data.image)
+                    .then((image) => {
+                        setAllImages((prevValue) => [...prevValue, image]);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        return null;
+                    });
+                }
+                else{
+                    // Get image of last tile from the dzi directory   
+                    
+                }
             }
         }else{
             setAllImages((prevFilesLink) => {
@@ -75,7 +83,8 @@ function RenderFile(props) {
     function handleClick(e){
         let num = e.target.id;
         setViewerImage(allImages[num]);
-        setImageName(props.info[num]);      
+        setImageName(props.info[num]);  
+
     }
 
     function handleDelete(event,file){
