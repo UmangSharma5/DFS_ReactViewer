@@ -1,0 +1,54 @@
+.render-file-container {
+    display: flex;
+    width: 100vw;
+}
+  
+
+.button-container {
+    flex: 25%;
+    display: flex;
+    flex-wrap: wrap;
+    /* background-color: red; */
+    /* justify-content: space-around; */
+    gap: 40px;
+    margin: 20px;
+    
+}
+
+#image-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 125px;
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+#image-name:hover {
+    overflow: visible;
+    color: red;
+}
+
+.viewer-container {
+    flex: 75%;
+    background-color: rgb(218, 235, 250);
+    flex-grow: 1; 
+    text-align: center;
+    height: 100%;
+}
+
+.viewer-container p {
+    text-align: center; 
+    font-size: 25px; /* Set the font size */
+    color: #333; /* Set the text color */
+    margin: 20px 0; /* Add some margin around the paragraph */
+}
+
+.name-del {
+    display: flex;
+}
+
+.del-btn {
+    border-radius: 60px;
+    color: red;
+}
