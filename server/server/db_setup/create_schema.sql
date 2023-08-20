@@ -13,5 +13,6 @@ CREATE TABLE FileTypeMap (
     file_id int NOT NULL AUTO_INCREMENT,
     filename varchar(255),
     file_type varchar(255),
+    isUploaded int DEFAULT 0,
     PRIMARY KEY (file_id)
 );

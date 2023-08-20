@@ -9,7 +9,7 @@ import bodyParser from "body-parser";
 import {execSql} from '../db.js'
 import { exec } from "child_process";
 import { walk } from "walk";
-import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_format } from '../Database_queries/queries.js'
+import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_format,file_uploaded } from '../Database_queries/queries.js'
 
 const sem = semaphore(100)
 app.use(cors());
@@ -111,15 +111,53 @@ router.get("/:url",async (req,res) => {
 });
 let count = 0;
 
-const handleUpload = async (bucketName,minioPath,filePath) => {
-    minioClient.fPutObject(bucketName, minioPath + filePath, filePath, (err,objInfo) => {
+const handleUpload = async (bucketName,minioPath,filePath,obj) => {
+    minioClient.fPutObject(bucketName, minioPath + filePath, filePath, async (err,objInfo) => {
         if (err) {
             console.error("---->",err)
         }else{
             console.log(count++)
+            obj.curr_count++;
             console.log("******")
+            if(obj.curr_count == obj.total_files)
+            {
+                await file_uploaded(obj.fileName,obj.format);
+            }
         }
         sem.leave(1)
+    })
+}
+
+const handleAllUpload = async (bucketName,fileName,format) => {
+    let obj = {
+        total_files: 0,
+        curr_count : 0,
+        fileName: fileName,
+        format: format
+    };
+    const walker = walk(`temp/${fileName}_files`);
+    const minioPath = `${fileName}/`
+
+    walker.on('file',async (root, fileStats, next) => {
+        obj.total_files++;
+        next()
+    })
+
+    walker.on('end', function() {
+        console.log('Counted Files')
+
+        walker = walk(`temp/${fileName}_files`);
+        let filePath;
+        walker.on('file',async (root, fileStats, next) => {
+            filePath = root +'/' +fileStats.name;
+
+            sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj))
+            next()
+        })
+
+        walker.on('end',() => {
+            console.log('End Upload')
+        })
     })
 }
 
@@ -153,7 +191,7 @@ router.post("/:url",async function(req,res){
                 })
             }
             else{
-                exec(`vips dzsave ${filePath} temp`, (error, stdout, stderr) => {
+                exec(`vips dzsave ${filePath} temp/${tempName}`, (error, stdout, stderr) => {
                     if (error) {
                         console.log(`error: ${error.message}`);
                         return;
@@ -163,28 +201,7 @@ router.post("/:url",async function(req,res){
                         // return;
                     }
                     console.log(`stdout: ${stdout}`);
-                    const walker = walk('temp_files');
-                    const minioPath = `${tempName}/`
-
-                    // let obj_data = []
-                    // while(!sem.available(1));
-                    // console.log(sem.current)
-                    // sem.take(1,() => {
-                    //     console.log(sem.current)
-                    //     sem.leave()
-                    // })
-                    console.log(sem.current)
-                    let filePath;
-                    walker.on('file',async (root, fileStats, next) => {
-                        filePath = root +'/' +fileStats.name;
-                        // while(!sem.available(1));
-                        sem.take(1,() => handleUpload(bucketName,minioPath,filePath))
-                        next()
-                    })
-                    walker.on('end', function() {
-                        console.log('End upload')
-                        // res.status(200).json({ filename: minioPath+filePath})
-                    })
+                    handleAllUpload(bucketName,tempName,parts[1]);
                 });
 
                 let tiffFilePath = filePath;

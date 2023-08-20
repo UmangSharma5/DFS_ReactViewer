@@ -27,11 +27,19 @@ const file_format = async (filename) => {
         return res;
     })
 }
+const file_uploaded = async (filename,format) => {
+    let query = `UPDATE FileTypeMap set isUploaded = 1 where filename = '${filename}' AND file_type = '${format}';`
+    return await execSql(query).then(res => {
+        // console.log(res);
+        return res;
+    })
+}
 
 export {
     map_user_to_bucket,
     get_user_bucket,
     remove_user_bucket,
     map_file_type,
-    file_format
+    file_format,
+    file_uploaded
 }
