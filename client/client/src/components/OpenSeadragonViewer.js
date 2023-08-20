@@ -2,9 +2,8 @@ import React, {useState,useEffect} from "react";
 import OpenSeadragon from "openseadragon";
 import './OpenSeadragon.css';
 
-function OpenSeadragonViewer({imageName,imageUrl,info,format}) {
+function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
         let viewer;
-        console.log(info);
         useEffect(() => {
           if(format == 'png' || format == 'jpeg')
           {
@@ -43,10 +42,11 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format}) {
                     let signature = info[level+"/"+x+"_"+y][0];
                     let date = info[level+"/"+x+"_"+y][1];
                     let credential = info[level+"/"+x+"_"+y][2];
+                    let startLink = outer.split('_files')[0];
 
-                    console.log("https://play.min.io:9000/umangsstudentsiiitacin/test/tmp/bigimage1_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
+                    console.log(startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
       
-                    return ["https://play.min.io:9000/shaantanukulkarnistudentsiiitacin/dwsample-tiff-4k/temp_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
+                    return [startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
                   }
                 }
             },          
@@ -62,12 +62,12 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format}) {
             sequenceMode:true,
             crossOriginPolicy: "Anonymous"
           });
-          return () => {
-            viewer && viewer.destroy();
-          };
         }
+        return () => {
+          viewer && viewer.destroy();
+        };
           
-        }, [imageUrl]);
+        }, [imageUrl,outer]);
 
       function takeSS(){
         let extension = imageName.split('.').pop();

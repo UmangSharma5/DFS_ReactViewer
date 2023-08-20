@@ -15,11 +15,10 @@ function RenderFile(props) {
     const [format,setFormat] = useState();
     const [pyramid,setPyramid] = useState({});
     const isFirstRender = React.useRef(true);
+    const [outer,setOuter] = useState();
 
     useEffect(()=>{
-        console.log(props.info);
         setAllImageName(props.info);
-        console.log(props.fileInfo);
         if(isFirstRender.current){
             console.log("Getting image links");
             getAllImageLinks();
@@ -37,16 +36,16 @@ function RenderFile(props) {
                 }
                 return;
             }else{
-                let imageObj = { imageName: props.currFile };
-                axios.get(config.BASE_URL+"/getURL/"+props.email, { params: imageObj },
+                let imageObj = { imageName: props.currFile.split('.')[0] };
+                axios.get(config.BASE_URL+"/getURL/"+props.email,
                 {
+                    params: imageObj ,
                     headers: {
                         'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
                     }
                 })
-                .then((response) => response.data.image)
-                .then((image) => {
-                    setAllImages((prevValue) => [...prevValue, image]);
+                .then((response) => {
+                    setAllImages((prevValue) => [...prevValue, response.data.image]);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -90,10 +89,9 @@ function RenderFile(props) {
     function handleClick(e){
         let num = e.target.id;
         const imagetype = props.info[num].format;
-        // const onlyFileName = props.info[num].split('.')[0];
         const dir_ = props.info[num].name.split('.')[0]
         if(imagetype != 'png' && imagetype != 'jpeg'){
-            let imageObj = { baseDir: dir_+"/temp_files/"};
+            let imageObj = { baseDir: dir_+"/temp/"+dir_+"_files/"};
             axios.get(config.BASE_URL+"/getURL/imagePyramid/"+props.email,
                 {
                     params: imageObj,
@@ -102,8 +100,9 @@ function RenderFile(props) {
                     }
                 })
                 .then((response) => {
-                    console.log(response) ;
-                    return response.data.image})
+                    setOuter(response.data.outer);
+                    return response.data.image;
+                })
                 .then((image) => {
                     setPyramid(image);
                 })
@@ -113,6 +112,7 @@ function RenderFile(props) {
                 });
         }
         setFormat(imagetype);
+        console.log(allImages[num]);
         setViewerImage(allImages[num]);
         setImageName(props.info[num]);
     }
@@ -126,7 +126,7 @@ function RenderFile(props) {
        <div className="render-file-container">
          <div className="button-container">
                 {allImageName.map((file, i) => {
-                    console.log(file);
+                    {/* console.log(file); */}
                     const buttonStyles = {
                         margin: '10px',
                         backgroundImage:allImages[i] ? `url(${allImages[i]})` : 'none',
@@ -151,7 +151,7 @@ function RenderFile(props) {
                 })}
             </div>
             <div className="viewer-container">
-                {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format}/> : <p>Select an image to view</p>}
+                {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}
             </div> 
         </div>
     )

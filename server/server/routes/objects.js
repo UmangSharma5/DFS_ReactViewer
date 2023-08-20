@@ -135,7 +135,7 @@ const handleAllUpload = async (bucketName,fileName,format) => {
         fileName: fileName,
         format: format
     };
-    const walker = walk(`temp/${fileName}_files`);
+    let walker = walk(`temp/${fileName}_files`);
     const minioPath = `${fileName}/`
 
     walker.on('file',async (root, fileStats, next) => {
@@ -191,6 +191,7 @@ router.post("/:url",async function(req,res){
                 })
             }
             else{
+                console.log(tempName);
                 exec(`vips dzsave ${filePath} temp/${tempName}`, (error, stdout, stderr) => {
                     if (error) {
                         console.log(`error: ${error.message}`);
