@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS FileTypeMap;
 
 CREATE TABLE FileTypeMap (
     file_id int NOT NULL AUTO_INCREMENT,
+    bucket_name varchar(255),
     filename varchar(255),
     file_type varchar(255),
     isUploaded int DEFAULT 0,

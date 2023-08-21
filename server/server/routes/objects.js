@@ -9,7 +9,7 @@ import bodyParser from "body-parser";
 import {execSql} from '../db.js'
 import { exec } from "child_process";
 import { walk } from "walk";
-import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_format,file_uploaded } from '../Database_queries/queries.js'
+import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_stats,file_uploaded } from '../Database_queries/queries.js'
 
 const sem = semaphore(100)
 app.use(cors());
@@ -94,9 +94,10 @@ router.get("/:url",async (req,res) => {
                 var temp = []
                 await Promise.all(objects.map(async (name) => {
                     let tname = name.split('/')[1];
-                    await file_format(tname.split('.')[0])
+                    await file_stats(bucketName,tname.split('.')[0])
                         .then(response => {
-                            temp.push({name: tname.split('.')[0], format: response[0]?.file_type});
+                            if(response[0]?.isUploaded == 1)
+                                temp.push({name: tname.split('.')[0], format: response[0]?.file_type});
                         })
                 }))
                 console.log('Listing objects completed.');
@@ -121,7 +122,7 @@ const handleUpload = async (bucketName,minioPath,filePath,obj) => {
             console.log("******")
             if(obj.curr_count == obj.total_files)
             {
-                await file_uploaded(obj.fileName,obj.format);
+                await file_uploaded(bucketName,obj.fileName,obj.format);
             }
         }
         sem.leave(1)
@@ -177,15 +178,16 @@ router.post("/:url",async function(req,res){
             let tempName = parts[0];
             let pngFileName = tempName+'.png';
 
-            await map_file_type(tempName,parts[1]);
+            await map_file_type(bucketName,tempName,parts[1]);
 
             // let information =  await execSql(`SELECT * from FileTypeMap;`);
 
             if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
-                minioClient.fPutObject(bucketName,"thumbnail/" +fileName, filePath, function(err, objInfo) {
+                minioClient.fPutObject(bucketName,"thumbnail/" +fileName, filePath, async (err, objInfo) => {
                     if(err) {
-                        res.status(400).json({error:"Failed to upload"})
+                        return res.status(400).json({error:"Failed to upload"})
                     }
+                    await file_uploaded(bucketName,tempName,parts[1]);
                     console.log("Success")
                     res.status(200).json({data:objInfo, filename:fileName})
                 })
@@ -218,7 +220,7 @@ router.post("/:url",async function(req,res){
                         console.log('Conversion completed successfully!');
                         await minioClient.fPutObject(bucketName, "thumbnail/"+pngFileName, pngFilePath, function(err, objInfo) {
                             if (err) {
-                                res.status(400).json({ error: "Failed to upload" });
+                                return res.status(400).json({ error: "Failed to upload" });
                             }
                             console.log("Success");
                             console.log(objInfo);
@@ -228,7 +230,7 @@ router.post("/:url",async function(req,res){
                         console.log(err);
                         await minioClient.fPutObject(bucketName, "thumbnail/"+pngFileName,__dirname+"../No-Preview-Available.jpg", function(err, objInfo) {
                             if (err) {
-                                res.status(400).json({ error: "Failed to upload" });
+                                return res.status(400).json({ error: "Failed to upload" });
                             }
                             console.log("Success");
                             console.log(objInfo);
