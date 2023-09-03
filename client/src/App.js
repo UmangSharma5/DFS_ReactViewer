@@ -11,7 +11,8 @@ function App(props) {
     name: ""
   });
   const [isUploaded,setIsUploaded] = useState(false);
-  
+  const [fileInfo,setFileInfo] = useState({});
+
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
   let shortEmail ='';
   for (let i = 0; i < email.length; i++) {
@@ -21,7 +22,6 @@ function App(props) {
     }
   }
   
-
   function handleClick(){
     props.logout();
   }
@@ -33,7 +33,6 @@ function App(props) {
       name : file
     }))
   };
-
   
   async function uploadFile(e) {
     e.preventDefault();
@@ -42,19 +41,24 @@ function App(props) {
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
       console.log("Initiating upload")
-      const response = await axios.post(bucketURL, formData);
+      const response = await axios.post(bucketURL, formData,
+      {
+          headers: {
+              'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+          }
+      });
       console.log("Upload complete");
-      console.log(formData);
       setIsUploaded(true);
+      console.log("resp-",response);
       setCurrentFile((prevValue) => ({
         ...prevValue,
-        count: prevValue.count+1
-      }))
-      
+        name:response.data.filename,
+        format: response.data.format,
+        count: prevValue.count+1,
+      }))     
     } catch (error) {
       console.log(error);
     }
-
   }
    
   
@@ -70,7 +74,7 @@ function App(props) {
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
-        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail}/>
+        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
       </div>
     </div>
   );

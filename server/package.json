@@ -11,14 +11,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.4.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "formidable": "^3.4.0",
     "minio": "^7.1.1",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.5.2",
+    "semaphore": "^1.1.0",
+    "sharp": "^0.32.1",
     "tiff-to-png": "^2.0.2",
-    "tiff.js": "^1.0.0"
+    "tiff.js": "^1.0.0",
+    "vips": "^1.0.0",
+    "walk": "^2.3.15"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

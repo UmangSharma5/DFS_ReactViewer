@@ -4,6 +4,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import require_auth from './middleware/Auth.js';
+
 app.use(cors());
 app.use(bodyParser.json());
 const __filename = fileURLToPath(import.meta.url);
@@ -15,35 +17,15 @@ import getURL from './routes/getURL.js';
 import deleteBucket from './routes/deleteBucket.js';
 import deleteObject from './routes/deleteObject.js';
 
-app.use('/hv/objects',objectsRoute);
-app.use('/hv/getURL',getURL);
-app.use('/hv/deleteBucket',deleteBucket);
-app.use('/hv/deleteObject',deleteObject);
+app.use('/hv/objects',require_auth,objectsRoute);
+app.use('/hv/getURL',require_auth,getURL);
+app.use('/hv/deleteBucket',require_auth,deleteBucket);
+app.use('/hv/deleteObject',require_auth,deleteObject);
 
-
-const success = (message, data, statusCode) => {
-    return {
-      message:message,
-      error: false,
-      code: statusCode,
-      data: data
-    };
-   
-};
-
-const error = (message, statusCode) => {
-    const codes = [200, 201, 400, 401, 404, 403, 422, 500];
-    const findCode = codes.find((code) => code == statusCode);
- 
-    if (!findCode) statusCode = 500;
-    else statusCode = findCode;
- 
-    return {
-      message:message,
-      code: statusCode,
-      error: true
-    };
-  };
+// app.use('/hv/objects',objectsRoute);
+// app.use('/hv/getURL',getURL);
+// app.use('/hv/deleteBucket',deleteBucket);
+// app.use('/hv/deleteObject',deleteObject);
 
 
 app.get('/*', function (req, res) {
