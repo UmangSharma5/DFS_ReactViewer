@@ -11,7 +11,8 @@ function App(props) {
     name: ""
   });
   const [isUploaded,setIsUploaded] = useState(false);
-  
+  const [fileInfo,setFileInfo] = useState({});
+
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
   let shortEmail ='';
   for (let i = 0; i < email.length; i++) {
@@ -21,7 +22,6 @@ function App(props) {
     }
   }
   
-
   function handleClick(){
     props.logout();
   }
@@ -33,7 +33,6 @@ function App(props) {
       name : file
     }))
   };
-
   
   async function uploadFile(e) {
     e.preventDefault();
@@ -51,16 +50,16 @@ function App(props) {
       console.log("Upload complete");
       console.log(response.data.filename);
       setIsUploaded(true);
+      console.log("resp-",response);
       setCurrentFile((prevValue) => ({
         ...prevValue,
         name:response.data.filename,
-        count: prevValue.count+1
-      }))
-      
+        format: response.data.format,
+        count: prevValue.count+1,
+      }))     
     } catch (error) {
       console.log(error);
     }
-
   }
    
   
@@ -76,7 +75,7 @@ function App(props) {
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
-        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail}/>
+        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
       </div>
     </div>
   );
