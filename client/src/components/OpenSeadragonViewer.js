@@ -86,6 +86,9 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
         }
       } 
 
+      
+      
+
     return ( 
       <div>
         <button onClick={takeSS} id="print-view" >Print View</button>

@@ -15,7 +15,6 @@ const remove_user_bucket = async (user) => {
     let query = `DELETE FROM User_Bucket where user = '${user}';`
     return await execSql(query)
 }
-
 const map_file_type = async (bucketName, filename,file_type) => {
     let query = `INSERT INTO FileTypeMap (bucket_name, filename,file_type) Values('${bucketName}','${filename}' ,'${file_type}');`
     return await execSql(query)

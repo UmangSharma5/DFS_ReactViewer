@@ -48,6 +48,7 @@ function App(props) {
           }
       });
       console.log("Upload complete");
+      console.log(response.data.filename);
       setIsUploaded(true);
       console.log("resp-",response);
       setCurrentFile((prevValue) => ({

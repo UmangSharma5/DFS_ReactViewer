@@ -21,6 +21,7 @@ function GetFiles(props){
             // setBackendData(
             //     [...backendData,{name:latest_file,format:props.fileObj.format}]
             // )
+
         }
     }, [props.fileObj.count]);
 
