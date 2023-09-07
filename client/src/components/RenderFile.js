@@ -126,7 +126,6 @@ function RenderFile(props) {
        <div className="render-file-container">
          <div className="button-container">
                 {allImageName.map((file, i) => {
-                    {/* console.log(file); */}
                     const buttonStyles = {
                         margin: '10px',
                         backgroundImage:allImages[i] ? `url(${allImages[i]})` : 'none',
@@ -144,7 +143,7 @@ function RenderFile(props) {
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
                                 <p id="image-name">{file.name.split('.')[0]+'.'+ file.format}</p> 
-                                {/* <button className="del-btn"  value={file} onClick={event => handleDelete(event,file)}> <i className="bi bi-archive"></i></button> */}
+                                <button className="del-btn"  value={file} onClick={event => handleDelete(event,file)}> <i className="bi bi-archive"></i></button>
                             </div>
                         </div> 
                     );
