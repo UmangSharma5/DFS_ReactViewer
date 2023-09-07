@@ -96,17 +96,6 @@ const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileNa
             if(obj.curr_count == obj.total_files)
             {
                 await file_uploaded(bucketName,obj.fileName,obj.format);
-                fs.rmdir(tempDirPath+"/"+fileName+"_files",
-                    { recursive: true, force: true }
-                    ,(err)=>{
-                    if(err){
-                        console.log("Directory delete from temp failed: ",err.message);
-                        return;
-                    }
-                    console.log("Directory delete successful",tempDirPath)
-                })
-                let dziPath = path.resolve(__dirname, '../temp')+"/"+fileName+".dzi"
-                fs.unlinkSync(dziPath)
             }
         }
         sem.leave(1)

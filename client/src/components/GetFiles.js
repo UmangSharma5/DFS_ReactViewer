@@ -26,23 +26,20 @@ function GetFiles(props){
         }
     }, [props.fileObj.count]);
 
-    async function getFiles() {
-
-        try {
-            const response = await axios.get(`${config.BASE_URL}/objects/${props.email}`,{
-                headers: {
-                  authorization:'Bearer ' +JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-                },
-              }
-            )
-            const sortedData = response.data.temp.sort(sortFileNames)
-            setBackendData(sortedData)
-            return backendData
-          }
-        catch (error) {
-            console.log(error)
-          }
-
+    function getFiles() {
+        axios.get(`${config.BASE_URL}/objects/${props.email}`,
+        {
+            headers: {
+                'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            }
+        })
+        .then(response => {
+            console.log(response);
+          setBackendData(response.data.temp);
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
 
     function handleDelete(event,file) {
