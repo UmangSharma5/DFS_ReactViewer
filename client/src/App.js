@@ -37,6 +37,7 @@ function App(props) {
   async function uploadFile(e) {
     e.preventDefault();
     const formData = new FormData();
+    const bar = document.getElementById('uploadProgressBar')
     formData.append('file', currentFile.name);
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
@@ -45,6 +46,15 @@ function App(props) {
       {
           headers: {
               'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+          },
+          onUploadProgress: function(progressEvent){
+            const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total)*100)
+            bar.setAttribute('value',percentCompleted)
+            bar.previousElementSibling.textContent = `${percentCompleted}%`
+            if(percentCompleted === 100)
+            {
+              bar.previousElementSibling.textContent = `Upload Completed!`
+            }
           }
       });
       console.log("Upload complete");
@@ -71,6 +81,10 @@ function App(props) {
             <input type="file" id="fileInput" onChange={handleChange} className="input-file"/>
             <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
           </form>
+          <div>
+            <progress id="uploadProgressBar" value="0" max="100"></progress>
+            <label for="uploadProgressBar" >0%</label>
+          </div>
         </div>
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
