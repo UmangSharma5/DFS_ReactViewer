@@ -92,7 +92,11 @@
 #uploadProgressBar {
   width: 100%;
   height: 25px;
-  background-color: #3498db;
+  background-color: blue;
+}
+
+progress[value]::-webkit-progress-value {
+  background-color: blue;
 }
 
 #uploadProgressBarLabel {
