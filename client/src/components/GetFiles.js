@@ -64,10 +64,15 @@ function GetFiles(props){
             console.log(error);
         }
     }
-    console.log("back->",backendData);
+
+    if(props.refreshStatus)
+    {
+        getFiles()
+    }
+
     return (
         <div className="get-files-container">
-            {backendData ? <RenderFile currFile={currFileName} info ={backendData} uploadStatus= {props.uploadStatus} email={props.email} onDelete={handleDelete}  deletedFileName={deletedFileName} /> : null} 
+            {backendData ? <RenderFile refreshStatus={props.refreshStatus} currFile={currFileName} info ={backendData} uploadStatus= {props.uploadStatus} email={props.email} onDelete={handleDelete}  deletedFileName={deletedFileName} /> : null} 
         </div>
     )
 }

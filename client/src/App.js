@@ -11,6 +11,7 @@ function App(props) {
     name: ""
   });
   const [isUploaded,setIsUploaded] = useState(false);
+  const [refreshStatus, setRefreshStatus] = useState(false);
   const [fileInfo,setFileInfo] = useState({});
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
@@ -61,6 +62,28 @@ function App(props) {
       console.log(error);
     }
   }
+
+ useEffect(() => {
+   const refreshInterval = setInterval(() => {
+     reRender() 
+
+    const timeoutId = setTimeout(reRender, 5000)
+
+   }, config.REFRESH_TIME) 
+   return () => clearInterval(refreshInterval)
+ }, [])
+
+  function reRender(){
+    console.log('doing')
+    setRefreshStatus(true)  
+  }
+
+  useEffect(() => {
+    if(refreshStatus)
+    {
+      setRefreshStatus(false)
+    }
+  },[refreshStatus])
    
   
   return (
@@ -75,7 +98,7 @@ function App(props) {
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
-        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
+        <GetFiles refreshStatus={refreshStatus} fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
       </div>
     </div>
   );

@@ -86,6 +86,10 @@ function RenderFile(props) {
         }
     }
 
+    if (props.refreshStatus) {
+      getAllImageLinks()
+    }
+
     function handleClick(e){
         let num = e.target.id;
         const imagetype = props.info[num].format;
@@ -121,7 +125,7 @@ function RenderFile(props) {
         props.onDelete(event,file);
         setViewerImage();
     }
-   
+
     return(
        <div className="render-file-container">
          <div className="button-container">
