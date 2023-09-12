@@ -80,14 +80,3 @@
   -webkit-user-select: none;
   touch-action: manipulation;
 }
-
-#uploadProgressBar {
-  width: 100%;
-  height: 25px;
-  background-color: blue;
-}
-
-
-progress[value]::-webkit-progress-value {
-  background-color: blue;
-}
