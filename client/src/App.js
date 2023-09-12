@@ -86,7 +86,7 @@ function App(props) {
             <input type="file" id="fileInput" onChange={handleChange} className="input-file"/>
             <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
           </form>
-          <ProgressBar display={displayProgressBar} progressValue={progressValue}/>
+          {displayProgressBar? <ProgressBar progressValue={progressValue}/>:<></>}
         </div>
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
