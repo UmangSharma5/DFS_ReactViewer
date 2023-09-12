@@ -91,10 +91,6 @@ function RenderFile(props) {
         }
     }
 
-    if (props.refreshStatus) {
-      getAllImageLinks()
-    }
-
     function handleClick(e){
         let num = e.target.id;
         const imagetype = props.info[num].format;
