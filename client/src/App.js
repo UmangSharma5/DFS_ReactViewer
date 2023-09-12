@@ -12,12 +12,9 @@ function App(props) {
     name: ""
   });
   const [isUploaded,setIsUploaded] = useState(false);
-<<<<<<< HEAD
   const [displayProgressBar, setDisplayProgressBar] = useState(false)
   const [progressValue,setProgressValue] = useState(0)
-=======
-  const [refreshStatus, setRefreshStatus] = useState(false);
->>>>>>> 3dce6e6d (Temporary Solution, Needs Changes)
+
   const [fileInfo,setFileInfo] = useState({});
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
@@ -83,15 +80,11 @@ function App(props) {
 
  useEffect(() => {
    const refreshInterval = setInterval(() => {
-     reRender() 
+     setRefreshStatus(true)  
 
    }, config.REFRESH_TIME) 
    return () => clearInterval(refreshInterval)
  }, [])
-
-  function reRender(){
-    setRefreshStatus(true)  
-  }
 
   useEffect(() => {
     if(refreshStatus)
