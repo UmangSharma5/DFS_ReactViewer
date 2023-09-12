@@ -85,14 +85,11 @@ function App(props) {
    const refreshInterval = setInterval(() => {
      reRender() 
 
-    const timeoutId = setTimeout(reRender, 5000)
-
    }, config.REFRESH_TIME) 
    return () => clearInterval(refreshInterval)
  }, [])
 
   function reRender(){
-    console.log('doing')
     setRefreshStatus(true)  
   }
 

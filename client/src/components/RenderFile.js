@@ -17,6 +17,11 @@ function RenderFile(props) {
     const isFirstRender = React.useRef(true);
     const [outer,setOuter] = useState();
 
+    if (props.refreshStatus) {
+        isFirstRender.current = true
+    }
+
+
     useEffect(()=>{
         setAllImageName(props.info);
         if(isFirstRender.current){
