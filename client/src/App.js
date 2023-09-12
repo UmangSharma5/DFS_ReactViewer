@@ -57,7 +57,7 @@ function App(props) {
         name:response.data.filename,
         format: response.data.format,
         count: prevValue.count+1,
-      }))     
+      })) 
     } catch (error) {
       console.log(error);
     }
@@ -65,15 +65,11 @@ function App(props) {
 
  useEffect(() => {
    const refreshInterval = setInterval(() => {
-     reRender() 
+     setRefreshStatus(true)  
 
    }, config.REFRESH_TIME) 
    return () => clearInterval(refreshInterval)
  }, [])
-
-  function reRender(){
-    setRefreshStatus(true)  
-  }
 
   useEffect(() => {
     if(refreshStatus)
