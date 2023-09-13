@@ -44,12 +44,30 @@ function App(props) {
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
       console.log("Initiating upload")
-      const response = await axios.post(bucketURL, formData,
-      {
+      const response = await axios
+        .post(bucketURL, formData, {
           headers: {
-              'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+             authorization:
+            'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+        },
+        // Added On Upload Progress Config to Axios Post Request
+        onUploadProgress: function (progressEvent) {
+          const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+          setProgressValue(percentCompleted)
+        },
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            alert('Upload is in progress...Please check after some time')
+          } else {
+            alert('Error in uploading file')
           }
-      });
+        })
+      setTimeout(function () {
+        setProgressValue(0)
+        setDisplayProgressBar(false)
+      }, 3000)
+
       console.log("Upload complete");
       console.log(response.data.filename);
       setIsUploaded(true);
