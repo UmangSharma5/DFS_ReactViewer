@@ -25,8 +25,8 @@ function GetFiles(props){
         }
     }, [props.fileObj.count]);
 
-    function getFiles() {
-        axios.get(`${config.BASE_URL}/objects/${props.email}`,
+    async function getFiles() {
+        return axios.get(`${config.BASE_URL}/objects/${props.email}`,
         {
             headers: {
                 'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
@@ -64,10 +64,10 @@ function GetFiles(props){
             console.log(error);
         }
     }
-    console.log("back->",backendData);
+
     return (
         <div className="get-files-container">
-            {backendData ? <RenderFile currFile={currFileName} info ={backendData} uploadStatus= {props.uploadStatus} email={props.email} onDelete={handleDelete}  deletedFileName={deletedFileName} /> : null} 
+            {backendData ? <RenderFile getFiles={getFiles} refreshStatus={props.refreshStatus} currFile={currFileName} info ={backendData} uploadStatus= {props.uploadStatus} email={props.email} onDelete={handleDelete}  deletedFileName={deletedFileName} /> : null} 
         </div>
     )
 }

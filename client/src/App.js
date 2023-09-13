@@ -11,10 +11,10 @@ function App(props) {
     count: 0,
     name: ""
   });
-  const [isUploaded,setIsUploaded] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false)
   const [displayProgressBar, setDisplayProgressBar] = useState(false)
-  const [progressValue,setProgressValue] = useState(0)
-  const [fileInfo,setFileInfo] = useState({});
+  const [progressValue, setProgressValue] = useState(0)
+  const [fileInfo, setFileInfo] = useState({})
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
   let shortEmail ='';
@@ -44,10 +44,11 @@ function App(props) {
     formData.append('file', currentFile.name);
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
-      console.log('Initiating upload')
-      const response = await axios.post(bucketURL, formData, {
-        headers: {
-          authorization:
+      console.log("Initiating upload")
+      const response = await axios
+        .post(bucketURL, formData, {
+          headers: {
+             authorization:
             'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
         },
         // Added On Upload Progress Config to Axios Post Request
@@ -56,16 +57,22 @@ function App(props) {
           setProgressValue(percentCompleted)
         },
       })
-
+        .then((res) => {
+          if (res.status === 200) {
+            alert('Upload is in Progress...Please check after some time')
+          } else {
+            alert('Error in Uploading File')
+          }
+        })
       setTimeout(function () {
         setProgressValue(0)
         setDisplayProgressBar(false)
       }, 3000)
 
-      console.log('Upload Complete')
-      console.log(response.data.filename)
-      setIsUploaded(true)
-      console.log('resp-', response)
+      console.log("Upload complete");
+      console.log(response.data.filename);
+      setIsUploaded(true);
+      console.log("resp-",response);
       setCurrentFile((prevValue) => ({
         ...prevValue,
         name: response.data.filename,
@@ -75,8 +82,7 @@ function App(props) {
     } catch (error) {
       console.log(error);
     }
-  }
-   
+  }   
   
   return (
     <div className="App">

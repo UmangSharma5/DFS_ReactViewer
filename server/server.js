@@ -29,10 +29,10 @@ app.use('/hv/deleteObject',require_auth,deleteObject);
 
 
 app.get('/*', function (req, res) {
-    console.log("here i am")
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+  console.log('here i am')
+  res.sendFile(path.join(__dirname, 'build', 'index.html'))
+})
 
-app.listen(5000,function(){
-    console.log("Server started on port 5000");
-});
+app.listen(5000, function () {
+  console.log('Server started on port 5000')
+})

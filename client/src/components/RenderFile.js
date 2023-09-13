@@ -17,11 +17,19 @@ function RenderFile(props) {
     const isFirstRender = React.useRef(true);
     const [outer,setOuter] = useState();
 
+    useEffect(() => {
+        const refreshInterval = setInterval(() => {
+        props.getFiles()
+      }, config.REFRESH_TIME)
+    return () => clearInterval(refreshInterval)
+    }, [])
+
     useEffect(()=>{
         setAllImageName(props.info);
+        getAllImageLinks()
         if(isFirstRender.current){
             console.log("Getting image links");
-            getAllImageLinks();
+            // getAllImageLinks();
             if (props.info.length > 0) {
                 isFirstRender.current = false;
             }
@@ -30,7 +38,7 @@ function RenderFile(props) {
         if(props.currFile != null){
             if(isFirstRender.current){
                 console.log("Getting image links");
-                getAllImageLinks();
+                // getAllImageLinks();
                 if (props.info.length > 0) {
                     isFirstRender.current = false;
                 }
@@ -121,7 +129,7 @@ function RenderFile(props) {
         props.onDelete(event,file);
         setViewerImage();
     }
-   
+
     return(
        <div className="render-file-container">
          <div className="button-container">
