@@ -11,7 +11,6 @@ function App(props) {
     name: ""
   });
   const [isUploaded,setIsUploaded] = useState(false);
-  const [refreshStatus, setRefreshStatus] = useState(false);
   const [fileInfo,setFileInfo] = useState({});
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
@@ -42,12 +41,21 @@ function App(props) {
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
       console.log("Initiating upload")
-      const response = await axios.post(bucketURL, formData,
-      {
+      const response = await axios
+        .post(bucketURL, formData, {
           headers: {
-              'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            authorization:
+              'Bearer ' +
+              JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+          },
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            alert('Upload is in progress...Please check after some time')
+          } else {
+            alert('Error in uploading file')
           }
-      });
+        })
       console.log("Upload complete");
       console.log(response.data.filename);
       setIsUploaded(true);
@@ -61,23 +69,7 @@ function App(props) {
     } catch (error) {
       console.log(error);
     }
-  }
-
- useEffect(() => {
-   const refreshInterval = setInterval(() => {
-     setRefreshStatus(true)  
-
-   }, config.REFRESH_TIME) 
-   return () => clearInterval(refreshInterval)
- }, [])
-
-  useEffect(() => {
-    if(refreshStatus)
-    {
-      setRefreshStatus(false)
-    }
-  },[refreshStatus])
-   
+  }   
   
   return (
     <div className="App">
@@ -91,7 +83,7 @@ function App(props) {
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
-        <GetFiles refreshStatus={refreshStatus} fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
+        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
       </div>
     </div>
   );
