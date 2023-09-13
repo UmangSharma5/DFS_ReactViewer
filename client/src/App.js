@@ -11,9 +11,10 @@ function App(props) {
     count: 0,
     name: ""
   });
-  const [isUploaded,setIsUploaded] = useState(false);
-  const [refreshStatus, setRefreshStatus] = useState(false);
-  const [fileInfo,setFileInfo] = useState({});
+  const [isUploaded, setIsUploaded] = useState(false)
+  const [displayProgressBar, setDisplayProgressBar] = useState(false)
+  const [progressValue, setProgressValue] = useState(0)
+  const [fileInfo, setFileInfo] = useState({})
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
   let shortEmail ='';
@@ -58,9 +59,9 @@ function App(props) {
       })
         .then((res) => {
           if (res.status === 200) {
-            alert('Upload is in progress...Please check after some time')
+            alert('Upload is in Progress...Please check after some time')
           } else {
-            alert('Error in uploading file')
+            alert('Error in Uploading File')
           }
         })
       setTimeout(function () {
