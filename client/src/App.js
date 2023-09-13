@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import GetFiles from './components/GetFiles';
+import ProgressBar from './components/ProgressBar';
 import { config } from './config'; 
 
 
@@ -11,6 +12,8 @@ function App(props) {
     name: ""
   });
   const [isUploaded,setIsUploaded] = useState(false);
+  const [displayProgressBar, setDisplayProgressBar] = useState(false)
+  const [progressValue,setProgressValue] = useState(0)
   const [fileInfo,setFileInfo] = useState({});
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
@@ -37,6 +40,7 @@ function App(props) {
   async function uploadFile(e) {
     e.preventDefault();
     const formData = new FormData();
+    setDisplayProgressBar(true)
     formData.append('file', currentFile.name);
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
     try {
@@ -44,11 +48,15 @@ function App(props) {
       const response = await axios
         .post(bucketURL, formData, {
           headers: {
-            authorization:
-              'Bearer ' +
-              JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-          },
-        })
+             authorization:
+            'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+        },
+        // Added On Upload Progress Config to Axios Post Request
+        onUploadProgress: function (progressEvent) {
+          const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+          setProgressValue(percentCompleted)
+        },
+      })
         .then((res) => {
           if (res.status === 200) {
             alert('Upload is in progress...Please check after some time')
@@ -56,16 +64,22 @@ function App(props) {
             alert('Error in uploading file')
           }
         })
+      setTimeout(function () {
+        setProgressValue(0)
+        setDisplayProgressBar(false)
+      }, 3000)
+      
       console.log("Upload complete");
       console.log(response.data.filename);
       setIsUploaded(true);
       console.log("resp-",response);
+      
       setCurrentFile((prevValue) => ({
         ...prevValue,
-        name:response.data.filename,
+        name: response.data.filename,
         format: response.data.format,
-        count: prevValue.count+1,
-      })) 
+        count: prevValue.count + 1,
+      }))
     } catch (error) {
       console.log(error);
     }
@@ -79,6 +93,7 @@ function App(props) {
             <input type="file" id="fileInput" onChange={handleChange} className="input-file"/>
             <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
           </form>
+          {displayProgressBar? <ProgressBar progressValue={progressValue}/>:<></>}
         </div>
         <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
