@@ -12,7 +12,7 @@ router.get("/:url",async function(req,res){
         const user = req.params.url;
         let bucketName = "datadrive-dev"
         const {imageName,imageFormat} = req.query;
-        const imageUrl = await minioClient.presignedGetObject(bucketName, user+"/thumbnail/"+imageName+".png", 60*60);
+        const imageUrl = await minioClient.presignedGetObject(bucketName, "hv/"+user+"/thumbnail/"+imageName+".png", 60*60);
         const imageURL = {image : imageUrl};
         res.json(imageURL);
     }catch(err){
@@ -65,7 +65,7 @@ router.get("/imagePyramid/:url",function(req,res){
         const {baseDir} = req.query
         console.log(baseDir)
         const objects = [];
-        const stream = minioClient.listObjects(bucketName, `${user}/${baseDir}`, true); 
+        const stream = minioClient.listObjects(bucketName, `hv/${user}/${baseDir}`, true); 
   
         stream.on('data', (obj) => {
             objects.push(obj);
