@@ -12,6 +12,7 @@ function RenderFile(props) {
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
     const [allImageName,setAllImageName] = useState([]);
+    const [previousImageName, setPreviousImageName] = useState(null)
     const [format,setFormat] = useState();
     const [pyramid,setPyramid] = useState({});
     const isFirstRender = React.useRef(true);
@@ -24,12 +25,34 @@ function RenderFile(props) {
     return () => clearInterval(refreshInterval)
     }, [])
 
-    useEffect(()=>{
-        setAllImageName(props.info);
-        getAllImageLinks()
+    useEffect(()=>{    
+        if (props.info.length > 0 && !isFirstRender.current && previousImageName != null) {
+            const newImageNames = props.info.filter(newImage => {
+                return !previousImageName.some(oldImage => 
+                    oldImage.name === newImage.name && oldImage.format === newImage.format
+                );
+            });
+            if (newImageNames.length > 0) {
+                console.log("New Images found:", newImageNames);
+                newImageNames.forEach((newImage) => {
+                  getImageLink(newImage)
+                })
+            }
+            else {
+                if (!(JSON.stringify(props.info) ===JSON.stringify(previousImageName)) && Object.keys(props.info).length > 0 ) {
+                    setAllImageName(props.info)
+                    getAllImageLinks()  
+                }   
+            }
+        }
+        else
+        {
+            setAllImageName(props.info)
+        }
+
         if(isFirstRender.current){
             console.log("Getting image links");
-            // getAllImageLinks();
+            getAllImageLinks();
             if (props.info.length > 0) {
                 isFirstRender.current = false;
             }
@@ -38,7 +61,7 @@ function RenderFile(props) {
         if(props.currFile != null){
             if(isFirstRender.current){
                 console.log("Getting image links");
-                // getAllImageLinks();
+                getAllImageLinks();
                 if (props.info.length > 0) {
                     isFirstRender.current = false;
                 }
@@ -67,6 +90,8 @@ function RenderFile(props) {
                 });
             });
         }
+
+        setPreviousImageName(props.info)
     },[props.info]);
 
     async function getAllImageLinks() {
@@ -92,6 +117,32 @@ function RenderFile(props) {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    async function getImageLink(image) {
+      try {
+        let imageObj = { imageName: image.name, imageFormat: image.format }
+        const response = await axios
+          .get(config.BASE_URL + '/getURL/' + props.email, {
+            params: imageObj,
+            headers: {
+              authorization:
+                'Bearer ' +
+                JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            },
+          })
+          .then((response) => response.data.image)
+          .catch((error) => {
+            console.log(error)
+          })
+        const imageLink = response
+        if (imageLink) {
+          setAllImages((prevImages) => [...prevImages, imageLink])
+          setAllImageName((prevImageNames) => [...prevImageNames, image])
+        }
+      } catch (error) {
+        console.log(error)
+      }
     }
 
     function handleClick(e){
