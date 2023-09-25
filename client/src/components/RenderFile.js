@@ -12,7 +12,7 @@ function RenderFile(props) {
     const [imageName,setImageName] =useState();
     const [allImages,setAllImages] = useState([]);
     const [allImageName,setAllImageName] = useState([]);
-    const [previousImageName, setPreviousImageName] = useState(null)
+    const [previousImageNames, setPreviousImageNames] = useState(null)
     const [format,setFormat] = useState();
     const [pyramid,setPyramid] = useState({});
     const isFirstRender = React.useRef(true);
@@ -26,9 +26,9 @@ function RenderFile(props) {
     }, [])
 
     useEffect(()=>{    
-        if (props.info.length > 0 && !isFirstRender.current && previousImageName != null) {
+        if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
             const newImageNames = props.info.filter(newImage => {
-                return !previousImageName.some(oldImage => 
+                return !previousImageNames.some(oldImage => 
                     oldImage.name === newImage.name && oldImage.format === newImage.format
                 );
             });
@@ -39,7 +39,7 @@ function RenderFile(props) {
                 })
             }
             else {
-                if (!(JSON.stringify(props.info) ===JSON.stringify(previousImageName)) && Object.keys(props.info).length > 0 ) {
+                if (!(JSON.stringify(props.info) ===JSON.stringify(previousImageNames)) && Object.keys(props.info).length > 0 ) {
                     setAllImageName(props.info)
                     getAllImageLinks()  
                 }   
@@ -91,7 +91,7 @@ function RenderFile(props) {
             });
         }
 
-        setPreviousImageName(props.info)
+        setPreviousImageNames(props.info)
     },[props.info]);
 
     async function getAllImageLinks() {
