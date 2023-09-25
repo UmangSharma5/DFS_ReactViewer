@@ -1,4 +1,5 @@
 import React,{useState,useEffect} from "react";
+import sortFileNames from "../helpers/GetFiles";
 import RenderFile from './RenderFile';
 import './GetFiles.css'
 import { config } from "../config";
@@ -33,19 +34,9 @@ function GetFiles(props){
                 },
               }
             )
-            const sortedData = response.data.temp.sort((a, b) => {
-              const nameA = a.name.toLowerCase()
-              const nameB = b.name.toLowerCase()
-
-              if (nameA < nameB) {
-                return -1
-              }
-              if (nameA > nameB) {
-                return 1
-              }
-              return 0
-            })
+            const sortedData = response.data.temp.sort(sortFileNames)
             setBackendData(sortedData)
+            return backendData
           }
         catch (error) {
             console.log(error)
