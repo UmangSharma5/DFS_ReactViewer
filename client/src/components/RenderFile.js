@@ -38,12 +38,12 @@ function RenderFile(props) {
                   getImageLink(newImage)
                 })
             }
-            else {
-                if (!(JSON.stringify(props.info) ===JSON.stringify(previousImageNames)) && Object.keys(props.info).length > 0 ) {
-                    setAllImageName(props.info)
-                    getAllImageLinks()  
-                }   
-            }
+            // else {
+            //     if (!(JSON.stringify(props.info) ===JSON.stringify(previousImageNames)) && Object.keys(props.info).length > 0 ) {
+            //         setAllImageName(props.info)
+            //         getAllImageLinks()  
+            //     }   
+            // }
         }
         else
         {
