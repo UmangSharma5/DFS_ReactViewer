@@ -144,96 +144,100 @@ router.post("/:url",async function(req,res){
                 res.status(400).json({ error: "Failed to parse form data" });
                 return;
             }
-            let filePath  = files.file[0].filepath;
-            let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
-            const bucketName = "datadrive-dev"
-            let fileName = files.file[0].originalFilename;
-            const parts = fileName.split('.');
-            let tempName = parts[0];
-            let pngFileName = tempName+'.png';
-            let tempDirPath = path.resolve(__dirname, '../temp');
-
-            await map_file_type(bucketName,tempName,parts[1]);
-
-            if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
-                minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
-                    if(err) {
-                        return res.status(400).json({error:"Failed to upload"})
-                    }
-                    await file_uploaded(bucketName,tempName,parts[1]);
-                    console.log("Success")
-                    res.status(200).json({data:objInfo, filename:tempName,format: parts[1]})
-                })
-            }
-            else{
-                let isVipsError = 1
-                exec(`vips dzsave ${filePath} temp/${tempName}`, (error, stdout, stderr) => {
-                    if (error) {
-                        console.log(`error: ${error.message}`);
-                        return;
-                    }
-                    if (stderr) {
-                        console.log(`stderr: ${stderr}`);
-                        return;
-                    }
-                    isVipsError = 0
-                    res.status(200).json("File has been Uploaded")
-                    console.log(`stdout: ${stdout}`);
-                    handleAllUpload(bucketName,user,`${tempName}`,parts[1],tempDirPath);
-                });
-                if(isVipsError == 1)
-                {
-                    console.log("ok")
-                    // return res.status(400).json({error: true, message: "Vips dzsave error"})
+            if(files.file != undefined){
+                let filePath  = files.file[0].filepath;
+                // console.log(files.file);
+                console.log(files.file[0]);
+                let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
+                const bucketName = "datadrive-dev"
+                let fileName = files.file[0].originalFilename;
+                const parts = fileName.split('.');
+                let tempName = parts[0];
+                let pngFileName = tempName+'.png';
+                let tempDirPath = path.resolve(__dirname, '../temp');
+    
+                await map_file_type(bucketName,tempName,parts[1]);
+    
+                if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
+                    minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
+                        if(err) {
+                            return res.status(400).json({error:"Failed to upload"})
+                        }
+                        await file_uploaded(bucketName,tempName,parts[1]);
+                        console.log("Success")
+                        res.status(200).json({data:objInfo, filename:tempName,format: parts[1]})
+                    })
                 }
-                let tiffFilePath = filePath;
-                let pngFilePath = __dirname+'/../tmp/'+files.file[0].newFilename+'0.png';
-                let tmpDirPath = path.resolve(__dirname, '../tmp');  
-                try {
-                    if (!fs.existsSync(tmpDirPath)) {
-                        fs.mkdirSync(tmpDirPath, { recursive: true });
+                else{
+                    let isVipsError = 1
+                    exec(`vips dzsave ${filePath} temp/${tempName}`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        isVipsError = 0
+                        res.status(200).json("File has been Uploaded")
+                        console.log(`stdout: ${stdout}`);
+                        handleAllUpload(bucketName,user,`${tempName}`,parts[1],tempDirPath);
+                    });
+                    if(isVipsError == 1)
+                    {
+                        console.log("ok")
+                        // return res.status(400).json({error: true, message: "Vips dzsave error"})
                     }
-
-                    try{
-                        await sharp(tiffFilePath).toFile(pngFilePath);
-                        console.log('Conversion completed successfully!');
-                        await minioClient.fPutObject(bucketName, "hv/"+user+"/thumbnail/"+pngFileName, pngFilePath, function(err, objInfo) {
-                            if (err) {
-                                return res.status(400).json({ error: "Failed to upload" });
-                            }
-                            console.log("Success");
-                            console.log(objInfo);
-                            // res.status(200).json({ data: objInfo, filename:tempName,format: parts[1]});
-                        });
-                     }catch(err){
-                        console.log(err);
-                        await minioClient.fPutObject(bucketName, "hv/"+user+"/thumbnail/"+pngFileName,__dirname+"../No-Preview-Available.jpg", function(err, objInfo) {
-                            if (err) {
-                                return res.status(400).json({ error: "Failed to upload" });
-                            }
-                            console.log("Success");
-                            console.log(objInfo);
-                            res.status(200).json({ data: objInfo, 
-                            filename:tempName,format: parts[1]});
-                            
-                        });
+                    let tiffFilePath = filePath;
+                    let pngFilePath = __dirname+'/../tmp/'+files.file[0].newFilename+'0.png';
+                    let tmpDirPath = path.resolve(__dirname, '../tmp');  
+                    try {
+                        if (!fs.existsSync(tmpDirPath)) {
+                            fs.mkdirSync(tmpDirPath, { recursive: true });
+                        }
+    
+                        try{
+                            await sharp(tiffFilePath).toFile(pngFilePath);
+                            console.log('Conversion completed successfully!');
+                            await minioClient.fPutObject(bucketName, "hv/"+user+"/thumbnail/"+pngFileName, pngFilePath, function(err, objInfo) {
+                                if (err) {
+                                    return res.status(400).json({ error: "Failed to upload" });
+                                }
+                                console.log("Success");
+                                console.log(objInfo);
+                                // res.status(200).json({ data: objInfo, filename:tempName,format: parts[1]});
+                            });
+                         }catch(err){
+                            console.log(err);
+                            await minioClient.fPutObject(bucketName, "hv/"+user+"/thumbnail/"+pngFileName,__dirname+"../No-Preview-Available.jpg", function(err, objInfo) {
+                                if (err) {
+                                    return res.status(400).json({ error: "Failed to upload" });
+                                }
+                                console.log("Success");
+                                console.log(objInfo);
+                                res.status(200).json({ data: objInfo, 
+                                filename:tempName,format: parts[1]});
+                                
+                            });
+                        }
+                        
+                        setTimeout(()=>{
+                            fs.rmdir(tmpDirPath,
+                                { recursive: true, force: true }
+                                ,(err)=>{
+                                if(err){
+                                    console.log("Directory delete from tmp failed: ",err.message);
+                                    return;
+                                }
+                                console.log("Directory delete successful",tmpDirPath)
+                            })
+                        },1000*1000)
+    
+                    } catch (err) {
+                        console.error('An error occurred:', err);
+                        res.status(500).json({ error: "Conversion failed" });
                     }
-                    
-                    setTimeout(()=>{
-                        fs.rmdir(tmpDirPath,
-                            { recursive: true, force: true }
-                            ,(err)=>{
-                            if(err){
-                                console.log("Directory delete from tmp failed: ",err.message);
-                                return;
-                            }
-                            console.log("Directory delete successful",tmpDirPath)
-                        })
-                    },1000*1000)
-
-                } catch (err) {
-                    console.error('An error occurred:', err);
-                    res.status(500).json({ error: "Conversion failed" });
                 }
             }
         })
