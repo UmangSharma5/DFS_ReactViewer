@@ -25,18 +25,6 @@ let convert_tiff_options = {
   logLevel: 1
 };
 
-const createNewBucket = async (bucketName,req,res) => {
-    minioClient.makeBucket(bucketName,async (err) =>{
-        if(err){
-            console.error('Error creating bucket:', err);
-            res.status(500).json({ error: 'Failed to create bucket' });
-        } else{
-            const new_bucket = await map_user_to_bucket(req.user.user_email,bucketName)
-            console.log('Bucket created successfully.');
-        }
-    })
-}
-
 router.get("/:url",async (req,res) => {
     try{
         let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
@@ -57,7 +45,7 @@ router.get("/:url",async (req,res) => {
                 })
             }
             const objects = [];
-            const stream = minioClient.listObjects(bucketName, user+'/thumbnail', true);
+            const stream = minioClient.listObjects(bucketName, "hv/"+user+'/thumbnail', true);
             console.log("stream collected");
             stream.on('data', async (obj) => {
                 objects.push(obj.name);
@@ -78,7 +66,7 @@ router.get("/:url",async (req,res) => {
                 console.log(objects)
                 var temp = []
                 await Promise.all(objects.map(async (name) => {
-                    let tname = name.split('/')[2];
+                    let tname = name.split('/')[3];
                     await file_stats(bucketName,tname.split('.')[0])
                         .then(response => {
                             if(response[0]?.isUploaded == 1)
@@ -97,7 +85,7 @@ router.get("/:url",async (req,res) => {
 });
 let count = 0;
 
-const handleUpload = async (bucketName,minioPath,filePath,obj) => {
+const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileName) => {
     minioClient.fPutObject(bucketName, minioPath + filePath, filePath, async (err,objInfo) => {
         if (err) {
             console.error("---->",err)
@@ -108,13 +96,24 @@ const handleUpload = async (bucketName,minioPath,filePath,obj) => {
             if(obj.curr_count == obj.total_files)
             {
                 await file_uploaded(bucketName,obj.fileName,obj.format);
+                fs.rmdir(tempDirPath+"/"+fileName+"_files",
+                    { recursive: true, force: true }
+                    ,(err)=>{
+                    if(err){
+                        console.log("Directory delete from temp failed: ",err.message);
+                        return;
+                    }
+                    console.log("Directory delete successful",tempDirPath)
+                })
+                let dziPath = path.resolve(__dirname, '../temp')+"/"+fileName+".dzi"
+                fs.unlinkSync(dziPath)
             }
         }
         sem.leave(1)
     })
 }
 
-const handleAllUpload = async (bucketName,user,fileName,format) => {
+const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
     let obj = {
         total_files: 0,
         curr_count : 0,
@@ -122,7 +121,7 @@ const handleAllUpload = async (bucketName,user,fileName,format) => {
         format: format
     };
     let walker = walk(`temp/${fileName}_files`);
-    const minioPath = `${user}/${fileName}/`
+    const minioPath = `hv/${user}/${fileName}/`
 
     walker.on('file',async (root, fileStats, next) => {
         obj.total_files++;
@@ -137,7 +136,7 @@ const handleAllUpload = async (bucketName,user,fileName,format) => {
         walker.on('file',async (root, fileStats, next) => {
             filePath = root +'/' +fileStats.name;
 
-            sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj))
+            sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
             next()
         })
 
@@ -163,11 +162,12 @@ router.post("/:url",async function(req,res){
             const parts = fileName.split('.');
             let tempName = parts[0];
             let pngFileName = tempName+'.png';
+            let tempDirPath = path.resolve(__dirname, '../temp');
 
             await map_file_type(bucketName,tempName,parts[1]);
 
             if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
-                minioClient.fPutObject(bucketName,user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
+                minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
                     if(err) {
                         return res.status(400).json({error:"Failed to upload"})
                     }
@@ -190,7 +190,7 @@ router.post("/:url",async function(req,res){
                     isVipsError = 0
                     res.status(200).json("File has been Uploaded")
                     console.log(`stdout: ${stdout}`);
-                    handleAllUpload(bucketName,user,`${tempName}`,parts[1]);
+                    handleAllUpload(bucketName,user,`${tempName}`,parts[1],tempDirPath);
                 });
                 if(isVipsError == 1)
                 {
@@ -199,16 +199,16 @@ router.post("/:url",async function(req,res){
                 }
                 let tiffFilePath = filePath;
                 let pngFilePath = __dirname+'/../tmp/'+files.file[0].newFilename+'0.png';
-                let tempDirPath = path.resolve(__dirname, '../tmp');  
+                let tmpDirPath = path.resolve(__dirname, '../tmp');  
                 try {
-                    if (!fs.existsSync(tempDirPath)) {
-                        fs.mkdirSync(tempDirPath, { recursive: true });
+                    if (!fs.existsSync(tmpDirPath)) {
+                        fs.mkdirSync(tmpDirPath, { recursive: true });
                     }
 
                     try{
                         await sharp(tiffFilePath).toFile(pngFilePath);
                         console.log('Conversion completed successfully!');
-                        await minioClient.fPutObject(bucketName, user+"/thumbnail/"+pngFileName, pngFilePath, function(err, objInfo) {
+                        await minioClient.fPutObject(bucketName, "hv/"+user+"/thumbnail/"+pngFileName, pngFilePath, function(err, objInfo) {
                             if (err) {
                                 return res.status(400).json({ error: "Failed to upload" });
                             }
@@ -218,7 +218,7 @@ router.post("/:url",async function(req,res){
                         });
                      }catch(err){
                         console.log(err);
-                        await minioClient.fPutObject(bucketName, user+"/thumbnail/"+pngFileName,__dirname+"../No-Preview-Available.jpg", function(err, objInfo) {
+                        await minioClient.fPutObject(bucketName, "hv/"+user+"/thumbnail/"+pngFileName,__dirname+"../No-Preview-Available.jpg", function(err, objInfo) {
                             if (err) {
                                 return res.status(400).json({ error: "Failed to upload" });
                             }
@@ -231,14 +231,14 @@ router.post("/:url",async function(req,res){
                     }
                     
                     setTimeout(()=>{
-                        fs.rmdir(tempDirPath,
+                        fs.rmdir(tmpDirPath,
                             { recursive: true, force: true }
                             ,(err)=>{
                             if(err){
                                 console.log("Directory delete from tmp failed: ",err.message);
                                 return;
                             }
-                            console.log("Directory delete successful",tempDirPath)
+                            console.log("Directory delete successful",tmpDirPath)
                         })
                     },1000*1000)
 
