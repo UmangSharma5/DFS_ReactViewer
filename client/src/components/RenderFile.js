@@ -32,11 +32,39 @@ function RenderFile(props) {
                     oldImage.name === newImage.name && oldImage.format === newImage.format
                 );
             });
+
+            const removedImageNames = previousImageNames.filter((oldImage) => {
+              return !props.info.some(
+                (newImage) =>
+                  oldImage.name === newImage.name &&
+                  oldImage.format === newImage.format
+              )
+            })
+
+            if (removedImageNames.length > 0) {
+              console.log('Removed Images found:', removedImageNames)
+
+              removedImageNames.forEach((removedImageName) => {
+                const indexToRemove = allImageName.findIndex((imageName) =>
+                    imageName.name === removedImageName.name && imageName.format === removedImageName.format)
+
+                if (indexToRemove !== -1) {
+                  setAllImages((prevImages) =>
+                    prevImages.filter((_, index) => index !== indexToRemove)
+                  )
+
+                  setAllImageName((prevImageNames) =>
+                    prevImageNames.filter((_, index) => index !== indexToRemove)
+                  )
+                }
+              })
+            }
+
             if (newImageNames.length > 0) {
-                console.log("New Images found:", newImageNames);
-                newImageNames.forEach((newImage) => {
-                  getImageLink(newImage)
-                })
+              console.log('New Images found:', newImageNames)
+              newImageNames.forEach((newImage) => {
+                getImageLink(newImage)
+              })
             }
         }
         else
@@ -44,6 +72,7 @@ function RenderFile(props) {
             setAllImageName(props.info)
         }
 
+        setPreviousImageNames(props.info)
         if(isFirstRender.current){
             console.log("Getting image links");
             getAllImageLinks();
@@ -84,8 +113,6 @@ function RenderFile(props) {
                 });
             });
         }
-
-        setPreviousImageNames(props.info)
     },[props.info]);
 
     async function getAllImageLinks() {
