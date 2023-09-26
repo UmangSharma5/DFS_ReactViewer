@@ -1,4 +1,5 @@
 import React,{useState,useEffect} from "react";
+import sortFileNames from "../helpers/GetFiles";
 import RenderFile from './RenderFile';
 import './GetFiles.css'
 import { config } from "../config";
@@ -26,19 +27,22 @@ function GetFiles(props){
     }, [props.fileObj.count]);
 
     async function getFiles() {
-        return axios.get(`${config.BASE_URL}/objects/${props.email}`,
-        {
-            headers: {
-                'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-            }
-        })
-        .then(response => {
-            console.log(response);
-            setBackendData(response.data.temp);
-        })
-        .catch(error => {
-          console.log(error);
-        });
+
+        try {
+            const response = await axios.get(`${config.BASE_URL}/objects/${props.email}`,{
+                headers: {
+                  authorization:'Bearer ' +JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+                },
+              }
+            )
+            const sortedData = response.data.temp.sort(sortFileNames)
+            setBackendData(sortedData)
+            return backendData
+          }
+        catch (error) {
+            console.log(error)
+          }
+
     }
 
     function handleDelete(event,file) {
