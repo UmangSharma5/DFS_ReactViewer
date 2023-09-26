@@ -96,7 +96,6 @@ const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileNa
             if(obj.curr_count == obj.total_files)
             {
                 await file_uploaded(bucketName,obj.fileName,obj.format);
-                console.log("upload done baby")
                 fs.rmdir(tempDirPath+"/"+fileName+"_files",
                     { recursive: true, force: true }
                     ,(err)=>{
