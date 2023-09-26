@@ -26,7 +26,53 @@ function RenderFile(props) {
     }, [])
 
     useEffect(()=>{    
-        setAllImageName(props.info)
+        if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
+            const newImageNames = props.info.filter(newImage => {
+                return !previousImageNames.some(oldImage => 
+                    oldImage.name === newImage.name && oldImage.format === newImage.format
+                );
+            });
+
+            const removedImageNames = previousImageNames.filter((oldImage) => {
+              return !props.info.some(
+                (newImage) =>
+                  oldImage.name === newImage.name &&
+                  oldImage.format === newImage.format
+              )
+            })
+
+            if (removedImageNames.length > 0) {
+              console.log('Removed Images found:', removedImageNames)
+
+              removedImageNames.forEach((removedImageName) => {
+                const indexToRemove = allImageName.findIndex((imageName) =>
+                    imageName.name === removedImageName.name && imageName.format === removedImageName.format)
+
+                if (indexToRemove !== -1) {
+                  setAllImages((prevImages) =>
+                    prevImages.filter((_, index) => index !== indexToRemove)
+                  )
+
+                  setAllImageName((prevImageNames) =>
+                    prevImageNames.filter((_, index) => index !== indexToRemove)
+                  )
+                }
+              })
+            }
+
+            if (newImageNames.length > 0) {
+              console.log('New Images found:', newImageNames)
+              newImageNames.forEach((newImage) => {
+                getImageLink(newImage)
+              })
+            }
+        }
+        else
+        {
+            setAllImageName(props.info)
+        }
+
+        setPreviousImageNames(props.info)
         if(isFirstRender.current){
             console.log("Getting image links");
             getAllImageLinks();
@@ -53,9 +99,7 @@ function RenderFile(props) {
                     }
                 })
                 .then((response) => {
-                    let name = response.data.imageName.split('.')[0];
-                    let link = response.data.imageUrl;
-                    setAllImagesLinks((prevValue) => ({...prevValue, [name]:link}));
+                    setAllImages((prevValue) => [...prevValue, response.data.image]);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -63,17 +107,13 @@ function RenderFile(props) {
                 });
             }
         }else{
-            setAllImagesLinks((prevFilesLink) => {
-                const newLinks = {};
-                for (let key in prevFilesLink) {
-                  if (key !== props.deletedfilename) {
-                    newLinks[key] = prevFilesLink[key];
-                  }
-                }        
-                return newLinks;
-              });
+            setAllImages((prevFilesLink) => {
+                return prevFilesLink.filter((link, index) => {
+                  return index !== allImageName.indexOf(props.deletedFileName);
+                });
+            });
         }
-    },[props.info.length]);
+    },[props.info]);
 
     async function getAllImageLinks() {
         try {
