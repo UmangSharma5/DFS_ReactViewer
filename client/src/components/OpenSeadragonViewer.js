@@ -5,6 +5,7 @@ import './OpenSeadragon.css';
 function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
         let viewer;
         useEffect(() => {
+          console.log(format);
           if(format == 'png' || format == 'jpeg')
           {
             viewer =OpenSeadragon({
@@ -91,7 +92,7 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
 
     return ( 
       <div>
-        <button onClick={takeSS} id="print-view" >Print View</button>
+        {/* <button onClick={takeSS} id="print-view" >Print View</button> */}
         <div id="openseadragon-viewer" ></div>
       </div>
     )

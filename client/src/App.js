@@ -6,6 +6,7 @@ import ProgressBar from './components/ProgressBar';
 import { config } from './config'; 
 
 
+
 function App(props) {
   const [currentFile,setCurrentFile] =useState({
     count: 0,
@@ -43,47 +44,66 @@ function App(props) {
     setDisplayProgressBar(true)
     formData.append('file', currentFile.name);
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
-    try {
-      console.log("Initiating upload")
-      const response = await axios
-        .post(bucketURL, formData, {
-          headers: {
-             authorization:
-            'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-        },
-        // Added On Upload Progress Config to Axios Post Request
-        onUploadProgress: function (progressEvent) {
-          const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total) * 100)
-          setProgressValue(percentCompleted)
-        },
-      })
-        .then((res) => {
-          if (res.status === 200) {
-            alert('Upload is in Progress...Please check after some time')
-          } else {
-            alert('Error in Uploading File')
-          }
-        })
-      setTimeout(function () {
-        setProgressValue(0)
-        setDisplayProgressBar(false)
-      }, 3000)
 
-      console.log("Upload complete");
-      console.log(response.data.filename);
-      setIsUploaded(true);
-      console.log("resp-",response);
-      setCurrentFile((prevValue) => ({
-        ...prevValue,
-        name: response.data.filename,
-        format: response.data.format,
-        count: prevValue.count + 1,
-      }))
-    } catch (error) {
-      console.log(error);
-    }
-  }   
-  
+    // try{
+      let res = await axios.get(config.BASE_URL+"/isUploaded/"+shortEmail,{
+        headers: {
+          authorization:'Bearer ' +JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+        },
+        params:{
+          fileName:currentFile.name.name,
+        }
+      })
+
+      if(res != undefined && res.data.isUploaded == 1){
+        alert("Image already exists");
+        setDisplayProgressBar(false);
+      }
+      else{
+        try{
+          console.log("Initiating upload")
+          let response = await axios.post(bucketURL, formData,{
+              headers: {
+                 authorization:
+                'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            },
+            // Added On Upload Progress Config to Axios Post Request
+            onUploadProgress: function (progressEvent) {
+              const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+              setProgressValue(percentCompleted)
+            },
+          })
+          // .then((res) => {
+            if (response.status === 200) {
+              alert('Upload is in Progress...Please check after some time')
+            } else {
+              alert('Error in Uploading File')
+            }
+          // })
+          setTimeout(function () {
+            setProgressValue(0)
+            setDisplayProgressBar(false)
+          }, 3000)
+          console.log("resp-",response);
+          console.log("Upload complete");
+          setIsUploaded(true);
+          console.log("resp-",response);
+          setCurrentFile((prevValue) => ({
+            ...prevValue,
+            name: response.data.filename,
+            format: response.data.format,
+            count: prevValue.count + 1,
+          }))
+        }catch (error) {
+          console.log(error);
+        }
+      }   
+      
+    // }catch(error){
+    //   console.log(error);
+    // }
+  }
+    
   return (
     <div className="App">
       <div className='main-btn'>
@@ -101,6 +121,7 @@ function App(props) {
       </div>
     </div>
   );
+
 }
 
 export default App;

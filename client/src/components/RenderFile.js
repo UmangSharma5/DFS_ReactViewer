@@ -4,19 +4,20 @@ import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
 import BarLoader from "react-spinners/BarLoader";
 import { config } from "../config";
-
+import LoadingOverlay from 'react-loading-overlay-ts';
 
 
 function RenderFile(props) {
     const [viewerImage,setViewerImage] =useState();
     const [imageName,setImageName] =useState();
-    const [allImages,setAllImages] = useState([]);
+    const [allImagesLinks,setAllImagesLinks] = useState({});
     const [allImageName,setAllImageName] = useState([]);
     const [previousImageNames, setPreviousImageNames] = useState(null)
     const [format,setFormat] = useState();
     const [pyramid,setPyramid] = useState({});
     const isFirstRender = React.useRef(true);
     const [outer,setOuter] = useState();
+    const [isLoding, setLoading] = useState(false)
 
     useEffect(() => {
         const refreshInterval = setInterval(() => {
@@ -26,24 +27,26 @@ function RenderFile(props) {
     }, [])
 
     useEffect(()=>{    
-        if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
-            const newImageNames = props.info.filter(newImage => {
-                return !previousImageNames.some(oldImage => 
-                    oldImage.name === newImage.name && oldImage.format === newImage.format
-                );
-            });
-            if (newImageNames.length > 0) {
-                console.log("New Images found:", newImageNames);
-                newImageNames.forEach((newImage) => {
-                  getImageLink(newImage)
-                })
-            }
-        }
-        else
-        {
-            setAllImageName(props.info)
-        }
-
+        console.log(props.info);
+        console.log("hekllo");
+        // if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
+        //     const newImageNames = props.info.filter(newImage => {
+        //         return !previousImageNames.some(oldImage => 
+        //             oldImage.name === newImage.name && oldImage.format === newImage.format
+        //         );
+        //     });
+        //     if (newImageNames.length > 0) {
+        //         console.log("New Images found:", newImageNames);
+        //         newImageNames.forEach((newImage) => {
+        //           getImageLink(newImage)
+        //         })
+        //     }
+        // }
+        // else
+        // {
+            // setAllImageName(props.info)
+        // }
+        setAllImageName(props.info)
         if(isFirstRender.current){
             console.log("Getting image links");
             getAllImageLinks();
@@ -70,7 +73,10 @@ function RenderFile(props) {
                     }
                 })
                 .then((response) => {
-                    setAllImages((prevValue) => [...prevValue, response.data.image]);
+                    console.log(response)
+                    let name = response.data.imageName.split('.')[0];
+                    let link = response.data.imageUrl;
+                    setAllImagesLinks((prevValue) => ({...prevValue, [name]:link}));
                 })
                 .catch((error) => {
                     console.log(error);
@@ -78,74 +84,57 @@ function RenderFile(props) {
                 });
             }
         }else{
-            setAllImages((prevFilesLink) => {
-                return prevFilesLink.filter((link, index) => {
-                  return index !== allImageName.indexOf(props.deletedFileName);
-                });
-            });
+            setAllImagesLinks((prevFilesLink) => {
+                const newLinks = {};
+                for (let key in prevFilesLink) {
+                  if (key !== props.deletedfilename) {
+                    newLinks[key] = prevFilesLink[key];
+                  }
+                }        
+                return newLinks;
+              });
         }
 
         setPreviousImageNames(props.info)
-    },[props.info]);
+    },[props.info.length]);
 
     async function getAllImageLinks() {
         try {
-            const response = await Promise.all(
-                props.info.map((image) => {
-                    let imageObj = { imageName: image.name,imageFormat:image.format};
-                    return axios.get(config.BASE_URL+"/getURL/"+props.email,
-                        { 
-                            params: imageObj,
-                            headers: {
-                                'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-                            }
-                        })
-                        .then((response) => response.data.image)
-                        .catch((error) => {
-                            console.log(error);
-                            return null;
-                        });
-                })
-            );
-            setAllImages(response);
+          const responses = await Promise.all(
+            props.info.map((image) => {
+              const imageObj = { imageName: image.name, imageFormat: image.format };
+              return axios.get(config.BASE_URL + "/getURL/" + props.email, {
+                params: imageObj,
+                headers: {
+                  Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.token,
+                },
+              });
+            })
+          );
+      
+          const imageLinks = {};
+          responses.forEach((response) => {
+            let name = response.data.imageName.split('.')[0];
+            let link = response.data.imageUrl;
+            imageLinks[name] = link;
+          });
+      
+          setAllImagesLinks(imageLinks);
         } catch (error) {
-            console.log(error);
+          console.log(error);
         }
     }
+      
 
-    async function getImageLink(image) {
-      try {
-        let imageObj = { imageName: image.name, imageFormat: image.format }
-        const response = await axios
-          .get(config.BASE_URL + '/getURL/' + props.email, {
-            params: imageObj,
-            headers: {
-              authorization:
-                'Bearer ' +
-                JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-            },
-          })
-          .then((response) => response.data.image)
-          .catch((error) => {
-            console.log(error)
-          })
-        const imageLink = response
-        if (imageLink) {
-          setAllImages((prevImages) => [...prevImages, imageLink])
-          setAllImageName((prevImageNames) => [...prevImageNames, image])
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
-
-    function handleClick(e){
+    async function handleClick(e){
+        setLoading(true);
+        console.log("i clicked");
         let num = e.target.id;
         const imagetype = props.info[num].format;
         const dir_ = props.info[num].name.split('.')[0]
         if(imagetype != 'png' && imagetype != 'jpeg'){
             let imageObj = { baseDir: dir_+"/temp/"+dir_+"_files/"};
-            axios.get(config.BASE_URL+"/getURL/imagePyramid/"+props.email,
+            await axios.get(config.BASE_URL+"/getURL/imagePyramid/"+props.email,
                 {
                     params: imageObj,
                     headers: {
@@ -154,10 +143,12 @@ function RenderFile(props) {
                 })
                 .then((response) => {
                     setOuter(response.data.outer);
+                    console.log("its done");
                     return response.data.image;
                 })
                 .then((image) => {
                     setPyramid(image);
+                    console.log("its done");
                 })
                 .catch((error) => {
                     console.log(error);
@@ -165,9 +156,10 @@ function RenderFile(props) {
                 });
         }
         setFormat(imagetype);
-        console.log(allImages[num]);
-        setViewerImage(allImages[num]);
+        console.log("I am changing the name");
+        setViewerImage(allImagesLinks[props.info[num].name]);
         setImageName(props.info[num]);
+        setLoading(false);
     }
 
     function handleDelete(event,file){
@@ -181,7 +173,7 @@ function RenderFile(props) {
                 {allImageName.map((file, i) => {
                     const buttonStyles = {
                         margin: '10px',
-                        backgroundImage:allImages[i] ? `url(${allImages[i]})` : 'none',
+                        backgroundImage:allImagesLinks[file.name] ? `url(${allImagesLinks[file.name]})` : 'none',
                         backgroundRepeat: 'no-repeat',
                         backgroundSize: 'cover',
                         color: '#333',
