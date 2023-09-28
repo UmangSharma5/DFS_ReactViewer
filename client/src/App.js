@@ -84,10 +84,8 @@ function App(props) {
             setProgressValue(0)
             setDisplayProgressBar(false)
           }, 3000)
-          console.log("resp-",response);
           console.log("Upload complete");
           setIsUploaded(true);
-          console.log("resp-",response);
           setCurrentFile((prevValue) => ({
             ...prevValue,
             name: response.data.filename,

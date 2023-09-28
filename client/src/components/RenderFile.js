@@ -53,7 +53,6 @@ function RenderFile(props) {
                     }
                 })
                 .then((response) => {
-                    console.log(response)
                     let name = response.data.imageName.split('.')[0];
                     let link = response.data.imageUrl;
                     setAllImagesLinks((prevValue) => ({...prevValue, [name]:link}));
@@ -106,7 +105,6 @@ function RenderFile(props) {
 
     async function handleClick(e){
         setLoading(true);
-        console.log("i clicked");
         let num = e.target.id;
         const imagetype = props.info[num].format;
         const dir_ = props.info[num].name.split('.')[0]
@@ -121,12 +119,10 @@ function RenderFile(props) {
                 })
                 .then((response) => {
                     setOuter(response.data.outer);
-                    console.log("its done");
                     return response.data.image;
                 })
                 .then((image) => {
                     setPyramid(image);
-                    console.log("its done");
                 })
                 .catch((error) => {
                     console.log(error);
@@ -134,7 +130,6 @@ function RenderFile(props) {
                 });
         }
         setFormat(imagetype);
-        console.log("I am changing the name");
         setViewerImage(allImagesLinks[props.info[num].name]);
         setImageName(props.info[num]);
         setLoading(false);

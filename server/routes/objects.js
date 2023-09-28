@@ -28,12 +28,10 @@ let convert_tiff_options = {
 router.get("/:url",async (req,res) => {
     try{
         let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
-        console.log(user)
         let bucketName = "datadrive-dev"
         if(user == undefined){
             user = await map_user_to_bucket(req.user.user_email,req.params.url);
             user = await get_user_bucket(req.user.user_email)[0];
-            console.log(user)
         }        
         
         minioClient.bucketExists(bucketName, async (err, exists) => {
@@ -63,7 +61,6 @@ router.get("/:url",async (req,res) => {
             // });
 
             stream.on('end', async () => {
-                console.log(objects)
                 var temp = []
                 await Promise.all(objects.map(async (name) => {
                     let tname = name.split('/')[3];
@@ -74,7 +71,6 @@ router.get("/:url",async (req,res) => {
                         })
                 }))
                 console.log('Listing objects completed.');
-                console.log("temp",temp);
                 res.json({ temp });
             });
         })
@@ -174,7 +170,6 @@ router.post("/:url",async function(req,res){
                             return res.status(400).json({error:"Failed to upload"})
                         }
                         await file_uploaded(bucketName,tempName,parts[1]);
-                        console.log("Success png")
                         res.status(200).json({data:objInfo, filename:tempName,format: parts[1]})
                     })
                 }
@@ -214,8 +209,6 @@ router.post("/:url",async function(req,res){
                                 if (err) {
                                     return res.status(400).json({ error: "Failed to upload" });
                                 }
-                                console.log("Success");
-                                console.log(objInfo);
                                 res.status(200).json({ data: objInfo, filename:tempName,format: parts[1]});
                             });
                          }catch(err){
@@ -224,8 +217,6 @@ router.post("/:url",async function(req,res){
                                 if (err) {
                                     return res.status(400).json({ error: "Failed to upload" });
                                 }
-                                console.log("Success");
-                                console.log(objInfo);
                                 res.status(200).json({ data: objInfo, 
                                 filename:tempName,format: parts[1]});
                                 

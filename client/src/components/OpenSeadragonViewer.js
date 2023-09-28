@@ -5,7 +5,6 @@ import './OpenSeadragon.css';
 function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
         let viewer;
         useEffect(() => {
-          console.log(format);
           if(format == 'png' || format == 'jpeg')
           {
             viewer =OpenSeadragon({
@@ -45,7 +44,7 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
                     let credential = info[level+"/"+x+"_"+y][2];
                     let startLink = outer.split('_files')[0];
 
-                    console.log(startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
+                    // console.log(startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
       
                     return [startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
                   }
@@ -75,7 +74,7 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
         if(extension === 'tif') extension ='png';
         var current_view = document.getElementsByTagName("canvas");
         if (current_view){
-          console.log(current_view.length);
+          // console.log(current_view.length);
           var my_view = current_view[0];
           var img = my_view.toDataURL("image/"+extension);
           const link = document.createElement('a')
