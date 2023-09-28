@@ -27,26 +27,24 @@ function RenderFile(props) {
     }, [])
 
     useEffect(()=>{    
-        console.log(props.info);
-        console.log("hekllo");
-        // if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
-        //     const newImageNames = props.info.filter(newImage => {
-        //         return !previousImageNames.some(oldImage => 
-        //             oldImage.name === newImage.name && oldImage.format === newImage.format
-        //         );
-        //     });
-        //     if (newImageNames.length > 0) {
-        //         console.log("New Images found:", newImageNames);
-        //         newImageNames.forEach((newImage) => {
-        //           getImageLink(newImage)
-        //         })
-        //     }
-        // }
-        // else
-        // {
-            // setAllImageName(props.info)
-        // }
-        setAllImageName(props.info)
+        if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
+            const newImageNames = props.info.filter(newImage => {
+                return !previousImageNames.some(oldImage => 
+                    oldImage.name === newImage.name && oldImage.format === newImage.format
+                );
+            });
+            if (newImageNames.length > 0) {
+                console.log("New Images found:", newImageNames);
+                newImageNames.forEach((newImage) => {
+                  getImageLink(newImage)
+                })
+            }
+        }
+        else
+        {
+            setAllImageName(props.info)
+        }
+
         if(isFirstRender.current){
             console.log("Getting image links");
             getAllImageLinks();
@@ -96,7 +94,7 @@ function RenderFile(props) {
         }
 
         setPreviousImageNames(props.info)
-    },[props.info.length]);
+    },[props.info]);
 
     async function getAllImageLinks() {
         try {
