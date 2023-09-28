@@ -18,7 +18,8 @@ function GetFiles(props){
             return;
         }else{
             const latest_file = props.fileObj.name;
-            // setCurrFileName(props.fileObj.name);
+            console.log(props.fileObj)
+            setCurrFileName(props.fileObj.name);
             // setBackendData(
             //     [...backendData,{name:latest_file,format:props.fileObj.format}]
             // )
@@ -27,7 +28,6 @@ function GetFiles(props){
     }, [props.fileObj.count]);
 
     async function getFiles() {
-
         try {
             const response = await axios.get(`${config.BASE_URL}/objects/${props.email}`,{
                 headers: {
@@ -37,12 +37,11 @@ function GetFiles(props){
             )
             const sortedData = response.data.temp.sort(sortFileNames)
             setBackendData(sortedData)
-            return backendData
+            // setBackendData(response.data.temp);
           }
         catch (error) {
             console.log(error)
           }
-
     }
 
     function handleDelete(event,file) {

@@ -7,7 +7,7 @@ import bodyParser from "body-parser";
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
-import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_stats,file_uploaded } from '../Database_queries/queries.js'
+import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_stats,file_uploaded, delete_file } from '../Database_queries/queries.js'
 
 router.post("/:url",async function(req,res){
     let user = await get_user_bucket(req.user.user_email);
@@ -48,6 +48,8 @@ router.post("/:url",async function(req,res){
             })
         })
     }
+
+    await delete_file(bucketName,name);
 })
 
 

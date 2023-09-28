@@ -16,11 +16,13 @@ import objectsRoute from './routes/objects.js';
 import getURL from './routes/getURL.js';
 import deleteBucket from './routes/deleteBucket.js';
 import deleteObject from './routes/deleteObject.js';
+import isUploaded from './routes/isUploaded.js';
 
 app.use('/hv/objects',require_auth,objectsRoute);
 app.use('/hv/getURL',require_auth,getURL);
 app.use('/hv/deleteBucket',require_auth,deleteBucket);
 app.use('/hv/deleteObject',require_auth,deleteObject);
+app.use('/hv/isUploaded',require_auth,isUploaded);
 
 // app.use('/hv/objects',objectsRoute);
 // app.use('/hv/getURL',getURL);
