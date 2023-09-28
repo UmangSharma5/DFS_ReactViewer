@@ -12,7 +12,6 @@ function RenderFile(props) {
     const [imageName,setImageName] =useState();
     const [allImagesLinks,setAllImagesLinks] = useState({});
     const [allImageName,setAllImageName] = useState([]);
-    const [previousImageNames, setPreviousImageNames] = useState(null)
     const [format,setFormat] = useState();
     const [pyramid,setPyramid] = useState({});
     const isFirstRender = React.useRef(true);
@@ -27,24 +26,7 @@ function RenderFile(props) {
     }, [])
 
     useEffect(()=>{    
-        if (props.info.length > 0 && !isFirstRender.current && previousImageNames != null) {
-            const newImageNames = props.info.filter(newImage => {
-                return !previousImageNames.some(oldImage => 
-                    oldImage.name === newImage.name && oldImage.format === newImage.format
-                );
-            });
-            if (newImageNames.length > 0) {
-                console.log("New Images found:", newImageNames);
-                newImageNames.forEach((newImage) => {
-                  getImageLink(newImage)
-                })
-            }
-        }
-        else
-        {
-            setAllImageName(props.info)
-        }
-
+        setAllImageName(props.info)
         if(isFirstRender.current){
             console.log("Getting image links");
             getAllImageLinks();
@@ -92,9 +74,7 @@ function RenderFile(props) {
                 return newLinks;
               });
         }
-
-        setPreviousImageNames(props.info)
-    },[props.info]);
+    },[props.info.length]);
 
     async function getAllImageLinks() {
         try {
