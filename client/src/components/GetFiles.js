@@ -57,7 +57,6 @@ function GetFiles(props){
                 }
             })
             .then(response => {
-                // const updatedData = backendData.filter(currFile => currFile !== delFileName);
                 const updatedData = Object.values(backendData).filter(
                   (currFile) =>
                     currFile.name !== file.name ||
