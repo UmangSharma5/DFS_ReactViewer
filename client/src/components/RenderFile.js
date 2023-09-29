@@ -12,6 +12,7 @@ function RenderFile(props) {
     const [imageName,setImageName] =useState();
     const [allImagesLinks,setAllImagesLinks] = useState({});
     const [allImageName,setAllImageName] = useState([]);
+    const [previousImageNames, setPreviousImageNames] = useState(null)
     const [format,setFormat] = useState();
     const [pyramid,setPyramid] = useState({});
     const isFirstRender = React.useRef(true);
@@ -44,20 +45,21 @@ function RenderFile(props) {
             if (removedImageNames.length > 0) {
               console.log('Removed Images found:', removedImageNames)
 
+              const updatedImageLinks = { ...allImagesLinks }
+
               removedImageNames.forEach((removedImageName) => {
                 const indexToRemove = allImageName.findIndex((imageName) =>
                     imageName.name === removedImageName.name && imageName.format === removedImageName.format)
 
-                if (indexToRemove !== -1) {
-                  setAllImages((prevImages) =>
-                    prevImages.filter((_, index) => index !== indexToRemove)
-                  )
+                const { name, format } = removedImageName
 
-                  setAllImageName((prevImageNames) =>
-                    prevImageNames.filter((_, index) => index !== indexToRemove)
-                  )
+                if (indexToRemove !== -1 && updatedImageLinks.hasOwnProperty(name)) {
+                  
+                  allImageName.splice(indexToRemove, 1)
+                  delete updatedImageLinks[name]
                 }
               })
+              setAllImagesLinks(updatedImageLinks)
             }
 
             if (newImageNames.length > 0) {
@@ -80,38 +82,6 @@ function RenderFile(props) {
                 isFirstRender.current = false;
             }
             return;
-        }
-        if(props.currFile != null){
-            if(isFirstRender.current){
-                console.log("Getting image links");
-                getAllImageLinks();
-                if (props.info.length > 0) {
-                    isFirstRender.current = false;
-                }
-                return;
-            }else{
-                let imageObj = { imageName: props.currFile };
-                axios.get(config.BASE_URL+"/getURL/"+props.email,
-                {
-                    params: imageObj ,
-                    headers: {
-                        'authorization': 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-                    }
-                })
-                .then((response) => {
-                    setAllImages((prevValue) => [...prevValue, response.data.image]);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    return null;
-                });
-            }
-        }else{
-            setAllImages((prevFilesLink) => {
-                return prevFilesLink.filter((link, index) => {
-                  return index !== allImageName.indexOf(props.deletedFileName);
-                });
-            });
         }
     },[props.info]);
 
@@ -141,13 +111,42 @@ function RenderFile(props) {
           console.log(error);
         }
     }
-      
 
+    async function getImageLink(image) {
+      try {
+        const imageObj = { imageName: image.name, imageFormat: image.format }
+        const response = await axios.get(config.BASE_URL + '/getURL/' + props.email, {
+            params: imageObj,
+            headers: {
+              authorization:'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            },
+          })
+          .then((response) => {
+              let name = response.data.imageName.split('.')[0]
+              let format = response.data.imageName.split('.')[1]
+              let link = response.data.imageUrl
+
+              allImagesLinks[name] = link;
+
+              let imageObj = { name: name, format: format }
+              allImageName.push(imageObj)
+
+              console.log(allImageName)
+              console.log(allImagesLinks)
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+      } catch (error) {
+        console.log(error)
+      }
+    }
+      
     async function handleClick(e){
         setLoading(true);
         let num = e.target.id;
-        const imagetype = props.info[num].format;
-        const dir_ = props.info[num].name.split('.')[0]
+        const imagetype = allImageName[num].format;
+        const dir_ = allImageName[num].name.split('.')[0]
         if(imagetype != 'png' && imagetype != 'jpeg'){
             let imageObj = { baseDir: dir_+"/temp/"+dir_+"_files/"};
             await axios.get(config.BASE_URL+"/getURL/imagePyramid/"+props.email,
@@ -170,8 +169,8 @@ function RenderFile(props) {
                 });
         }
         setFormat(imagetype);
-        setViewerImage(allImagesLinks[props.info[num].name]);
-        setImageName(props.info[num]);
+        setViewerImage(allImagesLinks[allImageName[num].name.split('.')[0]])
+        setImageName(allImageName[num])
         setLoading(false);
     }
 
@@ -201,7 +200,7 @@ function RenderFile(props) {
                         <div>
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
-                                <p id="image-name">{file.name.split('.')[0]+'.'+ file.format}</p> 
+                                <p id="image-name">{file.name + '.' + file.format}</p> 
                                 <button className="del-btn"  value={file} onClick={event => handleDelete(event,file)}> <i className="bi bi-archive"></i></button>
                             </div>
                         </div> 

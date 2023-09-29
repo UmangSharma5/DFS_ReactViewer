@@ -10,20 +10,12 @@ function GetFiles(props){
     const isFirstRender = React.useRef(true);
     const [deletedFileName,setDeletedFileName] = useState();
     const [currFileName,setCurrFileName] = useState();
+    
     useEffect(() => {
-
         if(isFirstRender.current){
             getFiles();
             isFirstRender.current = false;
             return;
-        }else{
-            const latest_file = props.fileObj.name;
-            console.log(props.fileObj)
-            setCurrFileName(props.fileObj.name);
-            // setBackendData(
-            //     [...backendData,{name:latest_file,format:props.fileObj.format}]
-            // )
-
         }
     }, [props.fileObj.count]);
 
@@ -37,7 +29,6 @@ function GetFiles(props){
             )
             const sortedData = response.data.temp.sort(sortFileNames)
             setBackendData(sortedData)
-            // setBackendData(response.data.temp);
           }
         catch (error) {
             console.log(error)
