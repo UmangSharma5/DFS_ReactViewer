@@ -125,6 +125,8 @@ function RenderFile(props) {
 
               allImagesLinks[name] = link;
               allImageName.push(image)
+              // setAllImages((prevImages) => [...prevImages, imageLink])
+              // setAllImageName((prevImageNames) => [...prevImageNames, image])
           })
           .catch((error) => {
             console.log(error)
@@ -133,7 +135,7 @@ function RenderFile(props) {
         console.log(error)
       }
     }
-      
+ 
     async function handleClick(e){
         setLoading(true);
         let num = e.target.id;

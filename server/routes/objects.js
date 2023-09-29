@@ -61,7 +61,7 @@ router.get("/:url",async (req,res) => {
                     await file_stats(bucketName,tname.split('.')[0])
                         .then(response => {
                             if(response[0]?.isUploaded == 1)
-                                temp.push({name: tname.split('.')[0], format: response[0]?.file_type});
+                                temp.push({name: tname.split('.')[0], format: response[0]?.file_type, date: response[0]?.upload_date});
                         })
                 }))
                 console.log('Listing objects completed.');
