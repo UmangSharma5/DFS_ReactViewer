@@ -35,11 +35,19 @@ const file_uploaded = async (bucketName,filename) => {
     })
 }
 
+const delete_file = async (bucketName,filename) => {
+    let query = `DELETE FROM FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}';`
+    return await execSql(query).then(res =>{
+        return res;
+    })
+}
+
 export {
     map_user_to_bucket,
     get_user_bucket,
     remove_user_bucket,
     map_file_type,
     file_stats,
-    file_uploaded
+    file_uploaded,
+    delete_file
 }

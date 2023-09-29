@@ -13,8 +13,9 @@ router.get("/:url",async function(req,res){
         let bucketName = "datadrive-dev"
         const {imageName,imageFormat} = req.query;
         const imageUrl = await minioClient.presignedGetObject(bucketName, "hv/"+user+"/thumbnail/"+imageName+".png", 60*60);
-        const imageURL = {image : imageUrl};
-        res.json(imageURL);
+        const fullImageName = imageName+".png";
+        const imageURL = {image: {fullImageName : imageUrl}};
+        res.json({imageName : fullImageName,imageUrl : imageUrl});
     }catch(err){
         console.log(err.message);
         res.send({err})
