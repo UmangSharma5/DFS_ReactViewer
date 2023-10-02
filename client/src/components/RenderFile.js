@@ -127,9 +127,6 @@ function RenderFile(props) {
 
               allImagesLinks[name] = link;
               allImageName.push(image)
-
-              console.log(allImageName)
-              console.log(allImagesLinks)
           })
           .catch((error) => {
             console.log(error)
