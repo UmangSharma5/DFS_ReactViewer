@@ -5,7 +5,6 @@ import './OpenSeadragon.css';
 function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
         let viewer;
         useEffect(() => {
-          console.log(format);
           if(format == 'png' || format == 'jpeg')
           {
             viewer =OpenSeadragon({

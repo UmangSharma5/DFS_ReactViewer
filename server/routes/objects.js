@@ -53,12 +53,6 @@ router.get("/:url",async (req,res) => {
                 console.error('Error listing objects:', err);
                 res.status(500).json({ error: 'Failed to list objects' });
             });
-        
-            // stream.on('end', () => {
-            // console.log('Listing objects completed.');
-            // console.log(objects);
-            // res.json({ objects });
-            // });
 
             stream.on('end', async () => {
                 var temp = []
@@ -119,7 +113,6 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
     };
     let walker = walk(`temp/${fileName}_files`);
     const minioPath = `hv/${user}/${fileName}/`
-    console.log("1");
     walker.on('file',async (root, fileStats, next) => {
         obj.total_files++;
         next()
@@ -132,7 +125,6 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
         let filePath;
         walker.on('file',async (root, fileStats, next) => {
             filePath = root +'/' +fileStats.name;
-            console.log("2");
             sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
             next()
         })
@@ -186,7 +178,6 @@ router.post("/:url",async function(req,res){
                         }
                         isVipsError = 0
                         // res.status(200).json("File has been Uploaded")
-                        console.log("hehwde");
                         console.log(`stdout: ${stdout}`);
                         handleAllUpload(bucketName,user,`${tempName}`,parts[1],tempDirPath);
                     });
