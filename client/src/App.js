@@ -63,7 +63,6 @@ function App(props) {
       else{
         try{
           console.log("Initiating upload")
-          console.log(formData);
           let response = await axios.post(bucketURL, formData,{
               headers: {
                  authorization:
