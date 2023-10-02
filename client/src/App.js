@@ -42,7 +42,7 @@ function App(props) {
     e.preventDefault();
     const formData = new FormData();
     setDisplayProgressBar(true)
-    formData.append('file', currentFile.name);
+    formData.append('file',currentFile.name );
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
 
     // try{
@@ -62,6 +62,7 @@ function App(props) {
       else{
         try{
           console.log("Initiating upload")
+          console.log(formData);
           let response = await axios.post(bucketURL, formData,{
               headers: {
                  authorization:
@@ -106,7 +107,7 @@ function App(props) {
     <div className="App">
       <div className='main-btn'>
         <div className="form-container">
-          <form>
+          <form enctype="multipart/form-data" method="post">
             <input type="file" id="fileInput" onChange={handleChange} className="input-file"/>
             <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
           </form>
