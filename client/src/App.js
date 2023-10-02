@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import GetFiles from './components/GetFiles';
@@ -15,6 +15,7 @@ function App(props) {
   const [isUploaded, setIsUploaded] = useState(false)
   const [displayProgressBar, setDisplayProgressBar] = useState(false)
   const [progressValue, setProgressValue] = useState(0)
+  const currentFileSelected = useRef(null)
   const [fileInfo, setFileInfo] = useState({})
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
@@ -85,6 +86,7 @@ function App(props) {
             setDisplayProgressBar(false)
           }, 3000)
           console.log("Upload complete");
+          currentFileSelected.current.value = null
           setIsUploaded(true);
           setCurrentFile((prevValue) => ({
             ...prevValue,
@@ -95,7 +97,7 @@ function App(props) {
         }catch (error) {
           console.log(error);
         }
-      }   
+      }  
   }
     
   return (
@@ -103,7 +105,7 @@ function App(props) {
       <div className='main-btn'>
         <div className="form-container">
           <form>
-            <input type="file" id="fileInput" onChange={handleChange} className="input-file"/>
+            <input type="file" ref={currentFileSelected} id="fileInput" onChange={handleChange} className="input-file"/>
             <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
           </form>
           {displayProgressBar? <ProgressBar progressValue={progressValue}/>:<></>}
