@@ -135,9 +135,9 @@ function RenderFile(props) {
         console.log(error)
       }
     }
- 
+
     async function handleClick(e){
-        setLoading(true);
+        setLoading(true)
         let num = e.target.id;
         const imagetype = allImageName[num].format;
         const dir_ = allImageName[num].name.split('.')[0]
