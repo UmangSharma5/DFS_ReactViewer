@@ -98,7 +98,7 @@ function RenderFile(props) {
               });
             })
           );
-      
+
           const imageLinks = {};
           responses.forEach((response) => {
             let name = response.data.imageName.split('.')[0];
@@ -123,13 +123,10 @@ function RenderFile(props) {
           })
           .then((response) => {
               let name = response.data.imageName.split('.')[0]
-              let format = response.data.imageName.split('.')[1]
               let link = response.data.imageUrl
 
               allImagesLinks[name] = link;
-
-              let imageObj = { name: name, format: format }
-              allImageName.push(imageObj)
+              allImageName.push(image)
 
               console.log(allImageName)
               console.log(allImagesLinks)
