@@ -62,7 +62,10 @@ function RenderFile(props) {
 
             if (newImageNames.length > 0) {
               console.log('New Images found:', newImageNames)
-              newImageNames.forEach((newImage) => {
+              
+              const reversedImageNames = [...newImageNames].reverse()
+
+              reversedImageNames.forEach((newImage) => {
                 getImageLink(newImage)
               })
             }
@@ -124,9 +127,7 @@ function RenderFile(props) {
               let link = response.data.imageUrl
 
               allImagesLinks[name] = link;
-              allImageName.push(image)
-              // setAllImages((prevImages) => [...prevImages, imageLink])
-              // setAllImageName((prevImageNames) => [...prevImageNames, image])
+              allImageName.unshift(image)
           })
           .catch((error) => {
             console.log(error)

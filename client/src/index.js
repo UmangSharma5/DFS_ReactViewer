@@ -39,7 +39,6 @@ async function checkAuth(email) {
     );
 
   } catch (error) {
-    console.log("Incorrect token!!!");
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render( 
           <BrowserRouter basename='/hv' >
