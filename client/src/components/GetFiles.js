@@ -36,7 +36,6 @@ function GetFiles(props){
     }
 
     function handleDelete(event,file) {
-        console.log("deleted->",file)
         let delFileName = file.name+"."+file.format;
         setDeletedFileName(delFileName);
         try {
