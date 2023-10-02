@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios, { all } from 'axios';
 import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
-import BarLoader from "react-spinners/BarLoader";
 import { config } from "../config";
-import LoadingOverlay from 'react-loading-overlay-ts';
 
 
 function RenderFile(props) {
