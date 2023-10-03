@@ -17,7 +17,7 @@ function RenderFile(props) {
     const isFirstRender = React.useRef(true);
     const [outer,setOuter] = useState();
     const [isLoding, setLoading] = useState(false)
-    const [showThumbnails,setShowThumbnails] = useState(false)
+    const [showThumbnails,setShowThumbnails] = useState(true)
 
     useEffect(() => {
         const refreshInterval = setInterval(() => {
