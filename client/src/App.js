@@ -4,6 +4,7 @@ import axios from 'axios';
 import GetFiles from './components/GetFiles';
 import ProgressBar from './components/ProgressBar';
 import { config } from './config'; 
+import { toast } from 'react-toastify'
 
 
 
@@ -45,8 +46,8 @@ function App(props) {
     setDisplayProgressBar(true)
     formData.append('file',currentFile.name );
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
+    
 
-    // try{
       let res = await axios.get(config.BASE_URL+"/isUploaded/"+shortEmail,{
         headers: {
           authorization:'Bearer ' +JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
@@ -57,7 +58,7 @@ function App(props) {
       })
 
       if(res != undefined && res.data.isUploaded == 1){
-        alert("Image already exists");
+        toast.warn("Image Already Exists");
         setDisplayProgressBar(false);
       }
       else{
@@ -74,13 +75,11 @@ function App(props) {
               setProgressValue(percentCompleted)
             },
           })
-          // .then((res) => {
-            if (response.status === 200) {
-              alert('Upload is in Progress...Please check after some time')
-            } else {
-              alert('Error in Uploading File')
-            }
-          // })
+          if (response.status === 200) {
+            toast.success('Upload is in Progress....Please check after some time')
+          } else {
+            toast.error('Error in Uploading File')
+          }
           setTimeout(function () {
             setProgressValue(0)
             setDisplayProgressBar(false)
