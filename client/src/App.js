@@ -76,7 +76,7 @@ function App(props) {
             },
           })
           if (response.status === 200) {
-            toast.success('Upload is in Progress....Please check after some time')
+            toast.info('Upload is in Progress....Please check after some time')
           } else {
             toast.error('Error in Uploading File')
           }
