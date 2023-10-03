@@ -17,6 +17,7 @@ function RenderFile(props) {
     const isFirstRender = React.useRef(true);
     const [outer,setOuter] = useState();
     const [isLoding, setLoading] = useState(false)
+    const [showThumbnails,setShowThumbnails] = useState(false)
 
     useEffect(() => {
         const refreshInterval = setInterval(() => {
@@ -176,7 +177,7 @@ function RenderFile(props) {
 
     return(
        <div className="render-file-container">
-         <div className="button-container">
+         {showThumbnails ? <div className="button-container">
                 {allImageName.map((file, i) => {
                     const buttonStyles = {
                         margin: '10px',
@@ -200,8 +201,9 @@ function RenderFile(props) {
                         </div> 
                     );
                 })}
-            </div>
+            </div> : <></>}
             <div className="viewer-container">
+                <button className='collapse-btn' onClick={() => {setShowThumbnails(!showThumbnails)}}> &#60;&#60; </button>
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}
             </div> 
         </div>
