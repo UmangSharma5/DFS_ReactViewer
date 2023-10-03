@@ -3,6 +3,7 @@ import axios, { all } from 'axios';
 import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
 import { config } from "../config";
+import { toast } from 'react-toastify'
 
 
 function RenderFile(props) {
@@ -65,6 +66,7 @@ function RenderFile(props) {
               newImageNames.forEach((newImage) => {
                 getImageLink(newImage)
               })
+              toast.success('Upload Completed!')
             }
         }
         else
@@ -168,6 +170,7 @@ function RenderFile(props) {
 
     function handleDelete(event,file){
         props.onDelete(event,file);
+        toast.info("Image Deleted Successfully!")
         setViewerImage();
     }
 
