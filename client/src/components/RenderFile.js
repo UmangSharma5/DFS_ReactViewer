@@ -192,7 +192,7 @@ function RenderFile(props) {
                         width: '150px', 
                     };
                     return (
-                        <div>
+                        <div id='thumbnail-container'>
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
                                 <p id="image-name">{file.name + '.' + file.format}</p> 
@@ -202,8 +202,9 @@ function RenderFile(props) {
                     );
                 })}
             </div> : <></>}
+            <button className='collapse-btn' onClick={() => {setShowThumbnails(!showThumbnails)}}> &#60;&#60; </button> 
             <div className="viewer-container">
-                <button className='collapse-btn' onClick={() => {setShowThumbnails(!showThumbnails)}}> &#60;&#60; </button>
+                <p id="viewer-image-name">{viewerImage ? imageName.name+"."+imageName.format : ' '}</p>
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}
             </div> 
         </div>
