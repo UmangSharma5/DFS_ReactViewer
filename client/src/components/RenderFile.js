@@ -4,8 +4,8 @@ import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
 import { config } from "../config";
 import { toast } from 'react-toastify'
-import UseAnimations from 'react-useanimations'
-import menu4 from 'react-useanimations/lib/menu4'
+import { FaRegImages } from 'react-icons/fa'
+import { AiFillCloseCircle } from 'react-icons/ai'
 
 
 function RenderFile(props) {
@@ -207,7 +207,7 @@ function RenderFile(props) {
                     );
                 })}
             </div> : <></>}
-            <button className='collapse-btn'><UseAnimations size={30} reverse={showThumbnails} animation={menu4} onClick={() => {setShowThumbnails(!showThumbnails)}} /></button> 
+            {showThumbnails ? <FaRegImages onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/> : <AiFillCloseCircle onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/>}
             <div className="viewer-container">
                 <p id="viewer-image-name">{viewerImage ? imageName.name+"."+imageName.format : ' '}</p>
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}
