@@ -207,7 +207,7 @@ function RenderFile(props) {
                     );
                 })}
             </div> : <></>}
-            {showThumbnails ?  <AiFillCloseCircle onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/> : <FaRegImages onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px',marginLeft:'10px'}}/>}
+            {showThumbnails ? <FaRegImages onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/> : <AiFillCloseCircle onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/>}
             <div className="viewer-container">
                 <p id="viewer-image-name">{viewerImage ? imageName.name+"."+imageName.format : ' '}</p>
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}
