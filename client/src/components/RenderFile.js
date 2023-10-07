@@ -62,7 +62,10 @@ function RenderFile(props) {
 
             if (newImageNames.length > 0) {
               console.log('New Images found:', newImageNames)
-              newImageNames.forEach((newImage) => {
+              
+              const reversedImageNames = [...newImageNames].reverse()
+
+              reversedImageNames.forEach((newImage) => {
                 getImageLink(newImage)
               })
             }
@@ -124,7 +127,7 @@ function RenderFile(props) {
               let link = response.data.imageUrl
 
               allImagesLinks[name] = link;
-              allImageName.push(image)
+              allImageName.unshift(image)
           })
           .catch((error) => {
             console.log(error)
@@ -133,9 +136,9 @@ function RenderFile(props) {
         console.log(error)
       }
     }
-      
+
     async function handleClick(e){
-        setLoading(true);
+        setLoading(true)
         let num = e.target.id;
         const imagetype = allImageName[num].format;
         const dir_ = allImageName[num].name.split('.')[0]

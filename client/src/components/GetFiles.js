@@ -46,10 +46,8 @@ function GetFiles(props){
                 }
             })
             .then(response => {
-                const updatedData = Object.values(backendData).filter(
-                  (currFile) =>
-                    currFile.name !== file.name ||
-                    currFile.format !== file.format
+                const updatedData = Object.values(backendData).filter((currFile) =>
+                    currFile.name !== file.name || currFile.format !== file.format
                 )
                 setBackendData(updatedData);
                 setCurrFileName(null);

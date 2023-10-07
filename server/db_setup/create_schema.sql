@@ -15,5 +15,6 @@ CREATE TABLE FileTypeMap (
     filename varchar(255),
     file_type varchar(255),
     isUploaded int DEFAULT 0,
+    upload_date DATETIME,
     PRIMARY KEY (file_id)
 );
