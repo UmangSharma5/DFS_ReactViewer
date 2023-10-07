@@ -3,21 +3,13 @@ function sortFileNames(a, b) {
     const dateA = a.date
     const dateB = b.date
 
-    if (a.date === null &&  b.date !== null) {
-        return 1
-    }
-    else if (a.date !== null && b.date === null) {
-        return -1
-    }
-    else if (a.date === null && b.date === null) {
-        return 1
-    }
-
-    if (dateA < dateB) {
-      return 1
-    }
-    if (dateA > dateB) {
+    if ((dateA && !dateB) || (dateA > dateB) )
+    {
       return -1
+    }
+    else
+    {
+      return 1
     }
   }
 
