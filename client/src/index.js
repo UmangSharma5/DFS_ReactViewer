@@ -5,8 +5,7 @@ import App from './App';
 import Login from './Login';
 import axios from 'axios';
 import {BrowserRouter} from 'react-router-dom';
-import { ToastContainer,Slide} from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import CustomToastContainer from './components/CustomToastContainer'
 
 const LOGIN_URL = "https://datafoundation.iiit.ac.in/api/login";
 const LOGIN_URL_DEV = "http://10.4.25.20:3001/api/login";
@@ -23,6 +22,7 @@ function logoutUser () {
     root.render( 
           <BrowserRouter basename='/hv'>
             <Login checkUser={checkUser} />
+            <CustomToastContainer />
           </BrowserRouter>
     );
 }
@@ -37,19 +37,7 @@ async function checkAuth(email) {
     root.render(
       <BrowserRouter basename='/hv'>
         <App logout={logoutUser} />
-        <ToastContainer
-          position='top-center'
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          transition={Slide}
-          theme='colored'
-        />
+        <CustomToastContainer />
       </BrowserRouter>
     );
     
@@ -59,6 +47,7 @@ async function checkAuth(email) {
     root.render( 
           <BrowserRouter basename='/hv' >
             <Login checkUser={checkUser} />
+            <CustomToastContainer />
           </BrowserRouter>
     );
   }
