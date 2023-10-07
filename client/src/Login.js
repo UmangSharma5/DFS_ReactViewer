@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import './Login.css';
-import {ToastContainer,Slide, toast } from 'react-toastify';
+import {toast } from 'react-toastify';
 
 
 function Login(props) {
@@ -57,19 +57,6 @@ async function handleClick (e) {
             <button className="btn" onClick={handleClick}>Submit</button>
         </div>
       </form>
-      <ToastContainer
-        position='top-center'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide}
-        theme='colored'
-      />
     </div>
   )
 }
