@@ -1,11 +1,10 @@
 import React, {useState} from "react";
 import './Login.css';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {toast } from 'react-toastify';
 
 
 function Login(props) {
-
+  
   const [input,setInput] = useState({
     username : "",
     password : ""
@@ -28,7 +27,7 @@ async function handleClick (e) {
     const isValid = await props.checkUser(email,password);
     console.log(isValid);
     if(isValid === false)
-      toast("Username or Password was Incorrect !!!!");
+      toast.error("Incorrect Username or Password!");
   };
 
   return (
@@ -56,11 +55,10 @@ async function handleClick (e) {
           </div>
           <div class="form-field">
             <button className="btn" onClick={handleClick}>Submit</button>
-          </div>
+        </div>
       </form>
-      <ToastContainer />
     </div>
-  );
+  )
 }
 
 export default Login;

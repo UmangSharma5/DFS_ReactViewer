@@ -3,6 +3,9 @@ import axios, { all } from 'axios';
 import OpenSeadragonViewer from "./OpenSeadragonViewer";
 import './RenderFile.css'
 import { config } from "../config";
+import { toast } from 'react-toastify'
+import { FaRegImages } from 'react-icons/fa'
+import { AiFillCloseCircle } from 'react-icons/ai'
 
 
 function RenderFile(props) {
@@ -16,6 +19,7 @@ function RenderFile(props) {
     const isFirstRender = React.useRef(true);
     const [outer,setOuter] = useState();
     const [isLoding, setLoading] = useState(false)
+    const [showThumbnails,setShowThumbnails] = useState(true)
 
     useEffect(() => {
         const refreshInterval = setInterval(() => {
@@ -68,6 +72,7 @@ function RenderFile(props) {
               reversedImageNames.forEach((newImage) => {
                 getImageLink(newImage)
               })
+              toast.success('Upload Completed!')
             }
         }
         else
@@ -171,12 +176,13 @@ function RenderFile(props) {
 
     function handleDelete(event,file){
         props.onDelete(event,file);
+        toast.info("Image Deleted Successfully!")
         setViewerImage();
     }
 
     return(
        <div className="render-file-container">
-         <div className="button-container">
+         {showThumbnails ? <div className="button-container">
                 {allImageName.map((file, i) => {
                     const buttonStyles = {
                         margin: '10px',
@@ -191,7 +197,7 @@ function RenderFile(props) {
                         width: '150px', 
                     };
                     return (
-                        <div>
+                        <div className='thumbnail-container'>
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
                                 <p id="image-name">{file.name + '.' + file.format}</p> 
@@ -200,8 +206,10 @@ function RenderFile(props) {
                         </div> 
                     );
                 })}
-            </div>
+            </div> : <></>}
+            {showThumbnails ?  <AiFillCloseCircle onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/> : <FaRegImages onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px',marginLeft:'10px'}}/>}
             <div className="viewer-container">
+                <p id="viewer-image-name">{viewerImage ? imageName.name+"."+imageName.format : ' '}</p>
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}
             </div> 
         </div>
