@@ -4,7 +4,7 @@
 }
 
 .button-container {
-    flex: 15%;
+    flex: 1%;
     display: flex;
     flex-wrap: wrap;
     gap: 40px;
@@ -59,9 +59,8 @@
     color: red;
 }
 
-#thumbnail-container:hover{
-    background-image: linear-gradient(rgb(13, 204, 234,0.7), rgb(13, 112, 234,0.9));
+.thumbnail-container:hover{
+    background-image: linear-gradient(rgb(13, 204, 234,0.4), rgb(13, 112, 234,0.5));
     box-shadow: rgba(0, 0, 0, .3) 0 5px 15px;
-    border-radius: 25px;
-    border: 2px solid black;
+    border-radius: 5px;
 }

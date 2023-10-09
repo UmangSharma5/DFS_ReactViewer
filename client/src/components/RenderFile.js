@@ -197,7 +197,7 @@ function RenderFile(props) {
                         width: '150px', 
                     };
                     return (
-                        <div id='thumbnail-container'>
+                        <div className='thumbnail-container'>
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
                                 <p id="image-name">{file.name + '.' + file.format}</p> 
