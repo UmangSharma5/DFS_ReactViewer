@@ -106,7 +106,7 @@ const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileNa
                 fs.unlinkSync(dziPath)
             }
         }
-        sem.leave(1)
+        // sem.leave(1)
     })
 }
 
@@ -132,8 +132,8 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
         let filePath;
         walker.on('file',async (root, fileStats, next) => {
             filePath = root +'/' +fileStats.name;
-            console.log("2");
-            sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
+            handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName)
+            // sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
             next()
         })
 
@@ -146,9 +146,10 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
 router.post("/:url",async function(req,res){
     try{
         count = 0;
-        const form = formidable({ multiples: false });
+        const form = formidable({ multiples: false,maxTotalFileSize : 1000 * 1024 * 1024 , maxFileSize: 1000 * 1024 * 1024});
         form.parse(req, async (err, fields, files) => {
             if (err) {
+                console.log(err);
                 res.status(400).json({ error: "Failed to parse form data" });
                 return;
             }
