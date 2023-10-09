@@ -16,21 +16,19 @@ const remove_user_bucket = async (user) => {
     return await execSql(query)
 }
 const map_file_type = async (bucketName, filename,file_type) => {
-    let query = `INSERT INTO FileTypeMap (bucket_name, filename,file_type) Values('${bucketName}','${filename}' ,'${file_type}');`
+    let query = `INSERT INTO FileTypeMap (bucket_name, filename,file_type,upload_date) Values('${bucketName}','${filename}' ,'${file_type}',NOW());`
     return await execSql(query)
 }
 
 const file_stats = async (bucketName,filename) => {
-    let query = `SELECT file_type, isUploaded from FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}';`
+    let query = `SELECT file_type, isUploaded, upload_date from FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}';`
     return await execSql(query).then(res => {
-        // console.log(res);
         return res;
     })
 }
 const file_uploaded = async (bucketName,filename) => {
     let query = `UPDATE FileTypeMap set isUploaded = 1 where filename = '${filename}' AND bucket_name = '${bucketName}';`
     return await execSql(query).then(res => {
-        // console.log(res);
         return res;
     })
 }

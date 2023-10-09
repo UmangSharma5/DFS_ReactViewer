@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import GetFiles from './components/GetFiles';
 import ProgressBar from './components/ProgressBar';
 import { config } from './config'; 
+import { toast } from 'react-toastify'
 
 
 
@@ -15,6 +16,7 @@ function App(props) {
   const [isUploaded, setIsUploaded] = useState(false)
   const [displayProgressBar, setDisplayProgressBar] = useState(false)
   const [progressValue, setProgressValue] = useState(0)
+  const currentFileSelected = useRef(null)
   const [fileInfo, setFileInfo] = useState({})
 
   const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
@@ -44,8 +46,8 @@ function App(props) {
     setDisplayProgressBar(true)
     formData.append('file',currentFile.name );
     let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
+    
 
-    // try{
       let res = await axios.get(config.BASE_URL+"/isUploaded/"+shortEmail,{
         headers: {
           authorization:'Bearer ' +JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
@@ -56,13 +58,12 @@ function App(props) {
       })
 
       if(res != undefined && res.data.isUploaded == 1){
-        alert("Image already exists");
+        toast.warn("Image Already Exists");
         setDisplayProgressBar(false);
       }
       else{
         try{
           console.log("Initiating upload")
-          console.log(formData);
           let response = await axios.post(bucketURL, formData,{
               headers: {
                  authorization:
@@ -74,18 +75,17 @@ function App(props) {
               setProgressValue(percentCompleted)
             },
           })
-          // .then((res) => {
-            if (response.status === 200) {
-              alert('Upload is in Progress...Please check after some time')
-            } else {
-              alert('Error in Uploading File')
-            }
-          // })
+          if (response.status === 200) {
+            toast.info('Upload is in Progress....Please check after some time')
+          } else {
+            toast.error('Error in Uploading File')
+          }
           setTimeout(function () {
             setProgressValue(0)
             setDisplayProgressBar(false)
           }, 3000)
           console.log("Upload complete");
+          currentFileSelected.current.value = null
           setIsUploaded(true);
           setCurrentFile((prevValue) => ({
             ...prevValue,
@@ -96,19 +96,15 @@ function App(props) {
         }catch (error) {
           console.log(error);
         }
-      }   
-      
-    // }catch(error){
-    //   console.log(error);
-    // }
+      }  
   }
     
   return (
     <div className="App">
       <div className='main-btn'>
         <div className="form-container">
-          <form enctype="multipart/form-data" method="post">
-            <input type="file" id="fileInput" onChange={handleChange} className="input-file"/>
+          <form>
+            <input type="file" ref={currentFileSelected} id="fileInput" onChange={handleChange} className="input-file"/>
             <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
           </form>
           {displayProgressBar? <ProgressBar progressValue={progressValue}/>:<></>}
