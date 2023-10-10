@@ -53,7 +53,7 @@
   background-color: rgb(218, 235, 250);
   flex-grow: 1;
   text-align: center;
-  height: calc(100vh - 120px);
+  height: 100vh
 }
 
 .viewer-container p {
