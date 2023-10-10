@@ -193,12 +193,12 @@ function RenderFile(props) {
                         objectFit: 'cover',
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
-                        height: '150px',
-                        width: '150px', 
+                        height: '100px',
+                        width: '100px', 
                     };
                     return (
                         <div className='thumbnail-container'>
-                            <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
+                            <img className='thumnails' onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
                                 <p className="image-name">{file.name + '.' + file.format}</p> 
                                 <button className="del-btn"  value={file} onClick={event => handleDelete(event,file)}> <i className="bi bi-archive"></i></button>
