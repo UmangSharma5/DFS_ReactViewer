@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import Login from './Login';
 import axios from 'axios';
 import {BrowserRouter} from 'react-router-dom';
 import CustomToastContainer from './components/CustomToastContainer'
+import Viewer from './components/Viewer'
 
 const LOGIN_URL = "https://datafoundation.iiit.ac.in/api/login";
 const LOGIN_URL_DEV = "http://10.4.25.20:3001/api/login";
@@ -36,7 +36,7 @@ async function checkAuth(email) {
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(
       <BrowserRouter basename='/hv'>
-        <App logout={logoutUser} />
+        <Viewer logout={logoutUser} />
         <CustomToastContainer />
       </BrowserRouter>
     );

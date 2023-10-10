@@ -200,14 +200,14 @@ function RenderFile(props) {
                         <div className='thumbnail-container'>
                             <img onClick={handleClick} style={buttonStyles} key={i} id={i} />
                             <div className="name-del">
-                                <p id="image-name">{file.name + '.' + file.format}</p> 
+                                <p className="image-name">{file.name + '.' + file.format}</p> 
                                 <button className="del-btn"  value={file} onClick={event => handleDelete(event,file)}> <i className="bi bi-archive"></i></button>
                             </div>
                         </div> 
                     );
                 })}
             </div> : <></>}
-            {showThumbnails ?  <AiFillCloseCircle onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/> : <FaRegImages onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px',marginLeft:'10px'}}/>}
+            {showThumbnails ?  <AiFillCloseCircle title="Hide Thumbnails" onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px'}}/> : <FaRegImages title="Show Thumbnails" onClick={() => {setShowThumbnails(!showThumbnails)}} style={{height: '30px',width: '30px',marginRight: '10px',marginLeft:'10px'}}/>}
             <div className="viewer-container">
                 <p id="viewer-image-name">{viewerImage ? imageName.name+"."+imageName.format : ' '}</p>
                 {viewerImage ? <OpenSeadragonViewer imageUrl={viewerImage} imageName={imageName} info={pyramid} format={format} outer={outer}/> : <p>Select an image to view</p>}

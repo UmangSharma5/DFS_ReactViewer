@@ -4,18 +4,25 @@
 }
 
 .button-container {
-    flex: 1%;
     display: flex;
     flex-wrap: wrap;
     gap: 40px;
     margin-left: 40px;
+    max-height: 200px;
+    max-width: 200px
 }
 
-#image-name {
+@media only screen and (min-width: 768px) {
+  .button-container{
+    max-width: 400px;
+  }
+}
+
+.image-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px;
+    width: 100px;
     margin-left: 10px;
     margin-right: 10px;
     font-size: 18px;
@@ -38,7 +45,7 @@
     background-color: rgb(218, 235, 250);
     flex-grow: 1; 
     text-align: center;
-    height: 100%;
+    height: calc(100vh - 120px)
 }
 
 .viewer-container p {
@@ -57,6 +64,10 @@
     width: 35px;
     height: 30px;
     color: red;
+}
+
+.thumbnail-container{
+    flex-basis: 1%;
 }
 
 .thumbnail-container:hover{
