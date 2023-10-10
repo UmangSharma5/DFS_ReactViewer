@@ -60,6 +60,7 @@ router.get("/:url",async (req,res) => {
                     let tname = name.split('/')[3];
                     await file_stats(bucketName,tname.split('.')[0])
                         .then(response => {
+                            // console.log(response);
                             if(response[0]?.isUploaded)
                                 temp.push({name: tname.split('.')[0], format: response[0]?.file_type, date: response[0]?.upload_date});
                         })
@@ -126,7 +127,8 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
         walker.on('file',async (root, fileStats, next) => {
             filePath = root +'/' +fileStats.name;
             console.log("2");
-            sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
+            // sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
+            handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName)
             next()
         })
 
@@ -139,7 +141,7 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
 router.post("/:url",async function(req,res){
     try{
         count = 0;
-        const form = formidable({ multiples: false,maxTotalFileSize : 1000 * 1024 * 1024 , maxFileSize: 1000 * 1024 * 1024});
+        const form = formidable({ multiples: false,maxTotalFileSize : 2000 * 1024 * 1024 , maxFileSize: 2000 * 1024 * 1024});
         form.parse(req, async (err, fields, files) => {
             if (err) {
                 console.log(err);
