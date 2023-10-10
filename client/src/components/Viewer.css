@@ -27,7 +27,7 @@
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-
+  height: 70px;
 }
 
 .form-container {
