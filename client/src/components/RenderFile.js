@@ -176,7 +176,7 @@ function RenderFile(props) {
 
     function handleDelete(event,file){
         props.onDelete(event,file);
-        props.getFiles()
+        toast.info('Image Deleted Successfully!')
         setViewerImage();
     }
 
