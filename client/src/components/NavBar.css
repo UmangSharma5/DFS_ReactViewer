@@ -1,0 +1,20 @@
+.navbar {
+  background-color: #031B34;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+#heading {
+  color: white;
+  margin: auto;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+}
+
+#ihub-logo{
+    /* background: center/cover url(../../public/img/ihub-logo.png) no-repeat;  */
+    background: center/cover url(https://ik.imagekit.io/amey/ihub_aGeZsxN8aS.png?updatedAt=1683179788691) no-repeat; 
+    width: 48px;
+    height: 48px;
+    margin-left: 2rem;
+}

@@ -35,7 +35,7 @@ async function handleClick (e) {
       <div id="bg"></div>
       <h1>Login</h1>
       <form>  
-          <div class="form-field">
+          <div className="form-field">
             <input 
               name="username"
               type="text"
@@ -44,7 +44,7 @@ async function handleClick (e) {
               value = {input.username}
             />
           </div>
-          <div class="form-field">
+          <div className="form-field">
             <input 
               name="password"
               type="password"
@@ -53,7 +53,7 @@ async function handleClick (e) {
               value = {input.password}
             />
           </div>
-          <div class="form-field">
+          <div className="form-field">
             <button className="btn" onClick={handleClick}>Submit</button>
         </div>
       </form>

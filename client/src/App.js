@@ -5,6 +5,7 @@ import CustomToastContainer from './components/CustomToastContainer'
 import Viewer from './components/Viewer'
 import Login from './Login'
 import './App.css'
+import NavBar from './components/NavBar';
 
 function App() {
   let tokenId = null
@@ -64,6 +65,7 @@ function App() {
 
   return (
     <>
+      <NavBar />
       <Routes>
         <Route exact path='/' element={isLoggedIn ? <Viewer logout={logoutUser} /> : <Navigate replace to="/login" />}/>
         <Route exact path='/login' element={isLoggedIn ? <Navigate replace to="/" /> : <Login checkUser={checkUser} />} />
