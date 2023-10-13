@@ -12,6 +12,7 @@ import { walk } from "walk";
 import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_stats,file_uploaded } from '../Database_queries/queries.js'
 
 const sem = semaphore(100)
+let socket = 0
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
@@ -25,6 +26,9 @@ let convert_tiff_options = {
   logLevel: 1
 };
 
+const updateSocket = (clientsocket) => {
+    socket = clientsocket
+}
 router.get("/:url",async (req,res) => {
     try{
         let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
@@ -84,9 +88,30 @@ const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileNa
         }else{
             console.log(count++)
             obj.curr_count++;
-            console.log("******")
+            if(socket != 0 && obj.curr_count % 10 == 0){
+                console.log("******")
+                socket.emit('progress',{
+                    "Title": "Upload Progress",
+                    "status": "uploading",
+                    "Data": {
+                        "Total_Files": obj.total_files,
+                        "Uploaded_Files": obj.curr_count
+                    }
+                })
+                // socket.emit('progress',0)
+            }
             if(obj.curr_count == obj.total_files)
             {
+                socket.emit('progress',{
+                    "Title": "Upload Progress",
+                    "status": "uploaded",
+                    "Data": {
+                        "Total_Files": obj.total_files,
+                        "Uploaded_Files": obj.curr_count
+                    }
+                })
+                socket.disconnect()
+                updateSocket(0)
                 await file_uploaded(bucketName,obj.fileName,obj.format);
                 fs.rmdir(tempDirPath+"/"+fileName+"_files",
                     { recursive: true, force: true }
@@ -161,6 +186,9 @@ router.post("/:url",async function(req,res){
                 await map_file_type(bucketName,tempName,parts[1]);
     
                 if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
+                    console.log(socket)
+                    socket.disconnect()
+                    updateSocket(0)
                     minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
                         if(err) {
                             return res.status(400).json({error:"Failed to upload"})
@@ -246,4 +274,7 @@ router.post("/:url",async function(req,res){
     }
 });
 
-export default router;
+export {
+    router,
+    updateSocket
+}
