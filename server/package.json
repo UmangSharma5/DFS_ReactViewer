@@ -22,6 +22,7 @@
     "mysql2": "^3.5.2",
     "semaphore": "^1.1.0",
     "sharp": "^0.32.1",
+    "socket.io": "^4.7.2",
     "tiff-to-png": "^2.0.2",
     "tiff.js": "^1.0.0",
     "vips": "^1.0.0",
