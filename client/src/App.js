@@ -65,7 +65,7 @@ function App() {
 
   return (
     <>
-      <NavBar />
+      <NavBar logout={logoutUser}/>
       <Routes>
         <Route exact path='/' element={isLoggedIn ? <Viewer logout={logoutUser} /> : <Navigate replace to="/login" />}/>
         <Route exact path='/login' element={isLoggedIn ? <Navigate replace to="/" /> : <Login checkUser={checkUser} />} />

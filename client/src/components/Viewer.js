@@ -28,10 +28,6 @@ function Viewer(props) {
     }
   }
   
-  function handleClick(){
-    props.logout();
-  }
-
   function handleChange(e){
     const file =  e.target.files[0];
     setCurrentFile((prevValue)=>({
@@ -109,7 +105,6 @@ function Viewer(props) {
           </form>
           {displayProgressBar? <ProgressBar progressValue={progressValue}/>:<></>}
         </div>
-        <button id="logout-btn" onClick={handleClick}>Logout</button>
       </div>
       <div className='get-files'>
         <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />

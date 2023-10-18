@@ -11,25 +11,6 @@
   height: 100px;
 }
 
-#logout-btn {
-  background-image: linear-gradient(#0dccea, #0d70ea);
-  border: 0;
-  border-radius: 50px;
-  box-shadow: rgba(0, 0, 0, .3) 0 5px 15px;
-  box-sizing: border-box;
-  color: #fff;
-  cursor: pointer;
-  font-family: Montserrat,sans-serif;
-  font-size: .9em;
-  margin: 5px;
-  padding: 10px 15px;
-  text-align: center;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  height: 70px;
-}
-
 .form-container {
   display: flex;
   flex-direction: column;
