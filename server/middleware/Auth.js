@@ -23,6 +23,7 @@ const require_auth = async (req,res,next) =>{
         // const user = detokn(req.headers.authorization.split('Bearer ')[1]);
         if(user){
             req.user = user;
+            req.token = token;
             next();
         }
         else{
