@@ -51,12 +51,13 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log(`User connected ${socket.id}`);
 
-  updateSocket(socket)
+  socket.on('addUser',(user) => {
+    updateSocket(user,socket)
+  })
 
   //when disconnect from client
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
-    updateSocket(0)
   });
 });
 

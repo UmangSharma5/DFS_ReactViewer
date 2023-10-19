@@ -50,6 +50,7 @@ function App(props) {
     const socket = io.connect('http://localhost:5000');
     socket.on('connect', () => {
       console.log('Connected:', socket.connected); // Should be true
+      socket.emit('addUser',JSON.parse(localStorage.getItem("dfs-user"))?.["token"])
     });
     socket.on('progress',(progress_data) => {
       console.log(progress_data)
