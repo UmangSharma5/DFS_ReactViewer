@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css?family=Lato:400,700");
 .Login #bg {
-  background-image: url('../public/img/background.jpg');
+  background-image: url('../../../public/img/background.jpg');
   position: fixed;
   left: 0;
   top: 0;
@@ -38,13 +38,13 @@
   background-repeat: no-repeat;
 }
 .Login form .form-field:nth-child(1)::before {
-  background-image: url(../public/img/user-icon.png);
+  background-image: url(../../../public/img/user-icon.png);
   width: 20px;
   height: 20px;
   top: 15px;
 }
 .Login form .form-field:nth-child(2)::before {
-  background-image: url(../public/img/lock-icon.png);
+  background-image: url(../../../public/img/lock-icon.png);
   width: 16px;
   height: 16px;
 }

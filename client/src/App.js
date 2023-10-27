@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import { Routes, Route,Navigate,useNavigate} from 'react-router-dom'
-import CustomToastContainer from './components/CustomToastContainer'
-import Viewer from './components/Viewer'
-import Login from './Login'
+import CustomToastContainer from './components/CustomToastContainer/CustomToastContainer'
+import Viewer from './components/Viewer/Viewer'
+import Login from './components/Login/Login'
 import './App.css'
-import NavBar from './components/NavBar';
+import NavBar from './components/Viewer/components/NavBar/NavBar';
 
 function App() {
   let tokenId = null

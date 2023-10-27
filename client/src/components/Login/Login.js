@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import './Login.css';
 import {toast } from 'react-toastify';
 
-
 function Login(props) {
   
   const [input,setInput] = useState({
