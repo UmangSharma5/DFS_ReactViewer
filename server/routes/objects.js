@@ -10,9 +10,9 @@ import {execSql} from '../db.js'
 import { exec } from "child_process";
 import { walk } from "walk";
 import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_stats,file_uploaded } from '../Database_queries/queries.js'
+import {sockets, updateSocket, removeSocket} from '../SocketManager/socketmanager.js'
 
 const sem = semaphore(100)
-let socket = []
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
@@ -26,17 +26,6 @@ let convert_tiff_options = {
   logLevel: 1
 };
 
-const updateSocket = (usertoken,clientsocket) => {
-    const entry = socket.findIndex(usersock => usersock.token == usertoken)
-    console.log(entry)
-    if(entry != -1)
-        socket[entry].sock = clientsocket
-    else
-        socket.push({token: usertoken,sock: clientsocket})
-}
-const removeSocket = (index) => {
-    socket.splice(index,1)
-}
 router.get("/:url",async (req,res) => {
     try{
         let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
@@ -90,7 +79,7 @@ router.get("/:url",async (req,res) => {
 let count = 0;
 
 const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileName, socketIndex) => {
-    let sock = socket[socketIndex].sock
+    let sock = sockets[socketIndex].sock
     minioClient.fPutObject(bucketName, minioPath + filePath, filePath, async (err,objInfo) => {
         if (err) {
             console.error("---->",err)
@@ -146,7 +135,7 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
         fileName: fileName,
         format: format
     };
-    let sock = socket.findIndex(usersock => usersock.token == user)
+    let sock = sockets.findIndex(usersock => usersock.token == user)
     let walker = walk(`temp/${fileName}_files`);
     const minioPath = `hv/${user}/${fileName}/`
     walker.on('file',async (root, fileStats, next) => {
@@ -196,8 +185,8 @@ router.post("/:url",async function(req,res){
                 await map_file_type(bucketName,tempName,parts[1]);
     
                 if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
-                    var sock = socket.findIndex(usersock => usersock.token == req.token)
-                    socket[sock].sock.disconnect()
+                    var sock = sockets.findIndex(usersock => usersock.token == req.token)
+                    sockets[sock].sock.disconnect()
                     removeSocket(sock)
                     minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
                         if(err) {
@@ -284,7 +273,5 @@ router.post("/:url",async function(req,res){
     }
 });
 
-export {
-    router,
-    updateSocket
-}
+export default router
+
