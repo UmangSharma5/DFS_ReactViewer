@@ -6,8 +6,10 @@ import path from 'path';
 import http from 'http'
 import { fileURLToPath } from 'url';
 import require_auth from './middleware/Auth.js';
+import { updateSocket } from './SocketManager/socketmanager.js';
 import { Server } from 'socket.io'
 const server = http.createServer(app);
+const port = process.env.PORT || 5000
 
 
 
@@ -17,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, 'build')));
 
-import {router as objectsRoute,updateSocket} from './routes/objects.js';
+import objectsRoute from './routes/objects.js';
 import getURL from './routes/getURL.js';
 import deleteBucket from './routes/deleteBucket.js';
 import deleteObject from './routes/deleteObject.js';
@@ -61,6 +63,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(5000, function () {
+server.listen(port, function () {
   console.log('Server started on port 5000')
 })
