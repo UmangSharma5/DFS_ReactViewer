@@ -1,123 +1,78 @@
-import React, { useEffect, useRef, useState } from 'react';
-import './App.css';
+import React, { useEffect, useState } from 'react'
 import axios from 'axios';
-import GetFiles from './components/GetFiles';
-import ProgressBar from './components/ProgressBar';
-import { config } from './config'; 
-import { toast } from 'react-toastify'
+import { Routes, Route,Navigate,useNavigate} from 'react-router-dom'
+import CustomToastContainer from './components/CustomToastContainer/CustomToastContainer'
+import Viewer from './components/Viewer/Viewer'
+import Login from './components/Login/Login'
+import './App.css'
+import NavBar from './components/Viewer/components/NavBar/NavBar';
 
+function App() {
+  let tokenId = null
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const navigate = useNavigate()
 
-function App(props) {
-  const [currentFile,setCurrentFile] =useState({
-    count: 0,
-    name: ""
-  });
-  const [isUploaded, setIsUploaded] = useState(false)
-  const [displayProgressBar, setDisplayProgressBar] = useState(false)
-  const [progressValue, setProgressValue] = useState(0)
-  const currentFileSelected = useRef(null)
-  const [fileInfo, setFileInfo] = useState({})
+  if (JSON.parse(localStorage.getItem('dfs-user')) != null) {
+    tokenId = JSON.parse(localStorage.getItem('dfs-user')).token
+  }
 
-  const email = JSON.parse(localStorage.getItem("dfs-user")).user.user_email.toLowerCase();
-  let shortEmail ='';
-  for (let i = 0; i < email.length; i++) {
-    const charCode = email.charCodeAt(i);   
-    if ((charCode >= 48 && charCode <= 57) || (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
-      shortEmail += email.charAt(i);
+  useEffect(() => {
+    checkAuth()
+  },[isLoggedIn])
+
+  function logoutUser(){
+    localStorage.clear()
+    setIsLoggedIn(false)
+    navigate('/login')
+  }
+
+  async function checkUser(email, password) {
+    const LOGIN_URL = 'https://datafoundation.iiit.ac.in/api/login'
+    const LOGIN_URL_DEV = 'http://10.4.25.20:3001/api/login'
+    try {
+      const response = await axios.post(LOGIN_URL_DEV, { email, password })
+
+      let dfs_user = {
+        user: response.data.data.user,
+        token: response.data.data.token,
+      }
+
+      var jsonString = JSON.stringify(dfs_user)
+
+      localStorage.setItem('dfs-user', jsonString)
+      tokenId = JSON.parse(localStorage.getItem('dfs-user')).token
+
+      await checkAuth(email)
+    } catch (error) {
+      console.log('Incorrect Username or password!!!')
+      return false
     }
   }
-  
-  function handleClick(){
-    props.logout();
+
+  async function checkAuth(email) {
+    const GET_URL ='https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId
+    const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId
+    
+    try {
+      const response = await axios.get(GET_URL_DEV)
+      setIsLoggedIn(true)
+      navigate('/')
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  function handleChange(e){
-    const file =  e.target.files[0];
-    setCurrentFile((prevValue)=>({
-      ...prevValue,
-      name : file
-    }))
-  };
-  
-  async function uploadFile(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    setDisplayProgressBar(true)
-    formData.append('file',currentFile.name );
-    let bucketURL = config.BASE_URL+"/objects/" + shortEmail;
-    
-
-      let res = await axios.get(config.BASE_URL+"/isUploaded/"+shortEmail,{
-        headers: {
-          authorization:'Bearer ' +JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-        },
-        params:{
-          fileName:currentFile.name.name,
-        }
-      })
-
-      if(res != undefined && res.data.isUploaded == 1){
-        toast.warn("Image Already Exists");
-        setDisplayProgressBar(false);
-      }
-      else{
-        try{
-          console.log("Initiating upload")
-          let response = await axios.post(bucketURL, formData,{
-              headers: {
-                 authorization:
-                'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-            },
-            // Added On Upload Progress Config to Axios Post Request
-            onUploadProgress: function (progressEvent) {
-              const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total) * 100)
-              setProgressValue(percentCompleted)
-            },
-          })
-          if (response.status === 200) {
-            toast.info('Upload is in Progress....Please check after some time')
-          } else {
-            toast.error('Error in Uploading File')
-          }
-          setTimeout(function () {
-            setProgressValue(0)
-            setDisplayProgressBar(false)
-          }, 3000)
-          console.log("Upload complete");
-          currentFileSelected.current.value = null
-          setIsUploaded(true);
-          setCurrentFile((prevValue) => ({
-            ...prevValue,
-            name: response.data.filename,
-            format: response.data.format,
-            count: prevValue.count + 1,
-          }))
-        }catch (error) {
-          console.log(error);
-        }
-      }  
-  }
-    
   return (
-    <div className="App">
-      <div className='main-btn'>
-        <div className="form-container">
-          <form>
-            <input type="file" ref={currentFileSelected} id="fileInput" onChange={handleChange} className="input-file"/>
-            <button type="submit" onClick={uploadFile} className="upload-button">Upload</button>
-          </form>
-          {displayProgressBar? <ProgressBar progressValue={progressValue}/>:<></>}
-        </div>
-        <button id="logout-btn" onClick={handleClick}>Logout</button>
-      </div>
-      <div className='get-files'>
-        <GetFiles fileObj={currentFile} uploadStatus={isUploaded} email={shortEmail} />
-      </div>
-    </div>
-  );
-
+    <>
+      <NavBar logout={logoutUser}/>
+      <Routes>
+        <Route exact path='/' element={isLoggedIn ? <Viewer logout={logoutUser} /> : <Navigate replace to="/login" />}/>
+        <Route exact path='/login' element={isLoggedIn ? <Navigate replace to="/" /> : <Login checkUser={checkUser} />} />
+      </Routes>
+      <CustomToastContainer />
+    </>
+  )
 }
 
-export default App;
-
+export default App
