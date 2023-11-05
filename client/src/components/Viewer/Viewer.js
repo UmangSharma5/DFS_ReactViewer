@@ -5,6 +5,8 @@ import GetFiles from './components/GetFiles/GetFiles'
 import ProgressBar from './components/ProgressBar/ProgressBar'
 import { config } from '../Config/config'
 import { toast } from 'react-toastify'
+import { io } from "socket.io-client";
+import StatusInfo from '../statusInfo'
 
 function Viewer(props) {
   const [currentFile, setCurrentFile] = useState({
@@ -16,6 +18,9 @@ function Viewer(props) {
   const [progressValue, setProgressValue] = useState(0)
   const currentFileSelected = useRef(null)
   const [fileInfo, setFileInfo] = useState({})
+  const [uploadPercentage,setUploadPercentage] = useState({});
+  const [recentUploaded,setRecentUploaded] = useState(null);
+  const [isConnected,setIsConnected] = useState(false);
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user')
@@ -42,6 +47,32 @@ function Viewer(props) {
 
   async function uploadFile(e) {
     e.preventDefault()
+
+    const socket = io.connect('http://localhost:5000');
+    socket.on('connect', () => {
+      console.log('Connected:', socket.connected); // Should be true
+      setIsConnected(true);
+      socket.emit('addUser',JSON.parse(localStorage.getItem("dfs-user"))?.["token"])
+    });
+
+    socket.on('progress',(progress_data) => {
+      console.log("progress data->",progress_data)
+      if(progress_data.Data.Uploaded_Files != undefined && progress_data.Data.Total_Files!= undefined){
+        let num = progress_data.Data.Uploaded_Files;
+        let den = progress_data.Data.Total_Files;
+        let per = (num/den) * 100 ;
+        const fileName = currentFile.name.name; 
+        setUploadPercentage((prevValue) => ({
+          ...prevValue,
+          [fileName]: per,
+        }));
+      }
+    })
+
+    socket.on('error', (error) => {
+      console.error('Socket.IO error:', error);
+    });
+
     const formData = new FormData()
     setDisplayProgressBar(true)
     formData.append('file', currentFile.name)
@@ -129,11 +160,16 @@ function Viewer(props) {
         </div>
       </div>
       <div className='get-files'>
-        <GetFiles
+      <GetFiles
           fileObj={currentFile}
           uploadStatus={isUploaded}
           email={shortEmail}
+          uploadPercentage = {uploadPercentage}
+          recentUploaded = {recentUploaded}
         />
+      </div>
+      <div className='status'>
+        <StatusInfo uploadPercentage={uploadPercentage} isConnected={isConnected}/>  
       </div>
     </div>
   )

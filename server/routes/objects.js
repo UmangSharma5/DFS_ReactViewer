@@ -10,6 +10,7 @@ import {execSql} from '../db.js'
 import { exec } from "child_process";
 import { walk } from "walk";
 import { map_user_to_bucket, get_user_bucket, remove_user_bucket, map_file_type, file_stats,file_uploaded } from '../Database_queries/queries.js'
+import {sockets, updateSocket, removeSocket} from '../SocketManager/socketmanager.js'
 
 const sem = semaphore(100)
 app.use(cors());
@@ -43,6 +44,7 @@ router.get("/:url",async (req,res) => {
                 })
             }
             const objects = [];
+            console.log(user);
             const stream = minioClient.listObjects(bucketName, "hv/"+user+'/thumbnail', true);
             console.log("stream collected");
             stream.on('data', async (obj) => {
@@ -77,16 +79,40 @@ router.get("/:url",async (req,res) => {
 });
 let count = 0;
 
-const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileName) => {
+const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileName, socketIndex) => {
+    console.log(sockets,socketIndex)
+    let sock = sockets[socketIndex].sock
+    console.log(bucketName+minioPath+filePath)
     minioClient.fPutObject(bucketName, minioPath + filePath, filePath, async (err,objInfo) => {
         if (err) {
             console.error("---->",err)
         }else{
             console.log(count++)
             obj.curr_count++;
-            console.log("******")
+            if(sock != 0 && obj.curr_count % 10 == 0){
+                console.log("******")
+                sock.emit('progress',{
+                    "Title": "Upload Progress",
+                    "status": "uploading",
+                    "Data": {
+                        "Total_Files": obj.total_files,
+                        "Uploaded_Files": obj.curr_count
+                    }
+                })
+                // socket.emit('progress',0)
+            }
             if(obj.curr_count == obj.total_files)
             {
+                sock.emit('progress',{
+                    "Title": "Upload Progress",
+                    "status": "uploaded",
+                    "Data": {
+                        "Total_Files": obj.total_files,
+                        "Uploaded_Files": obj.curr_count
+                    }
+                })
+                sock.disconnect()
+                removeSocket(socketIndex)
                 await file_uploaded(bucketName,obj.fileName,obj.format);
                 fs.rmdir(tempDirPath+"/"+fileName+"_files",
                     { recursive: true, force: true }
@@ -105,13 +131,15 @@ const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileNa
     })
 }
 
-const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
+const handleAllUpload = async (bucketName,user,token,fileName,format,tempDirPath) => {
+    console.log("user--",user);
     let obj = {
         total_files: 0,
         curr_count : 0,
         fileName: fileName,
         format: format
     };
+    let sock = sockets.findIndex(usersock => usersock.token === token)
     let walker = walk(`temp/${fileName}_files`);
     const minioPath = `hv/${user}/${fileName}/`
     walker.on('file',async (root, fileStats, next) => {
@@ -126,9 +154,9 @@ const handleAllUpload = async (bucketName,user,fileName,format,tempDirPath) => {
         let filePath;
         walker.on('file',async (root, fileStats, next) => {
             filePath = root +'/' +fileStats.name;
-            console.log("2");
             // sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
-            handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName)
+            // console.log(minioPath,filePath)
+            handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName, sock)
             next()
         })
 
@@ -161,6 +189,9 @@ router.post("/:url",async function(req,res){
                 await map_file_type(bucketName,tempName,parts[1]);
     
                 if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
+                    let sock = sockets.findIndex(usersock => usersock.token === req.token)
+                    sockets[sock].sock.disconnect()
+                    removeSocket(sock)
                     minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
                         if(err) {
                             return res.status(400).json({error:"Failed to upload"})
@@ -183,7 +214,9 @@ router.post("/:url",async function(req,res){
                         isVipsError = 0
                         // res.status(200).json("File has been Uploaded")
                         console.log(`stdout: ${stdout}`);
-                        handleAllUpload(bucketName,user,`${tempName}`,parts[1],tempDirPath);
+                        console.log("email---",req.user.user_email);
+                        
+                        handleAllUpload(bucketName,user,req.token,`${tempName}`,parts[1],tempDirPath);               
                     });
                     if(isVipsError == 1)
                     {
@@ -246,4 +279,5 @@ router.post("/:url",async function(req,res){
     }
 });
 
-export default router;
+export default router
+

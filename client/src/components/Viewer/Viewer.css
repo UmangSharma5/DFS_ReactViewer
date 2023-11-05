@@ -62,3 +62,10 @@
   -webkit-user-select: none;
   touch-action: manipulation;
 }
+
+.status{
+  position: absolute;
+  /* overflow-x: hidden; */
+  right: 3%;
+  bottom: 0;
+}
