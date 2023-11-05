@@ -82,6 +82,7 @@ function GetFiles(props) {
           email={props.email}
           onDelete={handleDelete}
           deletedFileName={deletedFileName}
+          uploadPercentage = {props.uploadPercentage}
         />
       ) : null}
     </div>

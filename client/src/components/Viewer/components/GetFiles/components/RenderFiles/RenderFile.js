@@ -6,6 +6,7 @@ import { config } from '../../../../../Config/config'
 import { toast } from 'react-toastify'
 import { FaRegImages } from 'react-icons/fa'
 import { AiFillCloseCircle } from 'react-icons/ai'
+import StatusInfo from '../../../../../statusInfo'
 
 function RenderFile(props) {
   const [viewerImage, setViewerImage] = useState()
@@ -79,7 +80,7 @@ function RenderFile(props) {
         reversedImageNames.forEach((newImage) => {
           getImageLink(newImage)
         })
-        toast.success('Upload Completed!')
+        // toast.success('Upload Completed!')
       }
     } else {
       setAllImageName(props.info)
@@ -275,6 +276,9 @@ function RenderFile(props) {
           <p>Select an image to view</p>
         )}
       </div>
+      {/* <div className='status'>
+        <StatusInfo uploadPercentage={props.uploadPercentage}/>  
+      </div> */}
     </div>
   )
 }
