@@ -82,6 +82,7 @@ let count = 0;
 const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileName, socketIndex) => {
     console.log(sockets,socketIndex)
     let sock = sockets[socketIndex].sock
+    console.log(bucketName+minioPath+filePath)
     minioClient.fPutObject(bucketName, minioPath + filePath, filePath, async (err,objInfo) => {
         if (err) {
             console.error("---->",err)
@@ -215,7 +216,7 @@ router.post("/:url",async function(req,res){
                         console.log(`stdout: ${stdout}`);
                         console.log("email---",req.user.user_email);
                         
-                        handleAllUpload(bucketName,req.user.user_email,req.token,`${tempName}`,parts[1],tempDirPath);               
+                        handleAllUpload(bucketName,user,req.token,`${tempName}`,parts[1],tempDirPath);               
                     });
                     if(isVipsError == 1)
                     {

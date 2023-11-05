@@ -48,7 +48,7 @@
 }
 
 .viewer-container {
-  flex: 75%;
+  /* flex: 75%; */
   background-color: rgb(218, 235, 250);
   flex-grow: 1;
   text-align: center;
