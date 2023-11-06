@@ -1,0 +1,90 @@
+.render-file-container {
+  display: flex;
+  width: 100vw;
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-left: 20px;
+  max-height: 150px;
+  max-width: 150px;
+}
+
+@media only screen and (min-width: 768px) {
+  .button-container{
+    min-width: 270px;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  .button-container{
+    max-width: 120px;
+    margin-left: 0px;
+  }
+}
+
+.image-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 55px;
+  margin-top: 5px;
+  margin-left: 10px;
+  margin-right: 10px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+#viewer-image-name {
+  white-space: nowrap;
+  max-width: 100px;
+  margin-left: 10px;
+  font-size: 18px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.viewer-container {
+  /* flex: 75%; */
+  background-color: rgb(218, 235, 250);
+  flex-grow: 1;
+  text-align: center;
+  height: 100vh;
+  /* max-width: 75vw; */
+  overflow: hidden;
+}
+
+.viewer-container p {
+  text-align: center;
+  font-size: 25px;
+  color: #333;
+  margin: 20px 0;
+}
+
+.name-del {
+  display: flex;
+}
+
+.del-btn {
+  border-radius: 30%;
+  width: 35px;
+  height: 30px;
+  color: red;
+}
+
+.thumbnail-container:hover{
+  background-image: linear-gradient(rgb(13, 204, 234, 0.4),rgb(13, 112, 234, 0.5));
+  box-shadow: rgba(0, 0, 0, 0.3) 0 5px 15px;
+  border-radius: 5px;
+}
+
+/* .status{
+  position: absolute;
+  overflow: hidden;
+  left: 90%;
+  bottom: 0;
+  width: 10px;
+} */

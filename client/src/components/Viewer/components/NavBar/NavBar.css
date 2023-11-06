@@ -1,0 +1,39 @@
+.navbar {
+  background-color: #031B34;
+  height: 80px;
+}
+
+#heading {
+  color: white;
+  margin: auto;
+  margin-left: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+#ihub-logo{
+  background: center/cover url(https://ik.imagekit.io/amey/ihub_aGeZsxN8aS.png?updatedAt=1683179788691) no-repeat; 
+  width: 48px;
+  height: 48px;
+  margin-left: 2rem;
+}
+
+#logout-btn {
+  background: #F54821;
+  border: 0;
+  border-style: none;
+  border-radius: 0.25rem;
+  color: white;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  font-family: 'Open Sans', sans-serif;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100px;
+  margin-right: 10px;
+}
