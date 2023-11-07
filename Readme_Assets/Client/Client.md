@@ -1,9 +1,5 @@
 # Client
 - This Repository Refers to the Frontend of the Web-App
----
-
-
-
 - In `client/` Run the Following Command to Install the Dependencies
 ```
 npm install --no-lockfile --legacy-peer-deps
