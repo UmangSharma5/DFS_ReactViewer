@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
+import { get_user_bucket } from '../Database_queries/queries.js';
 
 router.get("/:url",async function(req,res){
     try{
@@ -59,14 +60,14 @@ function extractCredentialFromURL(url) {
 }
 
 
-router.get("/imagePyramid/:url",function(req,res){
+router.get("/imagePyramid/:url",async (req,res) => {
     try {
-        const user = req.params.url
+        let user = await get_user_bucket(req.user.user_email)
         let bucketName = "datadrive-dev"
         const {baseDir} = req.query
         console.log(baseDir)
         const objects = [];
-        const stream = minioClient.listObjects(bucketName, `hv/${user}/${baseDir}`, true); 
+        const stream = minioClient.listObjects(bucketName, `hv/${user}/${baseDir}`, true);
   
         stream.on('data', (obj) => {
             objects.push(obj);

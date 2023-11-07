@@ -48,11 +48,13 @@
 }
 
 .viewer-container {
-  flex: 75%;
+  /* flex: 75%; */
   background-color: rgb(218, 235, 250);
   flex-grow: 1;
   text-align: center;
-  height: 100vh
+  height: 100vh;
+  /* max-width: 75vw; */
+  overflow: hidden;
 }
 
 .viewer-container p {
@@ -78,3 +80,11 @@
   box-shadow: rgba(0, 0, 0, 0.3) 0 5px 15px;
   border-radius: 5px;
 }
+
+/* .status{
+  position: absolute;
+  overflow: hidden;
+  left: 90%;
+  bottom: 0;
+  width: 10px;
+} */
