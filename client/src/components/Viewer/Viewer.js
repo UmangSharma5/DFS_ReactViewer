@@ -47,8 +47,7 @@ function Viewer(props) {
 
   async function uploadFile(e) {
     e.preventDefault()
-
-    const socket = io.connect('http://localhost:5000');
+    const socket = io(config.SOCKET_URL, {path: "/hv/socket"});
     socket.on('connect', () => {
       console.log('Connected:', socket.connected); // Should be true
       setIsConnected(true);

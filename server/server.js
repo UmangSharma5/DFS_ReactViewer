@@ -36,13 +36,8 @@ app.use('/hv/isUploaded',require_auth,isUploaded);
 // app.use('/hv/deleteBucket',deleteBucket);
 // app.use('/hv/deleteObject',deleteObject);
 
-
-app.get('/*', function (req, res) {
-  console.log('here i am')
-  res.sendFile(path.join(__dirname, 'build', 'index.html'))
-})
-
 const io = new Server(server, {
+  path: "/hv/socket",
   cors: {
     origin: '*'
   },
@@ -62,6 +57,11 @@ io.on('connection', (socket) => {
     console.log("a user disconnected!");
   });
 });
+
+app.get('/*', function (req, res) {
+  console.log('here i am')
+  res.sendFile(path.join(__dirname, 'build', 'index.html'))
+})
 
 server.listen(port, function () {
   console.log('Server started on port 5000')
