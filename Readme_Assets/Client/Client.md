@@ -14,11 +14,11 @@ npm start
 ---
 
 ### Directory Structure
-![](./Images/Directory_Structure.png)
+![Directory Structure](./Images/Directory_Structure.png)
 ---
 
 ### HV Upload Pipeline
-![](./Images/HV_Upload_Pipeline.png)
+![Upload Pipeline](./Images/HV_Upload_Pipeline.png)
 - The User can Upload `.tiff` `.tif` `.png` `.jpeg` `.jpg` files to the HV Platform.
 
 ### Storing the Images in MinIO Database
