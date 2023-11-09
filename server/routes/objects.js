@@ -80,9 +80,7 @@ router.get("/:url",async (req,res) => {
 let count = 0;
 
 const handleUpload = async (bucketName,minioPath,filePath,obj,tempDirPath,fileName, socketIndex) => {
-    console.log(sockets,socketIndex)
     let sock = sockets[socketIndex].sock
-    console.log(bucketName+minioPath+filePath)
     minioClient.fPutObject(bucketName, minioPath + filePath, filePath, async (err,objInfo) => {
         if (err) {
             console.error("---->",err)
@@ -179,6 +177,8 @@ router.post("/:url",async function(req,res){
             if(files.file != undefined){
                 let filePath  = files.file[0].filepath;
                 let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
+                let inProgress = req.query.inProgress
+                console.log("inProgress",inProgress)
                 const bucketName = "datadrive-dev"
                 let fileName = files.file[0].originalFilename;
                 const parts = fileName.split('.');
@@ -216,7 +216,7 @@ router.post("/:url",async function(req,res){
                         console.log(`stdout: ${stdout}`);
                         console.log("email---",req.user.user_email);
                         
-                        handleAllUpload(bucketName,user,req.token,`${tempName}`,parts[1],tempDirPath);               
+                        handleAllUpload(bucketName,user,`${req.token}_${inProgress}`,`${tempName}`,parts[1],tempDirPath);               
                     });
                     if(isVipsError == 1)
                     {

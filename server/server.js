@@ -49,7 +49,12 @@ io.on('connection', (socket) => {
   console.log(`User connected ${socket.id}`);
 
   socket.on('addUser',(user) => {
-    updateSocket(user,socket)
+    let usertoken = `${user.token}_${user.inProgress}`
+    console.log(usertoken)
+    updateSocket(usertoken,socket)
+    socket.emit('AddedUser',{
+      "user_added": true
+    })
   })
 
   //when disconnect from client
