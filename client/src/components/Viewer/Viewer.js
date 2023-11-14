@@ -45,6 +45,8 @@ function Viewer() {
     }));
   }
 
+// console.log(uploadPercentage)
+
   async function uploadFile(e) {
     e.preventDefault();
     const socket = io.connect('http://localhost:5000');
@@ -68,7 +70,10 @@ function Viewer() {
         const fileName = currentFile.name.name;
         setUploadPercentage(prevValue => ({
           ...prevValue,
-          [fileName]: per,
+          [fileName]: {
+            ...prevValue[fileName],
+            minio: per,
+          },
         }));
       }
     });
@@ -82,10 +87,10 @@ function Viewer() {
     formData.append('file', currentFile.name);
     let bucketURL = config.BASE_URL + '/objects/' + shortEmail;
 
-    let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
+    let res = await axios.get(config.BASE_URL + "/isUploaded/" + shortEmail, {
       headers: {
         authorization:
-          'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+          "Bearer " + JSON.parse(localStorage.getItem("dfs-user"))?.["token"],
       },
       params: {
         fileName: currentFile.name.name,
@@ -101,8 +106,8 @@ function Viewer() {
         let response = await axios.post(bucketURL, formData, {
           headers: {
             authorization:
-              'Bearer ' +
-              JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+              "Bearer " +
+              JSON.parse(localStorage.getItem("dfs-user"))?.["token"],
           },
           // Added On Upload Progress Config to Axios Post Request
           onUploadProgress: function (progressEvent) {
