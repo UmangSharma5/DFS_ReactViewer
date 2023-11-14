@@ -304,42 +304,48 @@ router.post('/:url', async function (req, res) {
               fs.mkdirSync(tmpDirPath, { recursive: true });
             }
 
-            try {
-              await sharp(tiffFilePath).toFile(pngFilePath);
-              //   console.error('Conversion completed successfully!');
-              await minioClient.fPutObject(
-                bucketName,
-                'hv/' + user + '/thumbnail/' + pngFileName,
-                pngFilePath,
-                function (err, objInfo) {
-                  if (err) {
-                    return res.status(400).json({ error: 'Failed to upload' });
+              try {
+                await sharp(tiffFilePath).toFile(pngFilePath);
+                // console.error("Conversion completed successfully!");
+                await minioClient.fPutObject(
+                  bucketName,
+                  "hv/" + user + "/thumbnail/" + pngFileName,
+                  pngFilePath,
+                  function (err, objInfo) {
+                    if (err) {
+                      return res
+                        .status(400)
+                        .json({ error: "Failed to upload" });
+                    }
+                    res.status(200).json({
+                      data: objInfo,
+                      filename: tempName,
+                      format: parts[1],
+                    });
                   }
-                  res.status(200).json({
-                    data: objInfo,
-                    filename: tempName,
-                    format: parts[1],
-                  });
-                },
-              );
-            } catch (err) {
-              console.error(err);
-              await minioClient.fPutObject(
-                bucketName,
-                'hv/' + user + '/thumbnail/' + pngFileName,
-                __dirname + '../No-Preview-Available.jpg',
-                function (err, objInfo) {
-                  if (err) {
-                    return res.status(400).json({ error: 'Failed to upload' });
+                );
+              } catch (err) {
+                console.error("sharp error->", err);
+                await minioClient.fPutObject(
+                  bucketName,
+                  "hv/" + user + "/thumbnail/" + pngFileName,
+                  __dirname + "/../No-Preview-Available.jpg",
+                  function (err, objInfo) {
+                    if (err) {
+                      console.error(err);
+                      return res
+                        .status(400)
+                        .json({ error: "Failed to upload" });
+                    }
+                    // console.error("no preview upload");
+                    res.status(200).json({
+                      data: objInfo,
+                      filename: tempName,
+                      format: parts[1],
+                    });
                   }
-                  res.status(200).json({
-                    data: objInfo,
-                    filename: tempName,
-                    format: parts[1],
-                  });
-                },
-              );
-            }
+                );
+              }
 
             setTimeout(() => {
               fs.rmdir(tmpDirPath, { recursive: true, force: true }, err => {
