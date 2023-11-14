@@ -3,21 +3,36 @@ import { FaRegImages } from "react-icons/fa";
 import { AiFillCloseCircle } from "react-icons/ai";
 import "./statusInfo.css";
 import BootstrapProgressBar from "./bootstrapProgressBar";
-import ProgressBar from 'react-bootstrap/ProgressBar';
+import ProgressBar from "react-bootstrap/ProgressBar";
 
 const StatusInfo = (props) => {
   const [showThumbnails, setShowThumbnails] = useState(false);
 
   return (
     <div>
-      {console.log("statusinfo files props --->",props.uploadPercentage)}
+      {console.log("statusinfo files props --->", props.uploadPercentage)}
       {showThumbnails ? (
         <div className="thumbnail-box">
           {Object.keys(props.uploadPercentage).map((key) => {
-            return props.uploadPercentage[key] !== 100 ? (
-              <div key={`progress-${key}`}>
-                <p>Connected {key}</p>
-                <BootstrapProgressBar key={key} percentage={props.uploadPercentage[key]} />
+            if (props.uploadPercentage[key].dzsave === -1) {
+              return null;
+            }
+            return props.uploadPercentage[key].dzsave !== 100 ? (
+              <div key={`dzsave-progress-${key}`}>
+                <p>DZSave in progress... {key}</p>
+                <BootstrapProgressBar
+                  key={`dzsave-progress-${key}`}
+                  percentage={props.uploadPercentage[key].dzsave}
+                />
+              </div>
+            ) : props.uploadPercentage[key].minio !== 100 ? (
+              <div key={`minio-progress-${key}`}>
+                <p>DZsave complete</p>
+                <p>Minio upload in progess... {key}</p>
+                <BootstrapProgressBar
+                  key={`minio-progress-${key}`}
+                  percentage={props.uploadPercentage[key].minio}
+                />
               </div>
             ) : (
               <div key={`uploaded-${key}`}>Uploaded {key}</div>
@@ -43,7 +58,7 @@ const StatusInfo = (props) => {
             height: "30px",
             width: "30px",
             marginRight: "10px",
-            marginLeft: "10px"
+            marginLeft: "10px",
           }}
         />
       )}
