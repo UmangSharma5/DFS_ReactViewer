@@ -1,9 +1,13 @@
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
 function BootstrapProgressBar(props) {
-  let now = Math.floor(props.percentage);
-  console.log("percen-->",now);
-  return <ProgressBar now={now} label={`${now}%`} />;
+  let val = Math.floor(props.percentage);
+  console.log("percen-->",val);
+  return <ProgressBar now={val} label={`${val}%`} />;
 }
+
+// BootstrapProgressBar.propTypes = {
+//   percentage: PropTypes.number.isRequired,
+// };
 
 export default BootstrapProgressBar;
