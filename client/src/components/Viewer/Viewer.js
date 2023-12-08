@@ -21,6 +21,7 @@ function Viewer(props) {
   const [uploadPercentage,setUploadPercentage] = useState({});
   const [recentUploaded,setRecentUploaded] = useState(null);
   const [isConnected,setIsConnected] = useState(false);
+  const inProgressUpload = useRef(0)
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user')
@@ -47,11 +48,16 @@ function Viewer(props) {
 
   async function uploadFile(e) {
     e.preventDefault()
-    const socket = io.connect('http://localhost:5000');
+    console.log(inProgressUpload)
+    const socket = io(config.SOCKET_URL, {path: "/hv/socket"});
     socket.on('connect', () => {
       console.log('Connected:', socket.connected); // Should be true
       setIsConnected(true);
-      socket.emit('addUser',JSON.parse(localStorage.getItem("dfs-user"))?.["token"])
+      inProgressUpload.current += 1
+      socket.emit('addUser',{
+        token: JSON.parse(localStorage.getItem("dfs-user"))?.["token"], 
+        inProgress: inProgressUpload.current
+      })
     });
 
     socket.on('progress',(progress_data) => {
@@ -72,63 +78,69 @@ function Viewer(props) {
       console.error('Socket.IO error:', error);
     });
 
-    const formData = new FormData()
-    setDisplayProgressBar(true)
-    formData.append('file', currentFile.name)
-    let bucketURL = config.BASE_URL + '/objects/' + shortEmail
+    socket.on('AddedUser',async (user_added) => {
+      const formData = new FormData()
+      setDisplayProgressBar(true)
+      formData.append('file', currentFile.name)
+      let bucketURL = config.BASE_URL + '/objects/' + shortEmail
 
-    let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
-      headers: {
-        authorization:
-          'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-      },
-      params: {
-        fileName: currentFile.name.name,
-      },
-    })
+      let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
+        headers: {
+          authorization:
+            'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+        },
+        params: {
+          fileName: currentFile.name.name,
+        },
+      })
 
-    if (res != undefined && res.data.isUploaded == 1) {
-      toast.warn('Image Already Exists')
-      setDisplayProgressBar(false)
-    } else {
-      try {
-        console.log('Initiating upload')
-        let response = await axios.post(bucketURL, formData, {
-          headers: {
-            authorization:
-              'Bearer ' +
-              JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-          },
-          // Added On Upload Progress Config to Axios Post Request
-          onUploadProgress: function (progressEvent) {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded / progressEvent.total) * 100
-            )
-            setProgressValue(percentCompleted)
-          },
-        })
-        if (response.status === 200) {
-          toast.info('Upload is in Progress....Please check after some time')
-        } else {
-          toast.error('Error in Uploading File')
+      if (res != undefined && res.data.isUploaded == 1) {
+        toast.warn('Image Already Exists')
+        setDisplayProgressBar(false)
+      } else {
+        try {
+          console.log('Initiating upload')
+          let response = await axios.post(bucketURL, formData, {
+            headers: {
+              authorization:
+                'Bearer ' +
+                JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+            },
+            params: {
+              inProgress: inProgressUpload.current
+            },
+            // Added On Upload Progress Config to Axios Post Request
+            onUploadProgress: function (progressEvent) {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded / progressEvent.total) * 100
+              )
+              setProgressValue(percentCompleted)
+            },
+          })
+          if (response.status === 200) {
+            toast.info('Upload is in Progress....Please check after some time')
+          } else {
+            toast.error('Error in Uploading File')
+          }
+          setTimeout(function () {
+            setProgressValue(0)
+            setDisplayProgressBar(false)
+          }, 3000)
+          console.log('Upload complete')
+          currentFileSelected.current.value = null
+          setIsUploaded(true)
+          setCurrentFile((prevValue) => ({
+            ...prevValue,
+            name: response.data.filename,
+            format: response.data.format,
+            count: prevValue.count + 1,
+          }))
+        } catch (error) {
+          console.log(error)
         }
-        setTimeout(function () {
-          setProgressValue(0)
-          setDisplayProgressBar(false)
-        }, 3000)
-        console.log('Upload complete')
-        currentFileSelected.current.value = null
-        setIsUploaded(true)
-        setCurrentFile((prevValue) => ({
-          ...prevValue,
-          name: response.data.filename,
-          format: response.data.format,
-          count: prevValue.count + 1,
-        }))
-      } catch (error) {
-        console.log(error)
       }
-    }
+      inProgressUpload.current -= 1
+    })
   }
 
   return (

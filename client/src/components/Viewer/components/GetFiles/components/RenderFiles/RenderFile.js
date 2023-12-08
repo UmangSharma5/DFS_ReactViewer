@@ -271,6 +271,7 @@ function RenderFile(props) {
             info={pyramid}
             format={format}
             outer={outer}
+            email={props.email}
           />
         ) : (
           <p>Select an image to view</p>
