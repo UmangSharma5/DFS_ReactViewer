@@ -1,8 +1,9 @@
 import React, {useState,useEffect} from "react";
 import OpenSeadragon from "openseadragon";
 import './OpenSeadragon.css';
+import { config } from "../../../../../../../Config/config";
 
-function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
+function OpenSeadragonViewer({imageName,imageUrl,info,format,outer,email}) {
         let viewer;
         useEffect(() => {
           if(format == 'png' || format == 'jpeg')
@@ -39,14 +40,15 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format,outer}) {
                 tileOverlap: 0,
                 getTileUrl: function(level, x, y) {
                   if(info[level+"/"+x+"_"+y] != undefined){
-                    let signature = info[level+"/"+x+"_"+y][0];
-                    let date = info[level+"/"+x+"_"+y][1];
-                    let credential = info[level+"/"+x+"_"+y][2];
-                    let startLink = outer.split('_files')[0];
+                    // let signature = info[level+"/"+x+"_"+y][0];
+                    // let date = info[level+"/"+x+"_"+y][1];
+                    // let credential = info[level+"/"+x+"_"+y][2];
+                    // let startLink = outer.split('_files')[0];
+                    const dir_ = imageName.name.split('.')[0]
+                    const baseDir =  dir_ + '/temp/' + dir_ + '_files/'
 
-                    // console.log(startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
-      
-                    return [startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
+                    return `${config.BASE_URL}/link/pyramid/${email}?baseDir=${baseDir}&level=${level}&x=${x}&y=${y}`
+                    // return [startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
                   }
                 }
             },          
