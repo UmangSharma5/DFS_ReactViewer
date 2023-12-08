@@ -209,6 +209,7 @@ const handleAllUpload = async (
       // );
       next();
     });
+    
 
     walker.on('end', () => {
       //   console.error('End Upload');
