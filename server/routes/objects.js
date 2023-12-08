@@ -189,7 +189,7 @@ router.post("/:url",async function(req,res){
                 await map_file_type(bucketName,tempName,parts[1]);
     
                 if(files.file[0].mimetype === 'image/jpeg' || files.file[0].mimetype === 'image/png'){
-                    let sock = sockets.findIndex(usersock => usersock.token === req.token)
+                    let sock = sockets.findIndex(usersock => usersock.token === `${req.token}_${inProgress}`)
                     sockets[sock].sock.disconnect()
                     removeSocket(sock)
                     minioClient.fPutObject(bucketName,"hv/"+user+"/thumbnail/" +fileName, filePath, async (err, objInfo) => {
