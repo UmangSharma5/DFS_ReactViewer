@@ -17,7 +17,7 @@
       "eslint --fix",
       "git add"
     ],
-    "**/*.{html,css,less,ejs}": [
+    "server/routes/*.{html,css,less,ejs}": [
       "prettier --write",
       "git add"
     ]
