@@ -15,6 +15,7 @@
     "rules": {
       //add customize rules here as per your project's needs
       "react/jsx-uses-react": "error",
-      "react/jsx-uses-vars": "error"
+      "react/jsx-uses-vars": "error",
+      "@typescript-eslint/no-unused-vars": "error"
     }
 }
