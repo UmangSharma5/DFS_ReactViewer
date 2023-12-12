@@ -52,10 +52,10 @@ function App() {
 
   async function checkAuth(email) {
     // const GET_URL ='https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId
-    // const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId
+    const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId;
 
     try {
-      // const response = await axios.get(GET_URL_DEV)
+      const response = await axios.get(GET_URL_DEV);
       setIsLoggedIn(true);
       navigate('/');
     } catch (error) {
