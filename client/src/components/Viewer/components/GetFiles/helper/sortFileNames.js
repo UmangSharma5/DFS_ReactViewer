@@ -1,7 +1,7 @@
 function sortFileNames(a, b) {
   if (
-    Object.a.hasOwnProperty.call('date') &&
-    Object.b.hasOwnProperty.call('date')
+    Object.hasOwnProperty.call(a, 'date') &&
+    Object.hasOwnProperty.call(b, 'date')
   ) {
     const dateA = a.date;
     const dateB = b.date;

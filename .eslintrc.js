@@ -40,6 +40,7 @@ module.exports = {
     'react/jsx-uses-vars': 'error',
     'react/prop-types': 'off',
     'react/jsx-key': 'off',
+    'react/no-prototype-builtins': 'off',
     // "@typescript-eslint/no-unused-vars": "error"
   },
 };

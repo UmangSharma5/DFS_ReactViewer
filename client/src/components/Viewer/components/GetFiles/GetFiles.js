@@ -34,7 +34,7 @@ function GetFiles(props) {
       const sortedData = response.data.temp.sort(sortFileNames);
       setBackendData(sortedData);
     } catch (error) {
-      console.error(error);
+      console.error('here', error);
     }
   }
 

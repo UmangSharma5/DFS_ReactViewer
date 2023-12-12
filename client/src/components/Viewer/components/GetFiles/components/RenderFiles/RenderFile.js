@@ -66,7 +66,7 @@ function RenderFile(props) {
 
           if (
             indexToRemove !== -1 &&
-            Object.updatedImageLinks.hasOwnProperty.call(name)
+            Object.hasOwnProperty.call(updatedImageLinks, name)
           ) {
             allImageName.splice(indexToRemove, 1);
             delete updatedImageLinks[name];
