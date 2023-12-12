@@ -271,10 +271,7 @@ router.post("/:url",async function(req,res){
                 }
             }else{
                 console.log("Invalid file");
-                console.log("yes this is invalid");
-                console.log("yes this is invalid");
-                console.log("yes this is invalid");
-                console.log("yes this is invalid");
+                console.log("yo");
             }
         })
     } catch(err){
