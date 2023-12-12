@@ -4,7 +4,7 @@ const app = express();
 import formidable from 'formidable';
 import cors from 'cors';
 import fs from 'fs';
-import semaphore from 'semaphore';
+// import semaphore from 'semaphore';
 import bodyParser from 'body-parser';
 // import {execSql} from '../db.js'
 import { exec } from 'child_process';
@@ -12,30 +12,25 @@ import { walk } from 'walk';
 import {
   map_user_to_bucket,
   get_user_bucket,
-  remove_user_bucket,
   map_file_type,
   file_stats,
   file_uploaded,
 } from '../Database_queries/queries.js';
-import {
-  sockets,
-  updateSocket,
-  removeSocket,
-} from '../SocketManager/socketmanager.js';
+import { sockets, removeSocket } from '../SocketManager/socketmanager.js';
 
-const sem = semaphore(100);
+// const sem = semaphore(100);
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
-import ConvertTiff from 'tiff-to-png';
+// import ConvertTiff from 'tiff-to-png';
 import sharp from 'sharp';
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-let convert_tiff_options = {
-  logLevel: 1,
-};
+// let convert_tiff_options = {
+//   logLevel: 1,
+// };
 
 router.get('/:url', async (req, res) => {
   try {
@@ -46,22 +41,21 @@ router.get('/:url', async (req, res) => {
       user = await get_user_bucket(req.user.user_email)[0];
     }
 
-    minioClient.bucketExists(bucketName, async (err, exists) => {
+    minioClient.bucketExists(bucketName, async err => {
       if (err) {
-        console.log(err);
+        console.error(err);
         res.send({
           error: true,
           message: 'Error in Checking if bucket Exists',
         });
       }
       const objects = [];
-      console.log(user);
       const stream = minioClient.listObjects(
         bucketName,
         'hv/' + user + '/thumbnail',
         true,
       );
-      console.log('stream collected');
+      //   console.error('stream collected');
       stream.on('data', async obj => {
         objects.push(obj.name);
       });
@@ -77,7 +71,6 @@ router.get('/:url', async (req, res) => {
           objects.map(async name => {
             let tname = name.split('/')[3];
             await file_stats(bucketName, tname.split('.')[0]).then(response => {
-              // console.log(response);
               if (response[0]?.isUploaded)
                 temp.push({
                   name: tname.split('.')[0],
@@ -87,16 +80,16 @@ router.get('/:url', async (req, res) => {
             });
           }),
         );
-        console.log('Listing objects completed.');
+        // console.error('Listing objects completed.');
         res.json({ temp });
       });
     });
   } catch (err) {
-    console.log(err.message);
+    console.error(err.message);
     res.send({ err });
   }
 });
-let count = 0;
+// let count = 0;
 
 const handleUpload = async (
   bucketName,
@@ -107,21 +100,19 @@ const handleUpload = async (
   fileName,
   socketIndex,
 ) => {
-  console.log(sockets, socketIndex);
   let sock = sockets[socketIndex].sock;
-  console.log(bucketName + minioPath + filePath);
   minioClient.fPutObject(
     bucketName,
     minioPath + filePath,
     filePath,
-    async (err, objInfo) => {
+    async err => {
       if (err) {
         console.error('---->', err);
       } else {
-        console.log(count++);
+        // console.error(count++);
         obj.curr_count++;
         if (sock != 0 && obj.curr_count % 10 == 0) {
-          console.log('******');
+          //   console.error('******');
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploading',
@@ -149,10 +140,13 @@ const handleUpload = async (
             { recursive: true, force: true },
             err => {
               if (err) {
-                console.log('Directory delete from temp failed: ', err.message);
+                console.error(
+                  'Directory delete from temp failed: ',
+                  err.message,
+                );
                 return;
               }
-              console.log('Directory delete successful', tempDirPath);
+              //   console.error('Directory delete successful', tempDirPath);
             },
           );
           let dziPath =
@@ -173,7 +167,6 @@ const handleAllUpload = async (
   format,
   tempDirPath,
 ) => {
-  console.log('user--', user);
   let obj = {
     total_files: 0,
     curr_count: 0,
@@ -189,14 +182,12 @@ const handleAllUpload = async (
   });
 
   walker.on('end', function () {
-    console.log('Counted Files');
-
     walker = walk(`temp/${fileName}_files`);
     let filePath;
     walker.on('file', async (root, fileStats, next) => {
       filePath = root + '/' + fileStats.name;
       // sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
-      // console.log(minioPath,filePath)
+      // console.error(minioPath,filePath)
       handleUpload(
         bucketName,
         minioPath,
@@ -210,14 +201,14 @@ const handleAllUpload = async (
     });
 
     walker.on('end', () => {
-      console.log('End Upload');
+      //   console.error('End Upload');
     });
   });
 };
 
 router.post('/:url', async function (req, res) {
   try {
-    count = 0;
+    // count = 0;
     const form = formidable({
       multiples: false,
       maxTotalFileSize: 2000 * 1024 * 1024,
@@ -225,7 +216,7 @@ router.post('/:url', async function (req, res) {
     });
     form.parse(req, async (err, fields, files) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         res.status(400).json({ error: 'Failed to parse form data' });
         return;
       }
@@ -270,17 +261,15 @@ router.post('/:url', async function (req, res) {
             `vips dzsave ${filePath} temp/${tempName}`,
             (error, stdout, stderr) => {
               if (error) {
-                console.log(`error: ${error.message}`);
+                console.error(`error: ${error.message}`);
                 return;
               }
               if (stderr) {
-                console.log(`stderr: ${stderr}`);
+                console.error(`stderr: ${stderr}`);
                 return;
               }
               isVipsError = 0;
               // res.status(200).json("File has been Uploaded")
-              console.log(`stdout: ${stdout}`);
-              console.log('email---', req.user.user_email);
 
               handleAllUpload(
                 bucketName,
@@ -293,7 +282,7 @@ router.post('/:url', async function (req, res) {
             },
           );
           if (isVipsError == 1) {
-            console.log('ok');
+            // console.error('ok');
             // return res.status(400).json({error: true, message: "Vips dzsave error"})
           }
           let tiffFilePath = filePath;
@@ -307,7 +296,7 @@ router.post('/:url', async function (req, res) {
 
             try {
               await sharp(tiffFilePath).toFile(pngFilePath);
-              console.log('Conversion completed successfully!');
+              //   console.error('Conversion completed successfully!');
               await minioClient.fPutObject(
                 bucketName,
                 'hv/' + user + '/thumbnail/' + pngFileName,
@@ -316,17 +305,15 @@ router.post('/:url', async function (req, res) {
                   if (err) {
                     return res.status(400).json({ error: 'Failed to upload' });
                   }
-                  res
-                    .status(200)
-                    .json({
-                      data: objInfo,
-                      filename: tempName,
-                      format: parts[1],
-                    });
+                  res.status(200).json({
+                    data: objInfo,
+                    filename: tempName,
+                    format: parts[1],
+                  });
                 },
               );
             } catch (err) {
-              console.log(err);
+              console.error(err);
               await minioClient.fPutObject(
                 bucketName,
                 'hv/' + user + '/thumbnail/' + pngFileName,
@@ -335,13 +322,11 @@ router.post('/:url', async function (req, res) {
                   if (err) {
                     return res.status(400).json({ error: 'Failed to upload' });
                   }
-                  res
-                    .status(200)
-                    .json({
-                      data: objInfo,
-                      filename: tempName,
-                      format: parts[1],
-                    });
+                  res.status(200).json({
+                    data: objInfo,
+                    filename: tempName,
+                    format: parts[1],
+                  });
                 },
               );
             }
@@ -349,13 +334,13 @@ router.post('/:url', async function (req, res) {
             setTimeout(() => {
               fs.rmdir(tmpDirPath, { recursive: true, force: true }, err => {
                 if (err) {
-                  console.log(
+                  console.error(
                     'Directory delete from tmp failed: ',
                     err.message,
                   );
                   return;
                 }
-                console.log('Directory delete successful', tmpDirPath);
+                // console.error('Directory delete successful', tmpDirPath);
               });
             }, 1000 * 1000);
           } catch (err) {
@@ -364,14 +349,11 @@ router.post('/:url', async function (req, res) {
           }
         }
       } else {
-        console.log('Invalid file');
-        console.log('yo');
-        console.log('yo');
-        console.log('yo');
+        console.error('Invalid file');
       }
     });
   } catch (err) {
-    console.log(err.message);
+    console.error(err.message);
     res.send({ err });
   }
 });
