@@ -19,10 +19,15 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    emacFeatures: {
+      jsx: true,
+    },
   },
   plugins: ['react'],
   rules: {
     'no-console': ['error', { allow: ['warn', 'error'] }],
     eqeqeq: 'error',
+    'react/jsx-uses-react': 'error',
+    'react/jsx-uses-vars': 'error',
   },
 };
