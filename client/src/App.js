@@ -56,6 +56,7 @@ function App() {
 
     try {
       const response = await axios.get(GET_URL_DEV);
+      console.log(response);
       setIsLoggedIn(true);
       navigate('/');
     } catch (error) {
