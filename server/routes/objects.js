@@ -36,7 +36,7 @@ router.get('/:url', async (req, res) => {
   try {
     let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
     let bucketName = 'datadrive-dev';
-    if (user == undefined) {
+    if (user === undefined) {
       user = await map_user_to_bucket(req.user.user_email, req.params.url);
       user = await get_user_bucket(req.user.user_email)[0];
     }
@@ -111,7 +111,7 @@ const handleUpload = async (
       } else {
         // console.error(count++);
         obj.curr_count++;
-        if (sock != 0 && obj.curr_count % 10 == 0) {
+        if (sock !== 0 && obj.curr_count % 10 === 0) {
           //   console.error('******');
           sock.emit('progress', {
             Title: 'Upload Progress',
@@ -123,7 +123,7 @@ const handleUpload = async (
           });
           // socket.emit('progress',0)
         }
-        if (obj.curr_count == obj.total_files) {
+        if (obj.curr_count === obj.total_files) {
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploaded',
@@ -220,7 +220,7 @@ router.post('/:url', async function (req, res) {
         res.status(400).json({ error: 'Failed to parse form data' });
         return;
       }
-      if (files.file != undefined) {
+      if (files.file !== undefined) {
         let filePath = files.file[0].filepath;
         let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
         const bucketName = 'datadrive-dev';
@@ -281,7 +281,7 @@ router.post('/:url', async function (req, res) {
               );
             },
           );
-          if (isVipsError == 1) {
+          if (isVipsError === 1) {
             // console.error('ok');
             // return res.status(400).json({error: true, message: "Vips dzsave error"})
           }

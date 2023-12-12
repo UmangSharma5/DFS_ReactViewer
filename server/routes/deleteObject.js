@@ -29,7 +29,7 @@ router.post('/:url', async function (req, res) {
     },
   );
 
-  if (format != 'png' || format != 'jpeg') {
+  if (format !== 'png' || format !== 'jpeg') {
     let objects = [];
     let stream = minioClient.listObjects(
       bucketName,
