@@ -1,6 +1,7 @@
 {
     "*.js": [
-      "prettier --write"
+      "prettier --write",
+      "eslint"
     ],
     "*.jsx": [
       "eslint",
