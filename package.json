@@ -13,7 +13,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,html,css,ejs}": "prettier --write",
-    "*.{js,jsx,ejs}": "eslint"
+    "**/*.{js,jsx,ejs}": "eslint"
   },
   "scripts": {
     "prepare": "husky install"
