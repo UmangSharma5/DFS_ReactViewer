@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import StatusInfo from '../statusInfo';
 
-function Viewer(props) {
+function Viewer() {
   const [currentFile, setCurrentFile] = useState({
     count: 0,
     name: '',
@@ -19,7 +19,7 @@ function Viewer(props) {
   const currentFileSelected = useRef(null);
   // const [fileInfo, setFileInfo] = useState({})
   const [uploadPercentage, setUploadPercentage] = useState({});
-  const [recentUploaded, setRecentUploaded] = useState(null);
+  const [recentUploaded] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
   const email = JSON.parse(
@@ -49,7 +49,7 @@ function Viewer(props) {
     e.preventDefault();
     const socket = io.connect('http://localhost:5000');
     socket.on('connect', () => {
-      console.log('Connected:', socket.connected); // Should be true
+      // console.error('Connected:', socket.connected); // Should be true
       setIsConnected(true);
       socket.emit(
         'addUser',
@@ -58,10 +58,9 @@ function Viewer(props) {
     });
 
     socket.on('progress', progress_data => {
-      console.log('progress data->', progress_data);
       if (
-        progress_data.Data.Uploaded_Files != undefined &&
-        progress_data.Data.Total_Files != undefined
+        progress_data.Data.Uploaded_Files !== undefined &&
+        progress_data.Data.Total_Files !== undefined
       ) {
         let num = progress_data.Data.Uploaded_Files;
         let den = progress_data.Data.Total_Files;
@@ -93,12 +92,12 @@ function Viewer(props) {
       },
     });
 
-    if (res != undefined && res.data.isUploaded == 1) {
+    if (res !== undefined && res.data.isUploaded === 1) {
       toast.warn('Image Already Exists');
       setDisplayProgressBar(false);
     } else {
       try {
-        console.log('Initiating upload');
+        // console.error('Initiating upload');
         let response = await axios.post(bucketURL, formData, {
           headers: {
             authorization:
@@ -122,7 +121,7 @@ function Viewer(props) {
           setProgressValue(0);
           setDisplayProgressBar(false);
         }, 3000);
-        console.log('Upload complete');
+        // console.error('Upload complete');
         currentFileSelected.current.value = null;
         setIsUploaded(true);
         setCurrentFile(prevValue => ({
@@ -132,7 +131,7 @@ function Viewer(props) {
           count: prevValue.count + 1,
         }));
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
   }

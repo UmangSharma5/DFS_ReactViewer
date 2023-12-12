@@ -1,134 +1,137 @@
-import React, { useEffect, useState } from 'react'
-import axios, { all } from 'axios'
-import OpenSeadragonViewer from './components/OpenSeaDragon/OpenSeadragonViewer'
-import './RenderFile.css'
-import { config } from '../../../../../Config/config'
-import { toast } from 'react-toastify'
-import { FaRegImages } from 'react-icons/fa'
-import { AiFillCloseCircle } from 'react-icons/ai'
-import StatusInfo from '../../../../../statusInfo'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import OpenSeadragonViewer from './components/OpenSeaDragon/OpenSeadragonViewer';
+import './RenderFile.css';
+import { config } from '../../../../../Config/config';
+import { toast } from 'react-toastify';
+import { FaRegImages } from 'react-icons/fa';
+import { AiFillCloseCircle } from 'react-icons/ai';
+// import StatusInfo from '../../../../../statusInfo'
 
 function RenderFile(props) {
-  const [viewerImage, setViewerImage] = useState()
-  const [imageName, setImageName] = useState()
-  const [allImagesLinks, setAllImagesLinks] = useState({})
-  const [allImageName, setAllImageName] = useState([])
-  const [previousImageNames, setPreviousImageNames] = useState(null)
-  const [format, setFormat] = useState()
-  const [pyramid, setPyramid] = useState({})
-  const isFirstRender = React.useRef(true)
-  const [outer, setOuter] = useState()
-  const [isLoding, setLoading] = useState(false)
-  const [showThumbnails, setShowThumbnails] = useState(true)
+  const [viewerImage, setViewerImage] = useState();
+  const [imageName, setImageName] = useState();
+  const [allImagesLinks, setAllImagesLinks] = useState({});
+  const [allImageName, setAllImageName] = useState([]);
+  const [previousImageNames, setPreviousImageNames] = useState(null);
+  const [format, setFormat] = useState();
+  const [pyramid, setPyramid] = useState({});
+  const isFirstRender = React.useRef(true);
+  const [outer, setOuter] = useState();
+  // const [isLoding, setLoading] = useState(false)
+  const [showThumbnails, setShowThumbnails] = useState(true);
 
   useEffect(() => {
     const refreshInterval = setInterval(() => {
-      props.getFiles()
-    }, config.REFRESH_TIME)
-    return () => clearInterval(refreshInterval)
-  }, [])
+      props.getFiles();
+    }, config.REFRESH_TIME);
+    return () => clearInterval(refreshInterval);
+  }, []);
 
   useEffect(() => {
     if (
       props.info.length > 0 &&
       !isFirstRender.current &&
-      previousImageNames != null
+      previousImageNames !== null
     ) {
-      const newImageNames = props.info.filter((newImage) => {
+      const newImageNames = props.info.filter(newImage => {
         return !previousImageNames.some(
-          (oldImage) =>
+          oldImage =>
             oldImage.name === newImage.name &&
-            oldImage.format === newImage.format
-        )
-      })
+            oldImage.format === newImage.format,
+        );
+      });
 
-      const removedImageNames = previousImageNames.filter((oldImage) => {
+      const removedImageNames = previousImageNames.filter(oldImage => {
         return !props.info.some(
-          (newImage) =>
+          newImage =>
             oldImage.name === newImage.name &&
-            oldImage.format === newImage.format
-        )
-      })
+            oldImage.format === newImage.format,
+        );
+      });
 
       if (removedImageNames.length > 0) {
-        console.log('Removed Images found:', removedImageNames)
+        // console.error('Removed Images found:', removedImageNames)
 
-        const updatedImageLinks = { ...allImagesLinks }
+        const updatedImageLinks = { ...allImagesLinks };
 
-        removedImageNames.forEach((removedImageName) => {
+        removedImageNames.forEach(removedImageName => {
           const indexToRemove = allImageName.findIndex(
-            (imageName) =>
+            imageName =>
               imageName.name === removedImageName.name &&
-              imageName.format === removedImageName.format
-          )
+              imageName.format === removedImageName.format,
+          );
 
-          const { name, format } = removedImageName
+          const { name } = removedImageName;
 
-          if (indexToRemove !== -1 && updatedImageLinks.hasOwnProperty(name)) {
-            allImageName.splice(indexToRemove, 1)
-            delete updatedImageLinks[name]
+          if (
+            indexToRemove !== -1 &&
+            Object.updatedImageLinks.hasOwnProperty.call(name)
+          ) {
+            allImageName.splice(indexToRemove, 1);
+            delete updatedImageLinks[name];
           }
-        })
-        setAllImagesLinks(updatedImageLinks)
+        });
+        setAllImagesLinks(updatedImageLinks);
       }
 
       if (newImageNames.length > 0) {
-        console.log('New Images found:', newImageNames)
+        // console.error('New Images found:', newImageNames)
 
-        const reversedImageNames = [...newImageNames].reverse()
+        const reversedImageNames = [...newImageNames].reverse();
 
-        reversedImageNames.forEach((newImage) => {
-          getImageLink(newImage)
-        })
+        reversedImageNames.forEach(newImage => {
+          getImageLink(newImage);
+        });
         // toast.success('Upload Completed!')
       }
     } else {
-      setAllImageName(props.info)
+      setAllImageName(props.info);
     }
 
-    setPreviousImageNames(props.info)
+    setPreviousImageNames(props.info);
     if (isFirstRender.current) {
-      console.log('Getting image links')
-      getAllImageLinks()
+      // console.error('Getting image links')
+      getAllImageLinks();
       if (props.info.length > 0) {
-        isFirstRender.current = false
+        isFirstRender.current = false;
       }
-      return
+      return;
     }
-  }, [props.info])
+  }, [props.info]);
 
   async function getAllImageLinks() {
     try {
       const responses = await Promise.all(
-        props.info.map((image) => {
-          const imageObj = { imageName: image.name, imageFormat: image.format }
+        props.info.map(image => {
+          const imageObj = { imageName: image.name, imageFormat: image.format };
           return axios.get(config.BASE_URL + '/getURL/' + props.email, {
             params: imageObj,
             headers: {
               Authorization:
                 'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.token,
             },
-          })
-        })
-      )
+          });
+        }),
+      );
 
-      const imageLinks = {}
-      responses.forEach((response) => {
-        let name = response.data.imageName.split('.')[0]
-        let link = response.data.imageUrl
-        imageLinks[name] = link
-      })
+      const imageLinks = {};
+      responses.forEach(response => {
+        let name = response.data.imageName.split('.')[0];
+        let link = response.data.imageUrl;
+        imageLinks[name] = link;
+      });
 
-      setAllImagesLinks(imageLinks)
+      setAllImagesLinks(imageLinks);
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
   }
 
   async function getImageLink(image) {
     try {
-      const imageObj = { imageName: image.name, imageFormat: image.format }
-      const response = await axios
+      const imageObj = { imageName: image.name, imageFormat: image.format };
+      await axios
         .get(config.BASE_URL + '/getURL/' + props.email, {
           params: imageObj,
           headers: {
@@ -137,28 +140,28 @@ function RenderFile(props) {
               JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
           },
         })
-        .then((response) => {
-          let name = response.data.imageName.split('.')[0]
-          let link = response.data.imageUrl
+        .then(response => {
+          let name = response.data.imageName.split('.')[0];
+          let link = response.data.imageUrl;
 
-          allImagesLinks[name] = link
-          allImageName.unshift(image)
+          allImagesLinks[name] = link;
+          allImageName.unshift(image);
         })
-        .catch((error) => {
-          console.log(error)
-        })
+        .catch(error => {
+          console.error(error);
+        });
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
   }
 
   async function handleClick(e) {
-    setLoading(true)
-    let num = e.target.id
-    const imagetype = allImageName[num].format
-    const dir_ = allImageName[num].name.split('.')[0]
-    if (imagetype != 'png' && imagetype != 'jpeg') {
-      let imageObj = { baseDir: dir_ + '/temp/' + dir_ + '_files/' }
+    // setLoading(true)
+    let num = e.target.id;
+    const imagetype = allImageName[num].format;
+    const dir_ = allImageName[num].name.split('.')[0];
+    if (imagetype !== 'png' && imagetype !== 'jpeg') {
+      let imageObj = { baseDir: dir_ + '/temp/' + dir_ + '_files/' };
       await axios
         .get(config.BASE_URL + '/getURL/imagePyramid/' + props.email, {
           params: imageObj,
@@ -168,34 +171,34 @@ function RenderFile(props) {
               JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
           },
         })
-        .then((response) => {
-          setOuter(response.data.outer)
-          return response.data.image
+        .then(response => {
+          setOuter(response.data.outer);
+          return response.data.image;
         })
-        .then((image) => {
-          setPyramid(image)
+        .then(image => {
+          setPyramid(image);
         })
-        .catch((error) => {
-          console.log(error)
-          return null
-        })
+        .catch(error => {
+          console.error(error);
+          return null;
+        });
     }
-    setFormat(imagetype)
-    setViewerImage(allImagesLinks[allImageName[num].name.split('.')[0]])
-    setImageName(allImageName[num])
-    setLoading(false)
+    setFormat(imagetype);
+    setViewerImage(allImagesLinks[allImageName[num].name.split('.')[0]]);
+    setImageName(allImageName[num]);
+    // setLoading(false)
   }
 
   function handleDelete(event, file) {
-    props.onDelete(event, file)
-    toast.info('Image Deleted Successfully!')
-    setViewerImage()
+    props.onDelete(event, file);
+    toast.info('Image Deleted Successfully!');
+    setViewerImage();
   }
 
   return (
-    <div className='render-file-container'>
+    <div className="render-file-container">
       {showThumbnails ? (
-        <div className='button-container'>
+        <div className="button-container">
           {allImageName.map((file, i) => {
             const buttonStyles = {
               margin: '10px',
@@ -210,29 +213,29 @@ function RenderFile(props) {
               whiteSpace: 'nowrap',
               height: '100px',
               width: '100px',
-            }
+            };
             return (
-              <div className='thumbnail-container'>
+              <div className="thumbnail-container">
                 <img
-                  className='thumnails'
+                  className="thumnails"
                   onClick={handleClick}
                   style={buttonStyles}
                   key={i}
                   id={i}
                 />
-                <div className='name-del'>
-                  <p className='image-name'>{file.name + '.' + file.format}</p>
+                <div className="name-del">
+                  <p className="image-name">{file.name + '.' + file.format}</p>
                   <button
-                    className='del-btn'
+                    className="del-btn"
                     value={file}
-                    onClick={(event) => handleDelete(event, file)}
+                    onClick={event => handleDelete(event, file)}
                   >
                     {' '}
-                    <i className='bi bi-archive'></i>
+                    <i className="bi bi-archive"></i>
                   </button>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       ) : (
@@ -240,17 +243,17 @@ function RenderFile(props) {
       )}
       {showThumbnails ? (
         <AiFillCloseCircle
-          title='Hide Thumbnails'
+          title="Hide Thumbnails"
           onClick={() => {
-            setShowThumbnails(!showThumbnails)
+            setShowThumbnails(!showThumbnails);
           }}
           style={{ height: '30px', width: '30px', marginRight: '10px' }}
         />
       ) : (
         <FaRegImages
-          title='Show Thumbnails'
+          title="Show Thumbnails"
           onClick={() => {
-            setShowThumbnails(!showThumbnails)
+            setShowThumbnails(!showThumbnails);
           }}
           style={{
             height: '30px',
@@ -260,8 +263,8 @@ function RenderFile(props) {
           }}
         />
       )}
-      <div className='viewer-container'>
-        <p id='viewer-image-name'>
+      <div className="viewer-container">
+        <p id="viewer-image-name">
           {viewerImage ? imageName.name + '.' + imageName.format : ' '}
         </p>
         {viewerImage ? (
@@ -280,7 +283,7 @@ function RenderFile(props) {
         <StatusInfo uploadPercentage={props.uploadPercentage}/>  
       </div> */}
     </div>
-  )
+  );
 }
 
-export default RenderFile
+export default RenderFile;

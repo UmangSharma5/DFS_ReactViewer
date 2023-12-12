@@ -13,7 +13,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  if (JSON.parse(localStorage.getItem('dfs-user')) != null) {
+  if (JSON.parse(localStorage.getItem('dfs-user')) !== null) {
     tokenId = JSON.parse(localStorage.getItem('dfs-user')).token;
   }
 
@@ -45,23 +45,21 @@ function App() {
 
       await checkAuth(email);
     } catch (error) {
-      console.log('Incorrect Username or password!!!');
+      console.error('Incorrect Username or password!!!');
       return false;
     }
   }
 
-  async function checkAuth(email) {
+  async function checkAuth() {
     // const GET_URL ='https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId
     const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId;
 
     try {
-      const response = await axios.get(GET_URL_DEV);
-      console.log(response);
-      console.log('hola');
+      await axios.get(GET_URL_DEV);
       setIsLoggedIn(true);
       navigate('/');
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 

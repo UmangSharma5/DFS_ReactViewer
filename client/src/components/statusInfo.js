@@ -10,7 +10,6 @@ const StatusInfo = props => {
 
   return (
     <div>
-      {console.log('statusinfo files props --->', props.uploadPercentage)}
       {showThumbnails ? (
         <div className="thumbnail-box">
           {Object.keys(props.uploadPercentage).map(key => {
