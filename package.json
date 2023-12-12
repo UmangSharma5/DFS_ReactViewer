@@ -12,7 +12,7 @@
     }
   },
   "lint-staged": {
-    "**/*.{js,jsx}": [
+    "server/routes/*.{js,jsx}": [
       "prettier --write",
       "eslint --fix",
       "git add"
