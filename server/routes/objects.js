@@ -272,6 +272,7 @@ router.post("/:url",async function(req,res){
             }else{
                 console.log("Invalid file");
                 console.log("yo");
+                console.log("yo");
             }
         })
     } catch(err){
