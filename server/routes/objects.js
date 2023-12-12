@@ -4,7 +4,7 @@ const app = express();
 import formidable from 'formidable';
 import cors from 'cors';
 import fs from 'fs';
-// import semaphore from 'semaphore';
+import semaphore from 'semaphore';
 import bodyParser from 'body-parser';
 // import {execSql} from '../db.js'
 import { exec } from 'child_process';
@@ -18,7 +18,7 @@ import {
 } from '../Database_queries/queries.js';
 import { sockets, removeSocket } from '../SocketManager/socketmanager.js';
 
-// const sem = semaphore(100);
+const sem = semaphore(100);
 app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
@@ -154,7 +154,7 @@ const handleUpload = async (
           fs.unlinkSync(dziPath);
         }
       }
-      // sem.leave(1)
+      sem.leave(1);
     },
   );
 };
@@ -186,17 +186,27 @@ const handleAllUpload = async (
     let filePath;
     walker.on('file', async (root, fileStats, next) => {
       filePath = root + '/' + fileStats.name;
-      // sem.take(1,() => handleUpload(bucketName,minioPath,filePath,obj,tempDirPath,fileName))
-      // console.error(minioPath,filePath)
-      handleUpload(
-        bucketName,
-        minioPath,
-        filePath,
-        obj,
-        tempDirPath,
-        fileName,
-        sock,
+      sem.take(1, () =>
+        handleUpload(
+          bucketName,
+          minioPath,
+          filePath,
+          obj,
+          tempDirPath,
+          fileName,
+          sock,
+        ),
       );
+      // console.error(minioPath,filePath)
+      // handleUpload(
+      //   bucketName,
+      //   minioPath,
+      //   filePath,
+      //   obj,
+      //   tempDirPath,
+      //   fileName,
+      //   sock,
+      // );
       next();
     });
 
