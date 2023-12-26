@@ -1,5 +1,5 @@
-import React, {useState,useEffect} from "react";
-import OpenSeadragon from "openseadragon";
+import React, { useEffect } from 'react';
+import OpenSeadragon from 'openseadragon';
 import './OpenSeadragon.css';
 import { config } from "../../../../../../../Config/config";
 
@@ -69,35 +69,14 @@ function OpenSeadragonViewer({imageName,imageUrl,info,format,outer,email}) {
           viewer && viewer.destroy();
         };
           
-        }, [imageUrl,outer]);
+        }, [imageUrl,outer]);         
 
-      function takeSS(){
-        let extension = imageName.split('.').pop();
-        if(extension === 'tif') extension ='png';
-        var current_view = document.getElementsByTagName("canvas");
-        if (current_view){
-          // console.log(current_view.length);
-          var my_view = current_view[0];
-          var img = my_view.toDataURL("image/"+extension);
-          const link = document.createElement('a')
-          link.href = img
-          link.download = imageName
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        }
-      } 
-
-      
-      
-
-    return ( 
-      <div>
-        {/* <button onClick={takeSS} id="print-view" >Print View</button> */}
-        <div id="openseadragon-viewer" ></div>
-      </div>
-    )
+  return (
+    <div>
+      {/* <button onClick={takeSS} id="print-view" >Print View</button> */}
+      <div id="openseadragon-viewer"></div>
+    </div>
+  );
 }
 
 export default OpenSeadragonViewer;
-

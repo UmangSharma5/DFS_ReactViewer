@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react'
-import sortFileNames from './helper/sortFileNames'
-import RenderFile from './components/RenderFiles/RenderFile'
-import './GetFiles.css'
-import { config } from '../../../Config/config'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react';
+import sortFileNames from './helper/sortFileNames';
+import RenderFile from './components/RenderFiles/RenderFile';
+import './GetFiles.css';
+import { config } from '../../../Config/config';
+import axios from 'axios';
 
 function GetFiles(props) {
-  const [backendData, setBackendData] = useState(null)
-  const isFirstRender = React.useRef(true)
-  const [deletedFileName, setDeletedFileName] = useState()
-  const [currFileName, setCurrFileName] = useState()
+  const [backendData, setBackendData] = useState(null);
+  const isFirstRender = React.useRef(true);
+  const [deletedFileName, setDeletedFileName] = useState();
+  const [currFileName, setCurrFileName] = useState();
 
   useEffect(() => {
     if (isFirstRender.current) {
-      getFiles()
-      isFirstRender.current = false
-      return
+      getFiles();
+      isFirstRender.current = false;
+      return;
     }
-  }, [props.fileObj.count])
+  }, [props.fileObj.count]);
 
   async function getFiles() {
     try {
@@ -29,18 +29,18 @@ function GetFiles(props) {
               'Bearer ' +
               JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
           },
-        }
-      )
-      const sortedData = response.data.temp.sort(sortFileNames)
-      setBackendData(sortedData)
+        },
+      );
+      const sortedData = response.data.temp.sort(sortFileNames);
+      setBackendData(sortedData);
     } catch (error) {
-      console.log(error)
+      console.error('here', error);
     }
   }
 
   function handleDelete(event, file) {
-    let delFileName = file.name + '.' + file.format
-    setDeletedFileName(delFileName)
+    let delFileName = file.name + '.' + file.format;
+    setDeletedFileName(delFileName);
     try {
       axios
         .post(
@@ -52,26 +52,26 @@ function GetFiles(props) {
                 'Bearer ' +
                 JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
             },
-          }
+          },
         )
-        .then((response) => {
+        .then(() => {
           const updatedData = Object.values(backendData).filter(
-            (currFile) =>
-              currFile.name !== file.name || currFile.format !== file.format
-          )
-          setBackendData(updatedData)
-          setCurrFileName(null)
+            currFile =>
+              currFile.name !== file.name || currFile.format !== file.format,
+          );
+          setBackendData(updatedData);
+          setCurrFileName(null);
         })
-        .catch((error) => {
-          console.log(error)
-        })
+        .catch(error => {
+          console.error(error);
+        });
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
   }
 
   return (
-    <div className='get-files-container'>
+    <div className="get-files-container">
       {backendData ? (
         <RenderFile
           getFiles={getFiles}
@@ -82,11 +82,11 @@ function GetFiles(props) {
           email={props.email}
           onDelete={handleDelete}
           deletedFileName={deletedFileName}
-          uploadPercentage = {props.uploadPercentage}
+          uploadPercentage={props.uploadPercentage}
         />
       ) : null}
     </div>
-  )
+  );
 }
 
-export default GetFiles
+export default GetFiles;
