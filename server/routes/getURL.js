@@ -8,21 +8,25 @@ app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import { get_user_bucket } from '../Database_queries/queries.js';
 
-router.get("/:url",async function(req,res){
-    try{
-        const user = req.params.url;
-        let bucketName = "datadrive-dev"
-        const {imageName,imageFormat} = req.query;
-        const imageUrl = `${process.env.BASE_URL}/link/thumbnail/${user}?imageName=${encodeURIComponent(imageName)}&imageFormat=${encodeURIComponent(imageFormat)}`
-        // const imageUrl = await minioClient.presignedGetObject(bucketName, "hv/"+user+"/thumbnail/"+imageName+".png", 60*60);
-        const fullImageName = imageName+".png";
-        const imageURL = {image: {fullImageName : imageUrl}};
-        res.json({imageName : fullImageName,imageUrl : imageUrl});
-    }catch(err){
-        console.log(err.message);
-        res.send({err})
-    }
-})
+router.get('/:url', async function (req, res) {
+  try {
+    const user = req.params.url;
+    // let bucketName = "datadrive-dev"
+    const { imageName, imageFormat } = req.query;
+    const imageUrl = `${
+      process.env.BASE_URL
+    }/link/thumbnail/${user}?imageName=${encodeURIComponent(
+      imageName,
+    )}&imageFormat=${encodeURIComponent(imageFormat)}`;
+    // const imageUrl = await minioClient.presignedGetObject(bucketName, "hv/"+user+"/thumbnail/"+imageName+".png", 60*60);
+    const fullImageName = imageName + '.png';
+    // const imageURL = {image: {fullImageName : imageUrl}};
+    res.json({ imageName: fullImageName, imageUrl: imageUrl });
+  } catch (err) {
+    console.error(err.message);
+    res.send({ err });
+  }
+});
 
 function extractSignatureFromURL(url) {
   const signatureRegex = /X-Amz-Signature=([a-fA-F0-9]+)/;

@@ -12,14 +12,14 @@ function Viewer() {
   const [currentFile, setCurrentFile] = useState({
     count: 0,
     name: '',
-  })
-  const [isUploaded, setIsUploaded] = useState(false)
-  const [displayProgressBar, setDisplayProgressBar] = useState(false)
-  const [progressValue, setProgressValue] = useState(0)
-  const currentFileSelected = useRef(null)
-  const [uploadPercentage,setUploadPercentage] = useState({});
-  const [isConnected,setIsConnected] = useState(false);
-  const inProgressUpload = useRef(0)
+  });
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [displayProgressBar, setDisplayProgressBar] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const currentFileSelected = useRef(null);
+  const [uploadPercentage, setUploadPercentage] = useState({});
+  const [isConnected, setIsConnected] = useState(false);
+  const inProgressUpload = useRef(0);
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user'),
@@ -45,16 +45,16 @@ function Viewer() {
   }
 
   async function uploadFile(e) {
-    e.preventDefault()
-    const socket = io(config.SOCKET_URL, {path: "/hv/socket"});
+    e.preventDefault();
+    const socket = io(config.SOCKET_URL, { path: '/hv/socket' });
     socket.on('connect', () => {
       // console.error('Connected:', socket.connected); // Should be true
       setIsConnected(true);
-      inProgressUpload.current += 1
-      socket.emit('addUser',{
-        token: JSON.parse(localStorage.getItem("dfs-user"))?.["token"], 
-        inProgress: inProgressUpload.current
-      })
+      inProgressUpload.current += 1;
+      socket.emit('addUser', {
+        token: JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+        inProgress: inProgressUpload.current,
+      });
     });
 
     socket.on('progress', progress_data => {
@@ -77,11 +77,11 @@ function Viewer() {
       console.error('Socket.IO error:', error);
     });
 
-    socket.on('AddedUser',async (user_added) => {
-      const formData = new FormData()
-      setDisplayProgressBar(true)
-      formData.append('file', currentFile.name)
-      let bucketURL = config.BASE_URL + '/objects/' + shortEmail
+    socket.on('AddedUser', async () => {
+      const formData = new FormData();
+      setDisplayProgressBar(true);
+      formData.append('file', currentFile.name);
+      let bucketURL = config.BASE_URL + '/objects/' + shortEmail;
 
       let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
         headers: {
@@ -91,11 +91,11 @@ function Viewer() {
         params: {
           fileName: currentFile.name.name,
         },
-      })
+      });
 
       if (res !== undefined && res.data.isUploaded === 1) {
-        toast.warn('Image Already Exists')
-        setDisplayProgressBar(false)
+        toast.warn('Image Already Exists');
+        setDisplayProgressBar(false);
       } else {
         try {
           let response = await axios.post(bucketURL, formData, {
@@ -105,39 +105,39 @@ function Viewer() {
                 JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
             },
             params: {
-              inProgress: inProgressUpload.current
+              inProgress: inProgressUpload.current,
             },
             // Added On Upload Progress Config to Axios Post Request
             onUploadProgress: function (progressEvent) {
               const percentCompleted = Math.round(
-                (progressEvent.loaded / progressEvent.total) * 100
-              )
-              setProgressValue(percentCompleted)
+                (progressEvent.loaded / progressEvent.total) * 100,
+              );
+              setProgressValue(percentCompleted);
             },
-          })
+          });
           if (response.status === 200) {
-            toast.info('Upload is in Progress....Please check after some time')
+            toast.info('Upload is in Progress....Please check after some time');
           } else {
-            toast.error('Error in Uploading File')
+            toast.error('Error in Uploading File');
           }
           setTimeout(function () {
-            setProgressValue(0)
-            setDisplayProgressBar(false)
-          }, 3000)
-          currentFileSelected.current.value = null
-          setIsUploaded(true)
-          setCurrentFile((prevValue) => ({
+            setProgressValue(0);
+            setDisplayProgressBar(false);
+          }, 3000);
+          currentFileSelected.current.value = null;
+          setIsUploaded(true);
+          setCurrentFile(prevValue => ({
             ...prevValue,
             name: response.data.filename,
             format: response.data.format,
             count: prevValue.count + 1,
-          }))
+          }));
         } catch (error) {
-          console.log(error)
+          console.error(error);
         }
       }
-      inProgressUpload.current -= 1
-    })
+      inProgressUpload.current -= 1;
+    });
   }
 
   return (
