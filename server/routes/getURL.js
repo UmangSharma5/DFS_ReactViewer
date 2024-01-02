@@ -17,7 +17,9 @@ router.get('/:url', async function (req, res) {
       process.env.BASE_URL
     }/link/thumbnail/${user}?imageName=${encodeURIComponent(
       imageName,
-    )}&imageFormat=${encodeURIComponent(imageFormat)}`;
+    )}&imageFormat=${encodeURIComponent(
+      imageFormat,
+    )}&token=${encodeURIComponent(req.token)}`;
     // const imageUrl = await minioClient.presignedGetObject(bucketName, "hv/"+user+"/thumbnail/"+imageName+".png", 60*60);
     const fullImageName = imageName + '.png';
     // const imageURL = {image: {fullImageName : imageUrl}};

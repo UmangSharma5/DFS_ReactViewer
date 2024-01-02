@@ -6,6 +6,7 @@ import path from 'path';
 import http from 'http';
 import { fileURLToPath } from 'url';
 import require_auth from './middleware/Auth.js';
+import require_auth_proxylinks from './middleware/proxyLinksAuth.js';
 import { updateSocket } from './SocketManager/socketmanager.js';
 import { Server } from 'socket.io';
 const server = http.createServer(app);
@@ -29,7 +30,7 @@ app.use('/hv/getURL', require_auth, getURL);
 app.use('/hv/deleteBucket', require_auth, deleteBucket);
 app.use('/hv/deleteObject', require_auth, deleteObject);
 app.use('/hv/isUploaded', require_auth, isUploaded);
-app.use('/hv/link', proxyLinks);
+app.use('/hv/link', require_auth_proxylinks, proxyLinks);
 // app.use('/hv/objects',objectsRoute);
 // app.use('/hv/getURL',getURL);
 // app.use('/hv/deleteBucket',deleteBucket);
@@ -70,5 +71,5 @@ app.get('/*', function (req, res) {
 });
 
 server.listen(port, function () {
-  // console.log('Server started on port 5000')
+  // console.log(`Server started on port ${port}`)
 });

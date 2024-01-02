@@ -53,8 +53,9 @@ function OpenSeadragonViewer({
               // let startLink = outer.split('_files')[0];
               const dir_ = imageName.name.split('.')[0];
               const baseDir = dir_ + '/temp/' + dir_ + '_files/';
+              const token = JSON.parse(localStorage.getItem('dfs-user'))?.token;
 
-              return `${config.BASE_URL}/link/pyramid/${email}?baseDir=${baseDir}&level=${level}&x=${x}&y=${y}`;
+              return `${config.BASE_URL}/link/pyramid/${email}?baseDir=${baseDir}&level=${level}&x=${x}&y=${y}&token=${token}`;
               // return [startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
             }
           },
