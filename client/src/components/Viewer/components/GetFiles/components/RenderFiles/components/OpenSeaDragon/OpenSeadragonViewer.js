@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import OpenSeadragon from 'openseadragon';
 import './OpenSeadragon.css';
-import { config } from '../../../../../../../Config/config';
+import { config } from 'components/Config/config';
+import constants from './constants';
 
 function OpenSeadragonViewer({
   imageName,
@@ -13,11 +14,10 @@ function OpenSeadragonViewer({
 }) {
   let viewer;
   useEffect(() => {
-    if (format === 'png' || format === 'jpeg') {
+    if (constants.SIMPLE_IMAGE_FORMATS.includes(format)) {
       viewer = OpenSeadragon({
         id: 'openseadragon-viewer',
-        prefixUrl:
-          ' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
+        prefixUrl: `${constants.OSD_PREFIX_URL}`,
         tileSources: {
           type: 'image',
           url: imageUrl,
@@ -38,25 +38,19 @@ function OpenSeadragonViewer({
     } else {
       viewer = OpenSeadragon({
         id: 'openseadragon-viewer',
-        prefixUrl:
-          ' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
+        prefixUrl: `${constants.OSD_PREFIX_URL}`,
         tileSources: {
           width: 28480,
           height: 28760,
           tileSize: 512,
           tileOverlap: 0,
           getTileUrl: function (level, x, y) {
-            if (info[level + '/' + x + '_' + y] !== undefined) {
-              // let signature = info[level+"/"+x+"_"+y][0];
-              // let date = info[level+"/"+x+"_"+y][1];
-              // let credential = info[level+"/"+x+"_"+y][2];
-              // let startLink = outer.split('_files')[0];
-              const dir_ = imageName.name.split('.')[0];
-              const baseDir = dir_ + '/temp/' + dir_ + '_files/';
+            if (info[level + '/' + x + '_' + y]) {
+              const _dir = imageName.name.split('.')[0];
+              const baseDir = _dir + '/temp/' + _dir + '_files/';
               const token = JSON.parse(localStorage.getItem('dfs-user'))?.token;
 
               return `${config.BASE_URL}/link/pyramid/${email}?baseDir=${baseDir}&level=${level}&x=${x}&y=${y}&token=${token}`;
-              // return [startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature].join('');
             }
           },
         },
