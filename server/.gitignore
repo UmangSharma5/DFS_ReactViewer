@@ -3,3 +3,4 @@ build
 temp*
 tmp*
 .DS_Store
+.env

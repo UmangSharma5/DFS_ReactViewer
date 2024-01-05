@@ -2,3 +2,4 @@ node_modules
 build
 tmp*
 .DS_Store
+client/src/components/Config

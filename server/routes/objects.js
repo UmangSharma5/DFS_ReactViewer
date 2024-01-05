@@ -107,12 +107,10 @@ const handleUpload = async (
     filePath,
     async err => {
       if (err) {
-        console.error('---->', err);
+        console.error(err);
       } else {
-        // console.error(count++)
         obj.curr_count++;
         if (sock !== 0 && obj.curr_count % 10 === 0) {
-          // console.error("******")
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploading',
@@ -121,7 +119,6 @@ const handleUpload = async (
               Uploaded_Files: obj.curr_count,
             },
           });
-          // socket.emit('progress',0)
         }
         if (obj.curr_count === obj.total_files) {
           sock.emit('progress', {
@@ -146,7 +143,6 @@ const handleUpload = async (
                 );
                 return;
               }
-              // console.error("Directory delete successful",tempDirPath)
             },
           );
           let dziPath =
@@ -229,7 +225,7 @@ router.post('/:url', async function (req, res) {
         res.status(400).json({ error: 'Failed to parse form data' });
         return;
       }
-      if (files.file !== undefined) {
+      if (files.file) {
         let filePath = files.file[0].filepath;
         let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
         const bucketName = 'datadrive-dev';
@@ -265,7 +261,7 @@ router.post('/:url', async function (req, res) {
             },
           );
         } else {
-          let isVipsError = 1;
+          let isVipsError = true;
           exec(
             `vips dzsave ${filePath} temp/${tempName}`,
             (error, stdout, stderr) => {
@@ -277,8 +273,7 @@ router.post('/:url', async function (req, res) {
                 console.error(`stderr: ${stderr}`);
                 return;
               }
-              isVipsError = 0;
-              // res.status(200).json("File has been Uploaded")
+              isVipsError = false;
 
               handleAllUpload(
                 bucketName,
@@ -290,12 +285,9 @@ router.post('/:url', async function (req, res) {
               );
             },
           );
-          if (isVipsError === 1) {
-            // console.error('ok');
-            // return res.status(400).json({error: true, message: "Vips dzsave error"})
+          if (isVipsError) {
+            // Handler if vips error
           }
-          // let tiffFilePath = filePath;
-          // let pngFilePath =__dirname + '/../tmp/' + files.file[0].newFilename + '0.png';
           let tmpDirPath = path.resolve(__dirname, '../tmp');
           try {
             if (!fs.existsSync(tmpDirPath)) {

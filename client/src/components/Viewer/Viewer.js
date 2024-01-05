@@ -13,6 +13,7 @@ function Viewer() {
     count: 0,
     name: '',
   });
+
   const [isUploaded, setIsUploaded] = useState(false);
   const [displayProgressBar, setDisplayProgressBar] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
