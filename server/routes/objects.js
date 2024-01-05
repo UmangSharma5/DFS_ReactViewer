@@ -55,7 +55,7 @@ router.get('/:url', async (req, res) => {
         'hv/' + user + '/thumbnail',
         true,
       );
-      //   console.error('stream collected');
+      // console.log('stream collected');
       stream.on('data', async obj => {
         objects.push(obj.name);
       });
@@ -334,13 +334,11 @@ router.post('/:url', async function (req, res) {
                         .json({ error: 'Failed to upload' });
                     }
                     await file_uploaded(bucketName, tempName, parts[1]);
-                    res
-                      .status(200)
-                      .json({
-                        data: objInfo,
-                        filename: tempName,
-                        format: parts[1],
-                      });
+                    res.status(200).json({
+                      data: objInfo,
+                      filename: tempName,
+                      format: parts[1],
+                    });
                   },
                 );
               } else {
@@ -395,13 +393,11 @@ router.post('/:url', async function (req, res) {
                             .status(400)
                             .json({ error: 'Failed to upload' });
                         }
-                        res
-                          .status(200)
-                          .json({
-                            data: objInfo,
-                            filename: tempName,
-                            format: parts[1],
-                          });
+                        res.status(200).json({
+                          data: objInfo,
+                          filename: tempName,
+                          format: parts[1],
+                        });
                       },
                     );
                   } catch (err) {
@@ -416,13 +412,11 @@ router.post('/:url', async function (req, res) {
                             .status(400)
                             .json({ error: 'Failed to upload' });
                         }
-                        res
-                          .status(200)
-                          .json({
-                            data: objInfo,
-                            filename: tempName,
-                            format: parts[1],
-                          });
+                        res.status(200).json({
+                          data: objInfo,
+                          filename: tempName,
+                          format: parts[1],
+                        });
                       },
                     );
                   }
