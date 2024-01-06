@@ -5,7 +5,7 @@ module.exports = {
     node: true,
   },
   extends: [
-    'eslint:recommended',
+    // 'eslint:recommended',
     // 'plugin:react/recommended',
     // 'plugin:react/jsx-runtime',
   ],
@@ -27,6 +27,9 @@ module.exports = {
     sourceType: 'module',
     emacFeatures: {
       jsx: true,
+    },
+    babelOptions: {
+      presets: ['@babel/preset-react'],
     },
   },
   settings: {

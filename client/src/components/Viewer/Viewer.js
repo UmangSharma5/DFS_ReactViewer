@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import './Viewer.css';
 import axios from 'axios';
 import GetFiles from './components/GetFiles/GetFiles';
@@ -56,6 +56,14 @@ function Viewer() {
         token: JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
         inProgress: inProgressUpload.current,
       });
+      const fileName = currentFile.name.name;
+      setUploadPercentage(prevValue => ({
+        ...prevValue,
+        [fileName]: {
+          minio: -1,
+          dzsave: -1,
+        },
+      }));
     });
 
     socket.on('progress', progress_data => {
@@ -67,15 +75,31 @@ function Viewer() {
         let den = progress_data.Data.Total_Files;
         let per = (num / den) * 100;
         const fileName = currentFile.name.name;
+        console.warn('per--', per);
         setUploadPercentage(prevValue => ({
           ...prevValue,
-          [fileName]: per,
+          [fileName]: {
+            ...prevValue[fileName],
+            minio: per,
+          },
         }));
       }
     });
 
     socket.on('error', error => {
       console.error('Socket.IO error:', error);
+    });
+
+    socket.on('dzsave-progress', progress_data => {
+      let per = progress_data.progress;
+      const fileName = currentFile.name.name;
+      setUploadPercentage(prevValue => ({
+        ...prevValue,
+        [fileName]: {
+          ...prevValue[fileName],
+          dzsave: Number(per),
+        },
+      }));
     });
 
     socket.on('AddedUser', async () => {
@@ -117,7 +141,7 @@ function Viewer() {
             },
           });
           if (response.status === 200) {
-            toast.info('Upload is in Progress....Please check after some time');
+            // toast.info('Upload is in Progress....Please check after some time');
           } else {
             toast.error('Error in Uploading File');
           }
