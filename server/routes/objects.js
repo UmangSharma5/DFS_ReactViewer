@@ -89,7 +89,6 @@ router.get('/:url', async (req, res) => {
     res.send({ err });
   }
 });
-// let count = 0;
 
 const handleUpload = async (
   bucketName,
@@ -100,7 +99,6 @@ const handleUpload = async (
   fileName,
   socketIndex,
 ) => {
-  // console.log(sockets)
   let sock = sockets[socketIndex].sock;
   minioClient.fPutObject(
     bucketName,
@@ -111,8 +109,6 @@ const handleUpload = async (
         console.error(err);
       } else {
         obj.curr_count++;
-        // console.log("sock--->",sock)
-        // console.log("count--",obj.curr_count)
         if (sock !== 0 && obj.curr_count % 10 === 0) {
           sock.emit('progress', {
             Title: 'Upload Progress',
@@ -265,8 +261,6 @@ router.post('/:url', async function (req, res) {
             },
           );
         } else {
-          // let isVipsError = true;
-
           const command = `vips`;
           const args = [
             'dzsave',
@@ -284,21 +278,29 @@ router.post('/:url', async function (req, res) {
 
           childProcess.stdout.on('data', data => {
             // Handle standard output data
-            // console.error(`stdout: ${data}`);
             let sockIndex = sockets.findIndex(
               usersock => usersock.token === `${req.token}_${inProgress}`,
             );
             let sock = sockets[sockIndex].sock;
-            const matches = String(data).match(/:\s*(\d+)/);
-            const numValue = matches ? parseInt(matches[1]) : null;
+
+            const percentageRegex = /[\d.]+%/g;
+            const matches = String(data).match(percentageRegex);
+            let lastPercentageValue;
+            if (matches && matches.length) {
+              lastPercentageValue = parseInt(matches[matches.length - 1]);
+            }
+
+            const isCompleted = String(data).toLowerCase().includes('done');
+            if (isCompleted) lastPercentageValue = 100;
+
             if (
-              numValue &&
-              !isNaN(numValue) &&
-              numValue >= 0 &&
-              numValue <= 100
+              lastPercentageValue &&
+              !isNaN(lastPercentageValue) &&
+              lastPercentageValue >= 0 &&
+              lastPercentageValue <= 100
             ) {
               sock.emit('dzsave-progress', {
-                progress: numValue,
+                progress: lastPercentageValue,
               });
             }
           });
