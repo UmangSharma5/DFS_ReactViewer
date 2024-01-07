@@ -7,19 +7,20 @@ app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import { get_user_bucket } from '../Database_queries/queries.js';
+import { bucketName } from '../constants.js';
 
 router.get('/:url', async function (req, res) {
   try {
     const user = req.params.url;
-    let bucketName = 'datadrive-dev';
-    const { imageName } = req.query;
-    const imageUrl = await minioClient.presignedGetObject(
-      bucketName,
-      'hv/' + user + '/thumbnail/' + imageName + '.png',
-      60 * 60,
-    );
+    const { imageName, imageFormat } = req.query;
+    const imageUrl = `${
+      process.env.BASE_URL
+    }/link/thumbnail/${user}?imageName=${encodeURIComponent(
+      imageName,
+    )}&imageFormat=${encodeURIComponent(
+      imageFormat,
+    )}&token=${encodeURIComponent(req.token)}`;
     const fullImageName = imageName + '.png';
-    // const imageURL = {image: {fullImageName : imageUrl}};
     res.json({ imageName: fullImageName, imageUrl: imageUrl });
   } catch (err) {
     console.error(err.message);
@@ -66,7 +67,6 @@ function extractCredentialFromURL(url) {
 router.get('/imagePyramid/:url', async (req, res) => {
   try {
     let user = await get_user_bucket(req.user.user_email);
-    let bucketName = 'datadrive-dev';
     const { baseDir } = req.query;
     const objects = [];
     const stream = minioClient.listObjects(

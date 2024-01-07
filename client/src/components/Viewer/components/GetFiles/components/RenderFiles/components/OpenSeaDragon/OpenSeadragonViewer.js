@@ -1,15 +1,23 @@
 import React, { useEffect } from 'react';
 import OpenSeadragon from 'openseadragon';
 import './OpenSeadragon.css';
+import { config } from 'components/Config/config';
+import constants from './constants';
 
-function OpenSeadragonViewer({ imageUrl, info, format, outer }) {
+function OpenSeadragonViewer({
+  imageName,
+  imageUrl,
+  info,
+  format,
+  outer,
+  email,
+}) {
   let viewer;
   useEffect(() => {
-    if (format === 'png' || format === 'jpeg') {
+    if (constants.SIMPLE_IMAGE_FORMATS.includes(format)) {
       viewer = OpenSeadragon({
         id: 'openseadragon-viewer',
-        prefixUrl:
-          ' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
+        prefixUrl: `${constants.OSD_PREFIX_URL}`,
         tileSources: {
           type: 'image',
           url: imageUrl,
@@ -30,37 +38,19 @@ function OpenSeadragonViewer({ imageUrl, info, format, outer }) {
     } else {
       viewer = OpenSeadragon({
         id: 'openseadragon-viewer',
-        prefixUrl:
-          ' https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/images/',
+        prefixUrl: `${constants.OSD_PREFIX_URL}`,
         tileSources: {
           width: 28480,
           height: 28760,
           tileSize: 512,
           tileOverlap: 0,
           getTileUrl: function (level, x, y) {
-            if (info[level + '/' + x + '_' + y] !== undefined) {
-              let signature = info[level + '/' + x + '_' + y][0];
-              let date = info[level + '/' + x + '_' + y][1];
-              let credential = info[level + '/' + x + '_' + y][2];
-              let startLink = outer.split('_files')[0];
+            if (info[level + '/' + x + '_' + y]) {
+              const _dir = imageName.name.split('.')[0];
+              const baseDir = _dir + '/temp/' + _dir + '_files/';
+              const token = JSON.parse(localStorage.getItem('dfs-user'))?.token;
 
-              // console.log(startLink+"_files/"+level+"/"+x+"_"+y+".jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential="+credential +"&X-Amz-Date="+date+"&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature="+signature)
-
-              return [
-                startLink +
-                  '_files/' +
-                  level +
-                  '/' +
-                  x +
-                  '_' +
-                  y +
-                  '.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=' +
-                  credential +
-                  '&X-Amz-Date=' +
-                  date +
-                  '&X-Amz-Expires=180000&X-Amz-SignedHeaders=host&X-Amz-Signature=' +
-                  signature,
-              ].join('');
+              return `${config.BASE_URL}/link/pyramid/${email}?baseDir=${baseDir}&level=${level}&x=${x}&y=${y}&token=${token}`;
             }
           },
         },
@@ -81,23 +71,6 @@ function OpenSeadragonViewer({ imageUrl, info, format, outer }) {
       viewer && viewer.destroy();
     };
   }, [imageUrl, outer]);
-
-  // function takeSS(){
-  //   let extension = imageName.split('.').pop();
-  //   if(extension === 'tif') extension ='png';
-  //   var current_view = document.getElementsByTagName("canvas");
-  //   if (current_view){
-  //     // console.log(current_view.length);
-  //     var my_view = current_view[0];
-  //     var img = my_view.toDataURL("image/"+extension);
-  //     const link = document.createElement('a')
-  //     link.href = img
-  //     link.download = imageName
-  //     document.body.appendChild(link)
-  //     link.click()
-  //     document.body.removeChild(link)
-  //   }
-  // }
 
   return (
     <div>

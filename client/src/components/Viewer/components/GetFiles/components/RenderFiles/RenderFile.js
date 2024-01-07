@@ -274,14 +274,16 @@ function RenderFile(props) {
             info={pyramid}
             format={format}
             outer={outer}
+            /*
+              Email is used to generate the Proxy links of the files and used in the backend
+              to retrieve the bucket name in MINIO server
+            */
+            email={props.email}
           />
         ) : (
           <p>Select an image to view</p>
         )}
       </div>
-      {/* <div className='status'>
-        <StatusInfo uploadPercentage={props.uploadPercentage}/>  
-      </div> */}
     </div>
   );
 }
