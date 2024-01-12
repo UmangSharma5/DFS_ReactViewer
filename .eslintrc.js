@@ -5,11 +5,11 @@ module.exports = {
     node: true,
   },
   extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
-    // 'react-app'
+    // 'eslint:recommended',
+    // 'plugin:react/recommended',
+    // 'plugin:react/jsx-runtime',
   ],
+  parser: '@babel/eslint-parser',
   overrides: [
     // {
     //   env: {
@@ -23,9 +23,13 @@ module.exports = {
   ],
   parserOptions: {
     ecmaVersion: 'latest',
+    requireConfigFile: false,
     sourceType: 'module',
     emacFeatures: {
       jsx: true,
+    },
+    babelOptions: {
+      presets: ['@babel/preset-react'],
     },
   },
   settings: {
@@ -33,15 +37,15 @@ module.exports = {
       version: 'detect',
     },
   },
-  plugins: ['react'],
+  //  plugins: ['react'],
   rules: {
     'no-console': ['error', { allow: ['warn', 'error'] }],
     eqeqeq: 'error',
-    'react/jsx-uses-react': 'error',
-    'react/jsx-uses-vars': 'error',
-    'react/prop-types': 'off',
-    'react/jsx-key': 'off',
-    'react/no-prototype-builtins': 'off',
+    // 'react/jsx-uses-react': 'error',
+    // 'react/jsx-uses-vars': 'error',
+    // 'react/prop-types': 'off',
+    // 'react/jsx-key': 'off',
+    // 'react/no-prototype-builtins': 'off',
     // "@typescript-eslint/no-unused-vars": "error"
   },
 };

@@ -284,9 +284,6 @@ function RenderFile(props) {
           <p>Select an image to view</p>
         )}
       </div>
-      {/* <div className='status'>
-        <StatusInfo uploadPercentage={props.uploadPercentage}/>  
-      </div> */}
     </div>
   );
 }
