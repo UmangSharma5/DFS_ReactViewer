@@ -1,9 +1,8 @@
 .progress-container {
   display: flex;
   position: relative;
-  left: -42px;
   top: 5px;
-  width: 350px;
+  width: 100%;
 }
 
 .uploadProgressBarLabel {

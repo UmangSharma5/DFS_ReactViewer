@@ -110,6 +110,7 @@ const handleUpload = async (
       } else {
         obj.curr_count++;
         if (sock !== 0 && obj.curr_count % 10 === 0) {
+          console.log('emitted');
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploading',

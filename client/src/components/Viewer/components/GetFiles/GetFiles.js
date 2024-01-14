@@ -78,6 +78,9 @@ function GetFiles(props) {
           refreshStatus={props.refreshStatus}
           currFile={currFileName}
           info={backendData}
+          setShow={props.setShow}
+          progressValue={props.progressValue}
+          displayProgressBar={props.displayProgressBar}
           uploadStatus={props.uploadStatus}
           email={props.email}
           onDelete={handleDelete}
