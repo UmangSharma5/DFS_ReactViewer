@@ -71,6 +71,7 @@ function Viewer() {
       socket.emit('addUser', {
         token: JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
         inProgress: inProgressUpload.current,
+        socket_id: socket.id
       });
       const fileName = currentFile.name.name;
       setUploadPercentage(prevValue => ({
@@ -133,6 +134,7 @@ function Viewer() {
           },
           params: {
             inProgress: inProgressUpload.current,
+            socket_id: socket.id
           },
           // Added On Upload Progress Config to Axios Post Request
           onUploadProgress: function (progressEvent) {
