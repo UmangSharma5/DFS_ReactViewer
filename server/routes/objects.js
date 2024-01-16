@@ -265,7 +265,7 @@ router.post('/:url', async function (req, res) {
             `./temp/${tempName}`,
             '--vips-progress',
             // "--tile-size",
-            // "350"
+            // "8192"
             // "--depth",
             // "onetile",
             // "--overlap=1",
