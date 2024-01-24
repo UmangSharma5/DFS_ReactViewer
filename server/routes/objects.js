@@ -97,9 +97,9 @@ const handleUpload = async (
   obj,
   tempDirPath,
   fileName,
-  socketIndex,
+  socket_id,
 ) => {
-  let sock = sockets[socketIndex].sock;
+  let sock = sockets[socket_id];
   minioClient.fPutObject(
     bucketName,
     minioPath + filePath,
@@ -110,7 +110,6 @@ const handleUpload = async (
       } else {
         obj.curr_count++;
         if (sock !== 0 && obj.curr_count % 10 === 0) {
-          console.log('emitted');
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploading',
@@ -130,7 +129,7 @@ const handleUpload = async (
             },
           });
           sock.disconnect();
-          removeSocket(socketIndex);
+          removeSocket(socket_id);
           await file_uploaded(bucketName, obj.fileName, obj.format);
           fs.rmdir(
             tempDirPath + '/' + fileName + '_files',
@@ -150,6 +149,7 @@ const handleUpload = async (
           fs.unlinkSync(dziPath);
         }
       }
+      sem.leave(1);
     },
   );
 };
@@ -168,7 +168,6 @@ const handleAllUpload = async (
     fileName: fileName,
     format: format,
   };
-  let sock = sockets.findIndex(usersock => usersock.token === token);
   let walker = walk(`temp/${fileName}_files`);
   const minioPath = `hv/${user}/${fileName}/`;
   walker.on('file', async (root, fileStats, next) => {
@@ -192,7 +191,7 @@ const handleAllUpload = async (
                 obj,
                 tempDirPath,
                 fileName,
-                sock,
+                token,
               ),
             ),
           );
@@ -232,6 +231,7 @@ router.post('/:url', async function (req, res) {
         const parts = fileName.split('.');
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
+        let socket_id = req.query.socket_id;
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
@@ -241,11 +241,8 @@ router.post('/:url', async function (req, res) {
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
         ) {
-          let sock = sockets.findIndex(
-            usersock => usersock.token === `${req.token}_${inProgress}`,
-          );
-          sockets[sock].sock.disconnect();
-          removeSocket(sock);
+          sockets[socket_id].disconnect();
+          removeSocket(socket_id);
           minioClient.fPutObject(
             bucketName,
             'hv/' + user + '/thumbnail/' + fileName,
@@ -278,10 +275,7 @@ router.post('/:url', async function (req, res) {
 
           childProcess.stdout.on('data', data => {
             // Handle standard output data
-            let sockIndex = sockets.findIndex(
-              usersock => usersock.token === `${req.token}_${inProgress}`,
-            );
-            let sock = sockets[sockIndex].sock;
+            let sock = sockets[socket_id];
 
             const percentageRegex = /[\d.]+%/g;
             const matches = String(data).match(percentageRegex);
@@ -315,7 +309,7 @@ router.post('/:url', async function (req, res) {
             handleAllUpload(
               bucketName,
               user,
-              `${req.token}_${inProgress}`,
+              socket_id,
               `${tempName}`,
               parts[1],
               tempDirPath,

@@ -39,7 +39,7 @@ module.exports = {
   },
   //  plugins: ['react'],
   rules: {
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['error', { allow: ['warn', 'error'] }],
     eqeqeq: 'error',
     // 'react/jsx-uses-react': 'error',
     // 'react/jsx-uses-vars': 'error',

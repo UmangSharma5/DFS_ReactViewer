@@ -58,7 +58,6 @@ function Viewer() {
 
   async function uploadFile(e) {
     e.preventDefault();
-    console.log(currentFile);
     Array.from(currentFile.names).forEach(async file => {
       let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
         headers: {
@@ -84,6 +83,7 @@ function Viewer() {
         socket.emit('addUser', {
           token: JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
           inProgress: inProgressUpload.current,
+          socket_id: socket.id,
         });
         const fileName = file.name;
         setUploadPercentage(prevValue => ({
@@ -96,7 +96,6 @@ function Viewer() {
       });
 
       socket.on('progress', progress_data => {
-        console.log(progress_data);
         if (
           progress_data.Data.Uploaded_Files !== undefined &&
           progress_data.Data.Total_Files !== undefined
@@ -121,7 +120,6 @@ function Viewer() {
       });
 
       socket.on('dzsave-progress', progress_data => {
-        console.log(progress_data);
         let per = progress_data.progress;
         const fileName = file.name;
         setUploadPercentage(prevValue => ({
@@ -148,6 +146,7 @@ function Viewer() {
             },
             params: {
               inProgress: inProgressUpload.current,
+              socket_id: socket.id,
             },
             // Added On Upload Progress Config to Axios Post Request
             onUploadProgress: function (progressEvent) {

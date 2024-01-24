@@ -53,7 +53,7 @@ io.on('connection', socket => {
   console.warn(`User connected ${socket.id}`);
 
   socket.on('addUser', user => {
-    let usertoken = `${user.token}_${user.inProgress}`;
+    let usertoken = user.socket_id;
     updateSocket(usertoken, socket);
     socket.emit('AddedUser', {
       user_added: true,
