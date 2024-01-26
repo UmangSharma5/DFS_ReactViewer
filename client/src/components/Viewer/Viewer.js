@@ -13,7 +13,7 @@ import Button from 'react-bootstrap/Button';
 function Viewer() {
   const [currentFile, setCurrentFile] = useState({
     count: 0,
-    names: '',
+    files: '',
   });
 
   const [isUploaded, setIsUploaded] = useState(false);
@@ -22,8 +22,7 @@ function Viewer() {
   const currentFileSelected = useRef(null);
   const [uploadPercentage, setUploadPercentage] = useState({});
   const [isConnected, setIsConnected] = useState(false);
-  const inProgressUpload = useRef(0);
-  const [show, setShow] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user'),
@@ -40,25 +39,17 @@ function Viewer() {
     }
   }
 
-  // function handleChange(e) {
-  //   const file = e.target.files[0];
-  //   setCurrentFile(prevValue => ({
-  //     ...prevValue,
-  //     name: file,
-  //   }));
-  // }
-
   function handleChange(e) {
     const files = e.target.files;
     setCurrentFile(prevValue => ({
       ...prevValue,
-      names: files,
+      files: files,
     }));
   }
 
   async function uploadFile(e) {
     e.preventDefault();
-    Array.from(currentFile.names).forEach(async file => {
+    Array.from(currentFile.files).forEach(async file => {
       let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
         headers: {
           authorization:
@@ -77,12 +68,9 @@ function Viewer() {
 
       const socket = io(config.SOCKET_URL, { path: '/hv/socket' });
       socket.on('connect', () => {
-        // console.error('Connected:', socket.connected); // Should be true
         setIsConnected(true);
-        inProgressUpload.current += 1;
         socket.emit('addUser', {
           token: JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-          inProgress: inProgressUpload.current,
           socket_id: socket.id,
         });
         const fileName = file.name;
@@ -145,7 +133,6 @@ function Viewer() {
                 JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
             },
             params: {
-              inProgress: inProgressUpload.current,
               socket_id: socket.id,
             },
             // Added On Upload Progress Config to Axios Post Request
@@ -156,9 +143,7 @@ function Viewer() {
               setProgressValue(percentCompleted);
             },
           });
-          if (response.status === 200) {
-            // toast.info('Upload is in Progress....Please check after some time');
-          } else {
+          if (response.status !== 200) {
             toast.error('Error in Uploading File');
           }
           setTimeout(function () {
@@ -176,14 +161,17 @@ function Viewer() {
         } catch (error) {
           console.error(error);
         }
-        inProgressUpload.current -= 1;
       });
     });
   }
 
   return (
     <div className="Viewer">
-      <Modal show={show} onHide={e => setShow(false)} centered>
+      <Modal
+        show={showUploadModal}
+        onHide={e => setShowUploadModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Select Files to Upload</Modal.Title>
         </Modal.Header>
@@ -207,7 +195,7 @@ function Viewer() {
             variant="success"
             onClick={e => {
               uploadFile(e);
-              setShow(false);
+              setShowUploadModal(false);
             }}
           >
             Upload
@@ -219,7 +207,7 @@ function Viewer() {
           fileObj={currentFile}
           uploadStatus={isUploaded}
           email={shortEmail}
-          setShow={setShow}
+          setShow={setShowUploadModal}
           displayProgressBar={displayProgressBar}
           progressValue={progressValue}
           uploadPercentage={uploadPercentage}

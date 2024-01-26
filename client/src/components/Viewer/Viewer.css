@@ -19,12 +19,6 @@
   width: 100%;
 }
 
-/* @media only screen and (min-width: 768px) {
-  .form-container {
-    min-width: 300px;
-  }
-  
-} */
 
 .Viewer input[type=file] {
   width: 350px;

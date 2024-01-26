@@ -6,7 +6,6 @@ import BootstrapProgressBar from './bootstrapProgressBar';
 
 const StatusInfo = props => {
   const [showThumbnails, setShowThumbnails] = useState(false);
-  console.log(props.uploadPercentage);
 
   return (
     <div>
