@@ -6,6 +6,9 @@ import { config } from '../../../../../Config/config';
 import { toast } from 'react-toastify';
 import { FaRegImages } from 'react-icons/fa';
 import { AiFillCloseCircle } from 'react-icons/ai';
+import { io } from 'socket.io-client';
+import ProgressBar from 'components/Viewer/components/ProgressBar/ProgressBar';
+import DeleteIcon from '@mui/icons-material/Delete';
 // import StatusInfo from '../../../../../statusInfo'
 
 function RenderFile(props) {
@@ -20,6 +23,10 @@ function RenderFile(props) {
   const [outer, setOuter] = useState();
   // const [isLoding, setLoading] = useState(false)
   const [showThumbnails, setShowThumbnails] = useState(true);
+  const [currentFile, setCurrentFile] = useState({
+    count: 0,
+    name: '',
+  });
 
   useEffect(() => {
     const refreshInterval = setInterval(() => {
@@ -199,6 +206,21 @@ function RenderFile(props) {
     <div className="render-file-container">
       {showThumbnails ? (
         <div className="button-container">
+          <div className="main-btn">
+            <div className="form-container">
+              <button
+                onClick={e => props.setShow(true)}
+                className="upload-button"
+              >
+                Upload Files
+              </button>
+              {props.displayProgressBar ? (
+                <ProgressBar progressValue={props.progressValue} />
+              ) : (
+                <></>
+              )}
+            </div>
+          </div>
           {allImageName.map((file, i) => {
             const buttonStyles = {
               margin: '10px',
@@ -225,14 +247,10 @@ function RenderFile(props) {
                 />
                 <div className="name-del">
                   <p className="image-name">{file.name + '.' + file.format}</p>
-                  <button
-                    className="del-btn"
-                    value={file}
+                  <DeleteIcon
                     onClick={event => handleDelete(event, file)}
-                  >
-                    {' '}
-                    <i className="bi bi-archive"></i>
-                  </button>
+                    style={{ color: 'red' }}
+                  />
                 </div>
               </div>
             );
