@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  redirect,
+} from 'react-router-dom';
 import CustomToastContainer from './components/CustomToastContainer/CustomToastContainer';
 import Viewer from './components/Viewer/Viewer';
 import Login from './components/Login/Login';
@@ -51,8 +57,9 @@ function App() {
   }
 
   async function checkAuth() {
-    // const GET_URL ='https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId
-    const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId;
+    const GET_URL_DEV =
+      'https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId;
+    // const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId;
 
     try {
       await axios.get(GET_URL_DEV);
@@ -82,13 +89,16 @@ function App() {
         <Route
           exact
           path="/login"
-          element={
-            isLoggedIn ? (
-              <Navigate replace to="/" />
-            ) : (
-              <Login checkUser={checkUser} />
-            )
-          }
+          Component={() => {
+            if (isLoggedIn) {
+              return <Navigate replace to="/" />;
+            } else {
+              // <Login checkUser={checkUser} />
+              window.location.href =
+                'https://datafoundation.iiit.ac.in/sign-in?redirect=/hv';
+              return <p>Redirecting ...</p>;
+            }
+          }}
         />
       </Routes>
       <CustomToastContainer />
@@ -96,4 +106,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
