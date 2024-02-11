@@ -26,6 +26,7 @@ import { minioClient } from '../minioConfig.js';
 import sharp from 'sharp';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { emitMessage } from '../SocketManager/socketmanager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // let convert_tiff_options = {
@@ -118,7 +119,7 @@ const handleUpload = async (
       } else {
         obj.curr_count++;
         if (sock !== 0 && obj.curr_count % 10 === 0) {
-          sock.emit('progress', {
+          const data = {
             Title: 'Upload Progress',
             status: 'uploading',
             Data: {
@@ -126,11 +127,11 @@ const handleUpload = async (
               Uploaded_Files: obj.curr_count,
               format: format,
             },
-          });
+          };
+          emitMessage(sock, 'progress', data);
         }
         if (obj.curr_count === obj.total_files) {
-          await file_uploaded(user, fileId);
-          sock.emit('progress', {
+          const data = {
             Title: 'Upload Progress',
             status: 'uploaded',
             Data: {
@@ -138,7 +139,8 @@ const handleUpload = async (
               Uploaded_Files: obj.curr_count,
               format: format,
             },
-          });
+          };
+          emitMessage(sock, 'progress', data);
           sock.disconnect();
           removeSocket(socket_id);
           fs.rmdir(
@@ -319,9 +321,11 @@ router.post('/:url', async function (req, res) {
               lastPercentageValue >= 0 &&
               lastPercentageValue <= 100
             ) {
-              sock.emit('dzsave-progress', {
-                progress: lastPercentageValue,
-              });
+              // sock.emit('dzsave-progress', {
+              //   progress: lastPercentageValue,
+              // });
+              const data = { progress: lastPercentageValue };
+              emitMessage(sock, 'dzsave-progress', data);
             }
           });
 
