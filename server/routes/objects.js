@@ -264,8 +264,8 @@ router.post('/:url', async function (req, res) {
             filePath,
             `./temp/${tempName}`,
             '--vips-progress',
-            // "--tile-size",
-            // "8192"
+            '--tile-size',
+            '4096',
             // "--depth",
             // "onetile",
             // "--overlap=1",

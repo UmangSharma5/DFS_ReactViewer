@@ -105,6 +105,7 @@ function RenderFile(props) {
       const responses = await Promise.all(
         props.info.map(image => {
           const imageObj = { imageName: image.name, imageFormat: image.format };
+          console.warn(config.BASE_URL + '/getURL/' + props.email);
           return axios.get(config.BASE_URL + '/getURL/' + props.email, {
             params: imageObj,
             headers: {
@@ -119,6 +120,7 @@ function RenderFile(props) {
       responses.forEach(response => {
         let name = response.data.imageName.split('.')[0];
         let link = response.data.imageUrl;
+        console.warn(link);
         imageLinks[name] = link;
       });
 
