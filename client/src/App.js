@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  redirect,
+} from 'react-router-dom';
 import CustomToastContainer from './components/CustomToastContainer/CustomToastContainer';
 import Viewer from './components/Viewer/Viewer';
-import Login from './components/Login/Login';
 import './App.css';
 import NavBar from './components/Viewer/components/NavBar/NavBar';
+import { config } from 'components/Config/config';
 
 function App() {
   let tokenId = null;
@@ -27,36 +33,9 @@ function App() {
     navigate('/login');
   }
 
-  async function checkUser(email, password) {
-    // const LOGIN_URL = 'https://datafoundation.iiit.ac.in/api/login'
-    const LOGIN_URL_DEV = 'http://10.4.25.20:3001/api/login';
-    try {
-      const response = await axios.post(LOGIN_URL_DEV, { email, password });
-
-      let dfs_user = {
-        user: response.data.data.user,
-        token: response.data.data.token,
-      };
-
-      var jsonString = JSON.stringify(dfs_user);
-
-      localStorage.setItem('dfs-user', jsonString);
-      tokenId = JSON.parse(localStorage.getItem('dfs-user')).token;
-
-      await checkAuth(email);
-    } catch (error) {
-      console.error('Incorrect Username or password!!!');
-      return false;
-    }
-  }
-
   async function checkAuth() {
-    // const GET_URL ='https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId
-    const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId;
-
     try {
-      await axios.get(GET_URL_DEV);
-      // console.warn(response);
+      await axios.get(config.GET_URL_DEV + tokenId);
       setIsLoggedIn(true);
       navigate('/');
     } catch (error) {
@@ -82,13 +61,14 @@ function App() {
         <Route
           exact
           path="/login"
-          element={
-            isLoggedIn ? (
-              <Navigate replace to="/" />
-            ) : (
-              <Login checkUser={checkUser} />
-            )
-          }
+          Component={() => {
+            if (isLoggedIn) {
+              return <Navigate replace to="/" />;
+            } else {
+              // window.location.href = config.LOGIN_URL
+              return <p>Redirecting ...</p>;
+            }
+          }}
         />
       </Routes>
       <CustomToastContainer />
@@ -96,4 +76,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

@@ -1,2 +1,4 @@
 .DS_Store
 node_modules
+client/src/components/Config
+server/.env
