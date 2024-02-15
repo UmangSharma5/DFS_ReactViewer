@@ -16,5 +16,18 @@ CREATE TABLE FileTypeMap (
     filename varchar(255),
     file_type varchar(255),    
     upload_date DATETIME,
-    is_uploaded boolean DEFAULT 0
+    PRIMARY KEY (file_id)
+);
+
+CREATE TABLE User_File_SocketMap (    
+    user_id varchar(255),
+    file_name varchar(255),
+    current_socket_id varchar(255),
+    current_state varchar(255),
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE User_id_Map (
+    user varchar(255),
+    user_id varchar(255)
 );

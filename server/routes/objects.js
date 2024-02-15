@@ -15,6 +15,8 @@ import {
   map_file_type,
   file_stats,
   file_uploaded,
+  check_user,
+  add_user,
 } from '../Database_queries/queries.js';
 import { sockets, removeSocket } from '../SocketManager/socketmanager.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,6 +38,7 @@ const __dirname = path.dirname(__filename);
 router.get('/:url', async (req, res) => {
   try {
     let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
+    // console.warn(uuidv4(user));
     let bucketName = 'datadrive-dev';
     if (user === undefined) {
       user = await map_user_to_bucket(req.user.user_email, req.params.url);
@@ -233,6 +236,20 @@ router.post('/:url', async function (req, res) {
       maxTotalFileSize: 2000 * 1024 * 1024,
       maxFileSize: 2000 * 1024 * 1024,
     });
+
+    let user = await get_user_bucket(req.user.user_email);
+    let len = 0;
+    check_user(user)
+      .then(result => {
+        len = result.length;
+        if (len === 0) {
+          add_user(user, uuidv4(user));
+        }
+      })
+      .catch(error => {
+        console.error(error); // Handle errors here
+      });
+
     form.parse(req, async (err, fields, files) => {
       if (err) {
         console.error(err);

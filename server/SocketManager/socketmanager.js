@@ -1,4 +1,11 @@
 import { Server } from 'socket.io';
+import {
+  add_user_socket,
+  get_userid,
+  check_user_socket,
+  update_user_socket,
+} from '../Database_queries/queries.js';
+import { v4 as uuidv4 } from 'uuid';
 
 let sockets = {};
 
@@ -27,6 +34,24 @@ export default function initializeSocket(server) {
   // Listen for when the client connects via socket.io-client
   io.on('connection', socket => {
     console.warn(`User connected ${socket.id}`);
+    // here update/add to the table the socket status filename
+    user = socket.handshake.query.user;
+    userid = get_userid(user);
+    filename = socket.handshake.query.filename;
+    time = socket.handshake.query.time;
+    hash_filename = uuidv4(filename + time);
+
+    check_user_socket(userid, hash_filename)
+      .then(result => {
+        if (result.length === 0) {
+          add_user_socket(userid, hash_filename, socket.id, 'connected');
+        } else {
+          update_user_socket(userid, hash_filename, socket.id, 'connected');
+        }
+      })
+      .catch(error => {
+        console.error(error); // Handle errors here
+      });
 
     socket.on('addUser', user => {
       let usertoken = user.socket_id;
