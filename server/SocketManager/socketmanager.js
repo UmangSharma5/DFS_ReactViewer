@@ -35,11 +35,11 @@ export default function initializeSocket(server) {
   io.on('connection', socket => {
     console.warn(`User connected ${socket.id}`);
     // here update/add to the table the socket status filename
-    user = socket.handshake.query.user;
-    userid = get_userid(user);
-    filename = socket.handshake.query.filename;
-    time = socket.handshake.query.time;
-    hash_filename = uuidv4(filename + time);
+    let user = socket.handshake.query.user;
+    let userid = get_userid(user);
+    let filename = socket.handshake.query.filename;
+    let time = socket.handshake.query.time;
+    let hash_filename = uuidv4(filename + time);
 
     check_user_socket(userid, hash_filename)
       .then(result => {
