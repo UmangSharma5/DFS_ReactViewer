@@ -9,6 +9,8 @@ import { io } from 'socket.io-client';
 import StatusInfo from '../statusInfo';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { v4 as uuidv4 } from 'uuid';
+// import { time } from 'geotiff/dist-node/logging';
 
 function Viewer(props) {
   const [currentFile, setCurrentFile] = useState({

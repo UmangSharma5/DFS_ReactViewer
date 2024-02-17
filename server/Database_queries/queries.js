@@ -58,12 +58,9 @@ const check_user = async user => {
 
 const get_userid = async user => {
   let query = `SELECT user_id from User_id_Map where user = '${user}';`;
-  try {
-    const res = await execSql(query);
+  return await execSql(query).then(res => {
     return res;
-  } catch (error) {
-    throw error; // Propagate the error
-  }
+  });
 };
 
 const add_user_socket = async (userid, filename, socketid, state) => {
@@ -73,15 +70,24 @@ const add_user_socket = async (userid, filename, socketid, state) => {
 };
 
 const check_user_socket = async (userid, filename) => {
-  let query = `SELECT socket_id from User_File_SocketMap where userid = '${userid}' AND file_name = '${filename}';`;
-  const res = await execSql(query);
-  return res;
+  let query = `SELECT current_socket_id from User_File_SocketMap where user_id = '${userid}' AND file_name = '${filename}';`;
+  return await execSql(query).then(res => {
+    return res;
+  });
 };
 
 const update_user_socket = async (userid, filename, socketid, state) => {
-  let query = `UPDATE User_File_SocketMap set socket_id = '${socketid}' AND current_state = '${state}' where user_id = '${userid}' AND file_name = '${filename}';`;
-  const res = await execSql(query);
-  return res;
+  let query = `UPDATE User_File_SocketMap set current_socket_id = '${socketid}' AND current_state = '${state}' where user_id = '${userid}' AND file_name = '${filename}';`;
+  return await execSql(query).then(res => {
+    return res;
+  });
+};
+
+const delete_user_socket = async (userid, filename) => {
+  let query = `DELETE FROM User_File_SocketMap WHERE user_id = '${userid}' AND file_name = '${filename}';`;
+  return await execSql(query).then(res => {
+    return res;
+  });
 };
 
 export {
@@ -97,4 +103,5 @@ export {
   get_userid,
   check_user_socket,
   update_user_socket,
+  delete_user_socket,
 };

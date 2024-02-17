@@ -36,18 +36,27 @@ export default function initializeSocket(server) {
     console.warn(`User connected ${socket.id}`);
     // here update/add to the table the socket status filename
     let user = socket.handshake.query.user;
-    let userid = get_userid(user);
     let filename = socket.handshake.query.filename;
-    let time = socket.handshake.query.time;
-    let hash_filename = uuidv4(filename + time);
+    let hash_filename = socket.handshake.query.hashFileName;
 
-    check_user_socket(userid, hash_filename)
-      .then(result => {
-        if (result.length === 0) {
-          add_user_socket(userid, hash_filename, socket.id, 'connected');
-        } else {
-          update_user_socket(userid, hash_filename, socket.id, 'connected');
-        }
+    console.warn(user);
+    console.warn(filename);
+    console.warn(hash_filename);
+
+    get_userid(user)
+      .then(res => {
+        let userid = res[0].user_id;
+        check_user_socket(userid, hash_filename)
+          .then(result => {
+            if (result.length === 0) {
+              add_user_socket(userid, hash_filename, socket.id, 'connected');
+            } else {
+              update_user_socket(userid, hash_filename, socket.id, 'connected');
+            }
+          })
+          .catch(error => {
+            console.error(error); // Handle errors here
+          });
       })
       .catch(error => {
         console.error(error); // Handle errors here
