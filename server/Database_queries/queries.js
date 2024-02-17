@@ -15,7 +15,7 @@ const get_user_bucket = async user => {
 //     return await execSql(query)
 // }
 const map_file_type = async (bucketName, filename, file_type) => {
-  let query = `INSERT INTO FileTypeMap (bucket_name, filename,file_type,upload_date) Values('${bucketName}','${filename}' ,'${file_type}',NOW());`;
+  let query = `INSERT INTO FileTypeMap (bucket_name, filename,file_type,upload_date) Values('uuid()','${bucketName}','${filename}' ,'${file_type}',NOW());`;
   return await execSql(query);
 };
 
