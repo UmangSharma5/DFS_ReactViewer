@@ -9,6 +9,7 @@ import require_auth from './middleware/Auth.js';
 import require_auth_proxylinks from './middleware/proxyLinksAuth.js';
 import { updateSocket } from './SocketManager/socketmanager.js';
 import { Server } from 'socket.io';
+import { logger } from './logger.js';
 const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 
@@ -62,7 +63,7 @@ io.on('connection', socket => {
 
   //when disconnect from client
   socket.on('disconnect', () => {
-    // console.log("a user disconnected!");
+    logger.info('a user disconnected!');
   });
 });
 
@@ -71,5 +72,5 @@ app.get('/*', function (req, res) {
 });
 
 server.listen(port, function () {
-  // console.log(`Server started on port ${port}`)
+  logger.info(`Server started on port ${port}`);
 });
