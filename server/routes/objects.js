@@ -71,16 +71,15 @@ router.get('/:url', async (req, res) => {
           objects.map(async name => {
             let tname = name.split('/')[3];
             await file_stats(bucketName, tname.split('.')[0]).then(response => {
-              if (response[0]?.isUploaded)
-                temp.push({
-                  name: tname.split('.')[0],
-                  format: response[0]?.file_type,
-                  date: response[0]?.upload_date,
-                });
+              temp.push({
+                name: tname.split('.')[0],
+                format: response[0]?.file_type,
+                date: response[0]?.upload_date,
+                fileId: response[0]?.file_unique_id,
+              });
             });
           }),
         );
-        // console.error('Listing objects completed.');
         res.json({ temp });
       });
     });
@@ -161,6 +160,7 @@ const handleAllUpload = async (
   fileName,
   format,
   tempDirPath,
+  fileId,
 ) => {
   let obj = {
     total_files: 0,
@@ -232,10 +232,11 @@ router.post('/:url', async function (req, res) {
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
         let socket_id = req.query.socket_id;
+        let fileId = req.query.hashedFile;
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
-        await map_file_type(bucketName, tempName, parts[1]);
+        await map_file_type(fileId, bucketName, tempName, parts[1]);
 
         if (
           files.file[0].mimetype === 'image/jpeg' ||
@@ -313,6 +314,7 @@ router.post('/:url', async function (req, res) {
               `${tempName}`,
               parts[1],
               tempDirPath,
+              fileId,
             );
             let tiffFilePath = filePath;
             let pngFilePath =

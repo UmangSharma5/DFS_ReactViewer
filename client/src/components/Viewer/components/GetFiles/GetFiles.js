@@ -32,6 +32,7 @@ function GetFiles(props) {
         },
       );
       const sortedData = response.data.temp.sort(sortFileNames);
+      console.warn('sorted data', sortedData);
       setBackendData(sortedData);
     } catch (error) {
       console.error('here', error);
@@ -40,6 +41,7 @@ function GetFiles(props) {
 
   function handleDelete(event, file) {
     let delFileName = file.name + '.' + file.format;
+    let delFileId = file.fileId;
     setDeletedFileName(delFileName);
     try {
       axios
@@ -57,7 +59,8 @@ function GetFiles(props) {
         .then(() => {
           const updatedData = Object.values(backendData).filter(
             currFile =>
-              currFile.name !== file.name || currFile.format !== file.format,
+              // currFile.name !== file.name || currFile.format !== file.format,
+              currFile.fileId !== file.fileId,
           );
           setBackendData(updatedData);
           setCurrFileName(null);
@@ -86,6 +89,7 @@ function GetFiles(props) {
           onDelete={handleDelete}
           deletedFileName={deletedFileName}
           uploadPercentage={props.uploadPercentage}
+          fileMap={props.fileMap}
         />
       ) : null}
     </div>
