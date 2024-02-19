@@ -70,12 +70,13 @@ router.get('/:url', async (req, res) => {
         await Promise.all(
           objects.map(async name => {
             let tname = name.split('/')[3];
+            const uniqueId = name.split('png').pop();
             await file_stats(bucketName, tname.split('.')[0]).then(response => {
               temp.push({
                 name: tname.split('.')[0],
                 format: response[0]?.file_type,
                 date: response[0]?.upload_date,
-                fileId: response[0]?.file_unique_id,
+                fileId: uniqueId,
               });
             });
           }),
@@ -169,7 +170,7 @@ const handleAllUpload = async (
     format: format,
   };
   let walker = walk(`temp/${fileName}_files`);
-  const minioPath = `hv/${user}/${fileName}/`;
+  const minioPath = `hv/${user}/${fileName + fileId}/`;
   walker.on('file', async (root, fileStats, next) => {
     obj.total_files++;
     next();
@@ -232,12 +233,13 @@ router.post('/:url', async function (req, res) {
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
         let socket_id = req.query.socket_id;
-        let fileId = req.query.hashedFile;
+        let fileId = req.query.fileId;
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
         await map_file_type(fileId, bucketName, tempName, parts[1]);
-
+        let fileInfo = await file_stats(bucketName, tempName);
+        // let fileId = fileInfo[0].file_unique_id;
         if (
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
@@ -246,7 +248,7 @@ router.post('/:url', async function (req, res) {
           removeSocket(socket_id);
           minioClient.fPutObject(
             bucketName,
-            'hv/' + user + '/thumbnail/' + fileName,
+            'hv/' + user + '/thumbnail/' + fileName + fileId,
             filePath,
             async (err, objInfo) => {
               if (err) {
@@ -335,7 +337,7 @@ router.post('/:url', async function (req, res) {
                 // console.error("Conversion completed successfully!");
                 await minioClient.fPutObject(
                   bucketName,
-                  'hv/' + user + '/thumbnail/' + pngFileName,
+                  'hv/' + user + '/thumbnail/' + pngFileName + fileId,
                   pngFilePath,
                   function (err, objInfo) {
                     if (err) {
@@ -354,7 +356,7 @@ router.post('/:url', async function (req, res) {
                 // console.error("sharp error->", err);
                 await minioClient.fPutObject(
                   bucketName,
-                  'hv/' + user + '/thumbnail/' + pngFileName,
+                  'hv/' + user + '/thumbnail/' + pngFileName + fileId,
                   __dirname + '/../No-Preview-Available.jpg',
                   function (err, objInfo) {
                     if (err) {

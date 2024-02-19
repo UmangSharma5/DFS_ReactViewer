@@ -47,7 +47,8 @@ function OpenSeadragonViewer({
           getTileUrl: function (level, x, y) {
             if (info[level + '/' + x + '_' + y]) {
               const _dir = imageName.name.split('.')[0];
-              const baseDir = _dir + '/temp/' + _dir + '_files/';
+              const fileId = imageName.fileId;
+              const baseDir = _dir + fileId + '/temp/' + _dir + '_files/';
               const token = JSON.parse(localStorage.getItem('dfs-user'))?.token;
 
               return `${config.BASE_URL}/link/pyramid/${email}?baseDir=${baseDir}&level=${level}&x=${x}&y=${y}&token=${token}`;

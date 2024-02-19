@@ -17,11 +17,11 @@ router.get('/:url', async function (req, res) {
       process.env.BASE_URL
     }/link/thumbnail/${user}?imageName=${encodeURIComponent(
       imageName,
-    )}&imageFormat=${encodeURIComponent(
+    )}&fileId=${encodeURIComponent(imageId)}&imageFormat=${encodeURIComponent(
       imageFormat,
     )}&token=${encodeURIComponent(req.token)}`;
     const fullImageName = imageName + '.png';
-    res.json({ imageName: fullImageName, imageUrl: imageUrl });
+    res.json({ imageName: fullImageName, imageUrl: imageUrl, fileId: imageId });
   } catch (err) {
     console.error(err.message);
     res.send({ err });

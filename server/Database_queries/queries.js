@@ -14,8 +14,8 @@ const get_user_bucket = async user => {
 //     let query = `DELETE FROM User_Bucket where user = '${user}';`
 //     return await execSql(query)
 // }
-const map_file_type = async (bucketName, filename, file_type) => {
-  let query = `INSERT INTO FileTypeMap (bucket_name, filename,file_type,upload_date) Values('uuid()','${bucketName}','${filename}' ,'${file_type}',NOW());`;
+const map_file_type = async (fileId, bucketName, filename, file_type) => {
+  let query = `INSERT INTO FileTypeMap (file_unique_id, bucket_name, filename, file_type, upload_date) VALUES ('${fileId}','${bucketName}','${filename}' ,'${file_type}',NOW());`;
   return await execSql(query);
 };
 

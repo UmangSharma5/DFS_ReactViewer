@@ -32,7 +32,6 @@ function GetFiles(props) {
         },
       );
       const sortedData = response.data.temp.sort(sortFileNames);
-      console.warn('sorted data', sortedData);
       setBackendData(sortedData);
     } catch (error) {
       console.error('here', error);
@@ -42,6 +41,7 @@ function GetFiles(props) {
   function handleDelete(event, file) {
     let delFileName = file.name + '.' + file.format;
     let delFileId = file.fileId;
+    console.warn('delId', delFileId);
     setDeletedFileName(delFileName);
     try {
       axios
