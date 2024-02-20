@@ -32,6 +32,7 @@ function GetFiles(props) {
         },
       );
       const sortedData = response.data.temp.sort(sortFileNames);
+      if (response.status === 404) props.logout();
       setBackendData(sortedData);
     } catch (error) {
       console.error('here', error);
@@ -62,6 +63,7 @@ function GetFiles(props) {
               currFile.fileId !== file.fileId,
           );
           setBackendData(updatedData);
+
           setCurrFileName(null);
         })
         .catch(error => {

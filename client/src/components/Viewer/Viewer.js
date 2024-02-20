@@ -10,12 +10,11 @@ import StatusInfo from '../statusInfo';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-function Viewer() {
+function Viewer(props) {
   const [currentFile, setCurrentFile] = useState({
     count: 0,
     files: '',
   });
-
   const [isUploaded, setIsUploaded] = useState(false);
   const [displayProgressBar, setDisplayProgressBar] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
@@ -194,6 +193,7 @@ function Viewer() {
           displayProgressBar={displayProgressBar}
           progressValue={progressValue}
           uploadPercentage={uploadPercentage}
+          logout={props.logout}
         />
       </div>
       <div className="status">
