@@ -28,6 +28,8 @@ function RenderFile(props) {
     name: '',
   });
 
+  console.warn(imageName);
+
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       props.getFiles();
@@ -42,55 +44,48 @@ function RenderFile(props) {
       previousImageNames !== null
     ) {
       const newImageNames = props.info.filter(newImage => {
-        return !previousImageNames.some(
-          oldImage =>
-            oldImage.name === newImage.name &&
-            oldImage.format === newImage.format,
-        );
+        return !previousImageNames.some(oldImage => {
+          let oldImageId = oldImage.fileId;
+          let newImageId = newImage.fileId;
+          return oldImageId === newImageId;
+        });
       });
 
       const removedImageNames = previousImageNames.filter(oldImage => {
-        return !props.info.some(
-          newImage =>
-            oldImage.name === newImage.name &&
-            oldImage.format === newImage.format,
-        );
+        return !props.info.some(newImage => {
+          let oldImageId = oldImage.fileId;
+          let newImageId = newImage.fileId;
+          return oldImageId === newImageId;
+        });
       });
 
       if (removedImageNames.length > 0) {
-        // console.error('Removed Images found:', removedImageNames)
-
         const updatedImageLinks = { ...allImagesLinks };
-
         removedImageNames.forEach(removedImageName => {
-          const indexToRemove = allImageName.findIndex(
-            imageName =>
-              imageName.name === removedImageName.name &&
-              imageName.format === removedImageName.format,
-          );
+          const indexToRemove = allImageName.findIndex(imageName => {
+            let imageId = imageName.fileId;
+            let removedImageId = removedImageName.fileId;
+            return imageId === removedImageId;
+          });
 
-          const { name } = removedImageName;
+          const { name, fileId } = removedImageName;
 
           if (
             indexToRemove !== -1 &&
-            Object.hasOwnProperty.call(updatedImageLinks, name)
+            Object.hasOwnProperty.call(updatedImageLinks, name + fileId)
           ) {
             allImageName.splice(indexToRemove, 1);
-            delete updatedImageLinks[name];
+            delete updatedImageLinks[name + fileId];
           }
         });
         setAllImagesLinks(updatedImageLinks);
       }
 
       if (newImageNames.length > 0) {
-        // console.error('New Images found:', newImageNames)
-
         const reversedImageNames = [...newImageNames].reverse();
-
         reversedImageNames.forEach(newImage => {
           getImageLink(newImage);
         });
-        // toast.success('Upload Completed!')
       }
     } else {
       setAllImageName(props.info);
@@ -98,7 +93,6 @@ function RenderFile(props) {
 
     setPreviousImageNames(props.info);
     if (isFirstRender.current) {
-      // console.error('Getting image links')
       getAllImageLinks();
       if (props.info.length > 0) {
         isFirstRender.current = false;
@@ -111,7 +105,11 @@ function RenderFile(props) {
     try {
       const responses = await Promise.all(
         props.info.map(image => {
-          const imageObj = { imageName: image.name, imageFormat: image.format };
+          const imageObj = {
+            imageName: image.name,
+            imageFormat: image.format,
+            imageId: image.fileId,
+          };
           return axios.get(config.BASE_URL + '/getURL/' + props.email, {
             params: imageObj,
             headers: {
@@ -125,10 +123,10 @@ function RenderFile(props) {
       const imageLinks = {};
       responses.forEach(response => {
         let name = response.data.imageName.split('.')[0];
+        let fileId = response.data.fileId;
         let link = response.data.imageUrl;
-        imageLinks[name] = link;
+        imageLinks[name + fileId] = link;
       });
-
       setAllImagesLinks(imageLinks);
     } catch (error) {
       console.error(error);
@@ -137,7 +135,11 @@ function RenderFile(props) {
 
   async function getImageLink(image) {
     try {
-      const imageObj = { imageName: image.name, imageFormat: image.format };
+      const imageObj = {
+        imageName: image.name,
+        imageFormat: image.format,
+        imageId: image.fileId,
+      };
       await axios
         .get(config.BASE_URL + '/getURL/' + props.email, {
           params: imageObj,
@@ -150,8 +152,8 @@ function RenderFile(props) {
         .then(response => {
           let name = response.data.imageName.split('.')[0];
           let link = response.data.imageUrl;
-
-          allImagesLinks[name] = link;
+          let fileId = response.data.fileId;
+          allImagesLinks[name + fileId] = link;
           allImageName.unshift(image);
         })
         .catch(error => {
@@ -167,8 +169,9 @@ function RenderFile(props) {
     let num = e.target.id;
     const imagetype = allImageName[num].format;
     const dir_ = allImageName[num].name.split('.')[0];
+    let imageId = allImageName[num].fileId;
     if (imagetype !== 'png' && imagetype !== 'jpeg') {
-      let imageObj = { baseDir: dir_ + '/temp/' + dir_ + '_files/' };
+      let imageObj = { baseDir: dir_ + imageId + '/temp/' + dir_ + '_files/' };
       await axios
         .get(config.BASE_URL + '/getURL/imagePyramid/' + props.email, {
           params: imageObj,
@@ -191,7 +194,10 @@ function RenderFile(props) {
         });
     }
     setFormat(imagetype);
-    setViewerImage(allImagesLinks[allImageName[num].name.split('.')[0]]);
+
+    setViewerImage(
+      allImagesLinks[allImageName[num].name + allImageName[num].fileId],
+    );
     setImageName(allImageName[num]);
     // setLoading(false)
   }
@@ -210,8 +216,7 @@ function RenderFile(props) {
             <div className="form-container">
               <button
                 onClick={e => props.setShow(true)}
-                className="upload-button"
-              >
+                className="upload-button">
                 Upload Files
               </button>
               {props.displayProgressBar ? (
@@ -224,8 +229,8 @@ function RenderFile(props) {
           {allImageName.map((file, i) => {
             const buttonStyles = {
               margin: '10px',
-              backgroundImage: allImagesLinks[file.name]
-                ? `url(${allImagesLinks[file.name]})`
+              backgroundImage: allImagesLinks[file.name + file.fileId]
+                ? `url(${allImagesLinks[file.name + file.fileId]})`
                 : 'none',
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'cover',

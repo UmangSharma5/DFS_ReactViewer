@@ -9,12 +9,12 @@ CREATE TABLE User_Bucket (
 );
 DROP TABLE IF EXISTS FileTypeMap;
 
-CREATE TABLE FileTypeMap (
-    file_id int NOT NULL AUTO_INCREMENT,
+CREATE TABLE FileTypeMap (    
+    user_name varchar(255),
+    file_unique_id varchar(36) NOT NULL,
     bucket_name varchar(255),
     filename varchar(255),
-    file_type varchar(255),
-    isUploaded int DEFAULT 0,
+    file_type varchar(255),    
     upload_date DATETIME,
-    PRIMARY KEY (file_id)
+    is_uploaded boolean DEFAULT 0
 );
