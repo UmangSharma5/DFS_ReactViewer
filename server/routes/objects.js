@@ -100,6 +100,7 @@ const handleUpload = async (
   tempDirPath,
   fileName,
   socket_id,
+  user,
 ) => {
   let sock = sockets[socket_id];
   minioClient.fPutObject(
@@ -132,7 +133,7 @@ const handleUpload = async (
           });
           sock.disconnect();
           removeSocket(socket_id);
-          await file_uploaded(bucketName, obj.fileName, obj.format);
+          await file_uploaded(user, bucketName, obj.fileName, obj.format);
           fs.rmdir(
             tempDirPath + '/' + fileName + '_files',
             { recursive: true, force: true },
@@ -195,6 +196,7 @@ const handleAllUpload = async (
                 tempDirPath,
                 fileName,
                 token,
+                user,
               ),
             ),
           );

@@ -28,8 +28,6 @@ function RenderFile(props) {
     name: '',
   });
 
-  console.warn(imageName);
-
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       props.getFiles();

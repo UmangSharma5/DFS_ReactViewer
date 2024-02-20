@@ -41,13 +41,12 @@ function GetFiles(props) {
   function handleDelete(event, file) {
     let delFileName = file.name + '.' + file.format;
     let delFileId = file.fileId;
-    console.warn('delId', delFileId);
     setDeletedFileName(delFileName);
     try {
       axios
         .post(
           config.BASE_URL + '/deleteObject/' + props.email,
-          { fileName: delFileName },
+          { fileName: delFileName, fileId: delFileId },
           {
             headers: {
               authorization:

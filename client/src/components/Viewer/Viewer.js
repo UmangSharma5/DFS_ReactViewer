@@ -76,7 +76,6 @@ function Viewer() {
           let den = progress_data.Data.Total_Files;
           let per = (num / den) * 100;
           const fileName = file.name;
-          console.warn('per--', per);
           setUploadPercentage(prevValue => ({
             ...prevValue,
             [fileName]: {
