@@ -15,5 +15,6 @@ CREATE TABLE FileTypeMap (
     bucket_name varchar(255),
     filename varchar(255),
     file_type varchar(255),    
-    upload_date DATETIME
+    upload_date DATETIME,
+    is_uploaded boolean DEFAULT 0
 );

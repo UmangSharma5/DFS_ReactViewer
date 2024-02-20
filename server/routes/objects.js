@@ -132,7 +132,7 @@ const handleUpload = async (
           });
           sock.disconnect();
           removeSocket(socket_id);
-          // await file_uploaded(bucketName, obj.fileName, obj.format);
+          await file_uploaded(bucketName, obj.fileName, obj.format);
           fs.rmdir(
             tempDirPath + '/' + fileName + '_files',
             { recursive: true, force: true },

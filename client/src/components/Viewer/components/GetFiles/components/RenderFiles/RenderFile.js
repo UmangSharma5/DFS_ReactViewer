@@ -28,6 +28,8 @@ function RenderFile(props) {
     name: '',
   });
 
+  console.warn(imageName);
+
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       props.getFiles();
@@ -192,9 +194,9 @@ function RenderFile(props) {
         });
     }
     setFormat(imagetype);
+
     setViewerImage(
-      allImagesLinks[allImageName[num].name.split('.')[0]] +
-        allImageName[num].fileId,
+      allImagesLinks[allImageName[num].name + allImageName[num].fileId],
     );
     setImageName(allImageName[num]);
     // setLoading(false)
