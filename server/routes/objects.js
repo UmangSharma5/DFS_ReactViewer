@@ -17,7 +17,7 @@ import {
   file_uploaded,
 } from '../Database_queries/queries.js';
 import { sockets, removeSocket } from '../SocketManager/socketmanager.js';
-
+import { v4 as uuidv4 } from 'uuid';
 const sem = semaphore(100);
 app.use(cors());
 app.use(bodyParser.json());
@@ -71,14 +71,16 @@ router.get('/:url', async (req, res) => {
           objects.map(async name => {
             let tname = name.split('/')[3];
             const uniqueId = name.split('png').pop();
-            await file_stats(bucketName, tname.split('.')[0]).then(response => {
-              temp.push({
-                name: tname.split('.')[0],
-                format: response[0]?.file_type,
-                date: response[0]?.upload_date,
-                fileId: uniqueId,
-              });
-            });
+            await file_stats(user, bucketName, tname.split('.')[0]).then(
+              response => {
+                temp.push({
+                  name: tname.split('.')[0],
+                  format: response[0]?.file_type,
+                  date: response[0]?.upload_date,
+                  fileId: uniqueId,
+                });
+              },
+            );
           }),
         );
         res.json({ temp });
@@ -130,7 +132,7 @@ const handleUpload = async (
           });
           sock.disconnect();
           removeSocket(socket_id);
-          await file_uploaded(bucketName, obj.fileName, obj.format);
+          // await file_uploaded(bucketName, obj.fileName, obj.format);
           fs.rmdir(
             tempDirPath + '/' + fileName + '_files',
             { recursive: true, force: true },
@@ -233,12 +235,12 @@ router.post('/:url', async function (req, res) {
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
         let socket_id = req.query.socket_id;
-        let fileId = req.query.fileId;
+        let fileId = uuidv4();
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
-        await map_file_type(fileId, bucketName, tempName, parts[1]);
-        let fileInfo = await file_stats(bucketName, tempName);
+        await map_file_type(user, fileId, bucketName, tempName, parts[1]);
+        // let fileInfo = await file_stats(bucketName, tempName);
         // let fileId = fileInfo[0].file_unique_id;
         if (
           files.file[0].mimetype === 'image/jpeg' ||
@@ -254,7 +256,7 @@ router.post('/:url', async function (req, res) {
               if (err) {
                 return res.status(400).json({ error: 'Failed to upload' });
               }
-              await file_uploaded(bucketName, tempName, parts[1]);
+              await file_uploaded(user, bucketName, tempName, parts[1]);
               res
                 .status(200)
                 .json({ data: objInfo, filename: tempName, format: parts[1] });

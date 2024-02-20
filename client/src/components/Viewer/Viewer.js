@@ -50,7 +50,6 @@ function Viewer() {
   async function uploadFile(e) {
     e.preventDefault();
     Array.from(currentFile.files).forEach(async file => {
-      let fileId = uuidv4();
       const socket = io(config.SOCKET_URL, { path: '/hv/socket' });
       socket.on('connect', () => {
         setIsConnected(true);
@@ -119,7 +118,6 @@ function Viewer() {
             },
             params: {
               socket_id: socket.id,
-              fileId: fileId,
             },
             // Added On Upload Progress Config to Axios Post Request
             onUploadProgress: function (progressEvent) {

@@ -53,7 +53,7 @@ router.post('/:url', async function (req, res) {
     });
   }
 
-  await delete_file(bucketName, name);
+  await delete_file(user, bucketName, fileId);
 });
 
 export default router;
