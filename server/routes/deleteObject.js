@@ -16,7 +16,7 @@ router.post('/:url', async function (req, res) {
   let bucketName = 'datadrive-dev';
   let format = fileName.split('.')[1];
   let name = fileName.split('.')[0];
-  let fileName_thumbnail = fileName.split('.')[0] + '.png';
+  let fileName_thumbnail = fileName.split('.')[0] + '.png' + fileId;
 
   minioClient.removeObject(
     bucketName,
@@ -33,7 +33,7 @@ router.post('/:url', async function (req, res) {
     let objects = [];
     let stream = minioClient.listObjects(
       bucketName,
-      'hv/' + user + '/' + name,
+      'hv/' + user + '/' + name + fileId,
       true,
     );
     stream.on('data', async obj => {
@@ -53,7 +53,7 @@ router.post('/:url', async function (req, res) {
     });
   }
 
-  await delete_file(bucketName, name);
+  await delete_file(user, bucketName, fileId);
 });
 
 export default router;

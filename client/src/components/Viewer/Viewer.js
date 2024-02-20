@@ -50,22 +50,6 @@ function Viewer() {
   async function uploadFile(e) {
     e.preventDefault();
     Array.from(currentFile.files).forEach(async file => {
-      let res = await axios.get(config.BASE_URL + '/isUploaded/' + shortEmail, {
-        headers: {
-          authorization:
-            'Bearer ' + JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
-        },
-        params: {
-          fileName: file.name,
-        },
-      });
-
-      if (res !== undefined && res.data.isUploaded === 1) {
-        toast.warn('Image Already Exists');
-        setDisplayProgressBar(false);
-        return;
-      }
-
       const socket = io(config.SOCKET_URL, { path: '/hv/socket' });
       socket.on('connect', () => {
         setIsConnected(true);
