@@ -22,6 +22,7 @@ function Viewer(props) {
   const [uploadPercentage, setUploadPercentage] = useState({});
   const [isConnected, setIsConnected] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user'),
@@ -82,6 +83,11 @@ function Viewer(props) {
               minio: per,
             },
           }));
+          if (progress_data.status === 'uploaded') {
+            setIsFileUploaded(true);
+          } else {
+            setIsFileUploaded(false);
+          }
         }
       });
 
@@ -194,6 +200,7 @@ function Viewer(props) {
           progressValue={progressValue}
           uploadPercentage={uploadPercentage}
           logout={props.logout}
+          isFileUploaded={isFileUploaded}
         />
       </div>
       <div className="status">

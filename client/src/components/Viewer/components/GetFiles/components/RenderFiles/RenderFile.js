@@ -28,12 +28,16 @@ function RenderFile(props) {
     name: '',
   });
 
+  // useEffect(() => {
+  //   const refreshInterval = setInterval(() => {
+  //     props.getFiles();
+  //   }, config.REFRESH_TIME);
+  //   return () => clearInterval(refreshInterval);
+  // }, []);
+  // console.warn(props.isFileUploaded);
   useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      props.getFiles();
-    }, config.REFRESH_TIME);
-    return () => clearInterval(refreshInterval);
-  }, []);
+    props.getFiles();
+  }, [props.isFileUploaded]);
 
   useEffect(() => {
     if (
