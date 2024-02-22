@@ -28,15 +28,8 @@ function RenderFile(props) {
     name: '',
   });
 
-  // useEffect(() => {
-  //   const refreshInterval = setInterval(() => {
-  //     props.getFiles();
-  //   }, config.REFRESH_TIME);
-  //   return () => clearInterval(refreshInterval);
-  // }, []);
-  // console.warn(props.isFileUploaded);
   useEffect(() => {
-    props.getFiles();
+    props.getFiles(props.isFileUploaded);
   }, [props.isFileUploaded]);
 
   useEffect(() => {
@@ -82,7 +75,6 @@ function RenderFile(props) {
         });
         setAllImagesLinks(updatedImageLinks);
       }
-
       if (newImageNames.length > 0) {
         const reversedImageNames = [...newImageNames].reverse();
         reversedImageNames.forEach(newImage => {
@@ -156,7 +148,9 @@ function RenderFile(props) {
           let link = response.data.imageUrl;
           let fileId = response.data.fileId;
           allImagesLinks[name + fileId] = link;
-          allImageName.unshift(image);
+          // allImageName.unshift(image);
+          // setAllImageName(allImageName);
+          setAllImageName(prevAllImageName => [image, ...prevAllImageName]);
         })
         .catch(error => {
           console.error(error);

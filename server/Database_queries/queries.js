@@ -20,7 +20,7 @@ const map_file_type = async (user, fileId, bucketName, filename, file_type) => {
 };
 
 const file_stats = async (user, bucketName, filename) => {
-  let query = `SELECT file_unique_id, file_type, upload_date from FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}' AND user_name = '${user}' AND is_uploaded=${1};`;
+  let query = `SELECT file_unique_id, file_type, upload_date, is_uploaded from FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}' AND user_name = '${user}' AND is_uploaded=${1};`;
   return await execSql(query).then(res => {
     return res;
   });

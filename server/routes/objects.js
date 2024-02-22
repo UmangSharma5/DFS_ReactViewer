@@ -73,12 +73,15 @@ router.get('/:url', async (req, res) => {
             const uniqueId = name.split('png').pop();
             await file_stats(user, bucketName, tname.split('.')[0]).then(
               response => {
-                temp.push({
-                  name: tname.split('.')[0],
-                  format: response[0]?.file_type,
-                  date: response[0]?.upload_date,
-                  fileId: uniqueId,
-                });
+                if (response.length > 0) {
+                  temp.push({
+                    name: tname.split('.')[0],
+                    format: response[0]?.file_type,
+                    date: response[0]?.upload_date,
+                    fileId: uniqueId,
+                    isUploaded: response[0]?.is_uploaded,
+                  });
+                }
               },
             );
           }),
@@ -101,6 +104,7 @@ const handleUpload = async (
   fileName,
   socket_id,
   user,
+  format,
 ) => {
   let sock = sockets[socket_id];
   minioClient.fPutObject(
@@ -119,21 +123,23 @@ const handleUpload = async (
             Data: {
               Total_Files: obj.total_files,
               Uploaded_Files: obj.curr_count,
+              format: format,
             },
           });
         }
         if (obj.curr_count === obj.total_files) {
+          await file_uploaded(user, bucketName, obj.fileName, obj.format);
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploaded',
             Data: {
               Total_Files: obj.total_files,
               Uploaded_Files: obj.curr_count,
+              format: format,
             },
           });
           sock.disconnect();
           removeSocket(socket_id);
-          await file_uploaded(user, bucketName, obj.fileName, obj.format);
           fs.rmdir(
             tempDirPath + '/' + fileName + '_files',
             { recursive: true, force: true },
@@ -197,6 +203,7 @@ const handleAllUpload = async (
                 fileName,
                 token,
                 user,
+                format,
               ),
             ),
           );
@@ -248,8 +255,15 @@ router.post('/:url', async function (req, res) {
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
         ) {
-          sockets[socket_id].disconnect();
-          removeSocket(socket_id);
+          sockets[socket_id].emit('progress', {
+            Title: 'Upload Progress',
+            status: 'uploading',
+            Data: {
+              Total_Files: 1,
+              Uploaded_Files: 0,
+              format: parts[1],
+            },
+          });
           minioClient.fPutObject(
             bucketName,
             'hv/' + user + '/thumbnail/' + fileName + fileId,
@@ -258,12 +272,24 @@ router.post('/:url', async function (req, res) {
               if (err) {
                 return res.status(400).json({ error: 'Failed to upload' });
               }
-              await file_uploaded(user, bucketName, tempName, parts[1]);
+              // await file_uploaded(user, bucketName, tempName, parts[1]);
               res
                 .status(200)
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
             },
           );
+          await file_uploaded(user, bucketName, tempName, parts[1]);
+          sockets[socket_id].emit('progress', {
+            Title: 'Upload Progress',
+            status: 'uploaded',
+            Data: {
+              Total_Files: 1,
+              Uploaded_Files: 1,
+              format: parts[1],
+            },
+          });
+          sockets[socket_id].disconnect();
+          removeSocket(socket_id);
         } else {
           const command = `vips`;
           const args = [

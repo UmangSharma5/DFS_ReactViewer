@@ -19,7 +19,7 @@ function GetFiles(props) {
     }
   }, [props.fileObj.count]);
 
-  async function getFiles() {
+  async function getFiles(cnt) {
     try {
       const response = await axios.get(
         `${config.BASE_URL}/objects/${props.email}`,

@@ -22,7 +22,7 @@ function Viewer(props) {
   const [uploadPercentage, setUploadPercentage] = useState({});
   const [isConnected, setIsConnected] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [isFileUploaded, setIsFileUploaded] = useState(false);
+  let [isFileUploaded, setIsFileUploaded] = useState(0);
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user'),
@@ -84,9 +84,8 @@ function Viewer(props) {
             },
           }));
           if (progress_data.status === 'uploaded') {
-            setIsFileUploaded(true);
-          } else {
-            setIsFileUploaded(false);
+            isFileUploaded = isFileUploaded + 1;
+            setIsFileUploaded(isFileUploaded);
           }
         }
       });
