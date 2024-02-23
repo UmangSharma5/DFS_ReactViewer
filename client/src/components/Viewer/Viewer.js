@@ -10,12 +10,11 @@ import StatusInfo from '../statusInfo';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-function Viewer() {
+function Viewer(props) {
   const [currentFile, setCurrentFile] = useState({
     count: 0,
     files: '',
   });
-
   const [isUploaded, setIsUploaded] = useState(false);
   const [displayProgressBar, setDisplayProgressBar] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
@@ -23,6 +22,7 @@ function Viewer() {
   const [uploadPercentage, setUploadPercentage] = useState({});
   const [isConnected, setIsConnected] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  let [isFileUploaded, setIsFileUploaded] = useState(0);
 
   const email = JSON.parse(
     localStorage.getItem('dfs-user'),
@@ -76,7 +76,6 @@ function Viewer() {
           let den = progress_data.Data.Total_Files;
           let per = (num / den) * 100;
           const fileName = file.name;
-          console.warn('per--', per);
           setUploadPercentage(prevValue => ({
             ...prevValue,
             [fileName]: {
@@ -84,6 +83,10 @@ function Viewer() {
               minio: per,
             },
           }));
+          if (progress_data.status === 'uploaded') {
+            isFileUploaded = isFileUploaded + 1;
+            setIsFileUploaded(isFileUploaded);
+          }
         }
       });
 
@@ -154,7 +157,8 @@ function Viewer() {
       <Modal
         show={showUploadModal}
         onHide={e => setShowUploadModal(false)}
-        centered>
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Select Files to Upload</Modal.Title>
         </Modal.Header>
@@ -179,7 +183,8 @@ function Viewer() {
             onClick={e => {
               uploadFile(e);
               setShowUploadModal(false);
-            }}>
+            }}
+          >
             Upload
           </Button>
         </Modal.Footer>
@@ -193,6 +198,8 @@ function Viewer() {
           displayProgressBar={displayProgressBar}
           progressValue={progressValue}
           uploadPercentage={uploadPercentage}
+          logout={props.logout}
+          isFileUploaded={isFileUploaded}
         />
       </div>
       <div className="status">

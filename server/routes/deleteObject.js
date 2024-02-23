@@ -12,12 +12,12 @@ import { get_user_bucket, delete_file } from '../Database_queries/queries.js';
 router.post('/:url', async function (req, res) {
   let user = await get_user_bucket(req.user.user_email);
   let fileName = req.body.fileName;
+  let fileId = req.body.fileId;
   let miniopath = '/hv/' + user + '/thumbnail/';
   let bucketName = 'datadrive-dev';
   let format = fileName.split('.')[1];
   let name = fileName.split('.')[0];
   let fileName_thumbnail = fileName.split('.')[0] + '.png' + fileId;
-
   minioClient.removeObject(
     bucketName,
     miniopath + fileName_thumbnail,

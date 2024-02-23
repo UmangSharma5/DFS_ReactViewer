@@ -6,6 +6,8 @@ import Viewer from './components/Viewer/Viewer';
 import Login from './components/Login/Login';
 import './App.css';
 import NavBar from './components/Viewer/components/NavBar/NavBar';
+// import '../src/components/Config/config'
+import { config } from 'components/Config/config';
 
 function App() {
   let tokenId = null;
@@ -28,10 +30,10 @@ function App() {
   }
 
   async function checkUser(email, password) {
-    // const LOGIN_URL = 'https://datafoundation.iiit.ac.in/api/login'
-    const LOGIN_URL_DEV = 'http://10.4.25.20:3001/api/login';
+    const LOGIN_URL = config.LOGIN_URL;
+
     try {
-      const response = await axios.post(LOGIN_URL_DEV, { email, password });
+      const response = await axios.post(LOGIN_URL, { email, password });
 
       let dfs_user = {
         user: response.data.data.user,
@@ -51,12 +53,9 @@ function App() {
   }
 
   async function checkAuth() {
-    // const GET_URL ='https://datafoundation.iiit.ac.in/api/detokn?token=' + tokenId
-    const GET_URL_DEV = 'http://10.4.25.20:3001/api/detokn?token=' + tokenId;
-
+    const GET_URL = config.GET_URL + tokenId;
     try {
-      await axios.get(GET_URL_DEV);
-      // console.warn(response);
+      await axios.get(GET_URL);
       setIsLoggedIn(true);
       navigate('/');
     } catch (error) {
@@ -96,4 +95,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

@@ -28,14 +28,9 @@ function RenderFile(props) {
     name: '',
   });
 
-  console.warn(imageName);
-
   useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      props.getFiles();
-    }, config.REFRESH_TIME);
-    return () => clearInterval(refreshInterval);
-  }, []);
+    props.getFiles(props.isFileUploaded);
+  }, [props.isFileUploaded]);
 
   useEffect(() => {
     if (
@@ -80,7 +75,6 @@ function RenderFile(props) {
         });
         setAllImagesLinks(updatedImageLinks);
       }
-
       if (newImageNames.length > 0) {
         const reversedImageNames = [...newImageNames].reverse();
         reversedImageNames.forEach(newImage => {
@@ -154,7 +148,9 @@ function RenderFile(props) {
           let link = response.data.imageUrl;
           let fileId = response.data.fileId;
           allImagesLinks[name + fileId] = link;
-          allImageName.unshift(image);
+          // allImageName.unshift(image);
+          // setAllImageName(allImageName);
+          setAllImageName(prevAllImageName => [image, ...prevAllImageName]);
         })
         .catch(error => {
           console.error(error);
@@ -182,6 +178,9 @@ function RenderFile(props) {
           },
         })
         .then(response => {
+          if (response.data.status === 401) {
+            throw new Error('Invalid Token');
+          }
           setOuter(response.data.outer);
           return response.data.image;
         })
@@ -216,7 +215,8 @@ function RenderFile(props) {
             <div className="form-container">
               <button
                 onClick={e => props.setShow(true)}
-                className="upload-button">
+                className="upload-button"
+              >
                 Upload Files
               </button>
               {props.displayProgressBar ? (
