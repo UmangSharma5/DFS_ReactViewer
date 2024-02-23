@@ -1,15 +1,19 @@
+// library imports
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import OpenSeadragonViewer from './components/OpenSeaDragon/OpenSeadragonViewer';
-import './RenderFile.css';
-import { config } from '../../../../../Config/config';
 import { toast } from 'react-toastify';
-import { FaRegImages } from 'react-icons/fa';
-import { AiFillCloseCircle } from 'react-icons/ai';
-import { io } from 'socket.io-client';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
+
+// components
+import OpenSeadragonViewer from './components/OpenSeaDragon/OpenSeadragonViewer';
 import ProgressBar from 'components/Viewer/components/ProgressBar/ProgressBar';
-import DeleteIcon from '@mui/icons-material/Delete';
-// import StatusInfo from '../../../../../statusInfo'
+
+// config/helpers
+import { config } from 'components/Config/config';
+
+// css file
+import './RenderFile.css';
 
 function RenderFile(props) {
   const [viewerImage, setViewerImage] = useState();
@@ -21,12 +25,7 @@ function RenderFile(props) {
   const [pyramid, setPyramid] = useState({});
   const isFirstRender = React.useRef(true);
   const [outer, setOuter] = useState();
-  // const [isLoding, setLoading] = useState(false)
   const [showThumbnails, setShowThumbnails] = useState(true);
-  const [currentFile, setCurrentFile] = useState({
-    count: 0,
-    name: '',
-  });
 
   useEffect(() => {
     props.getFiles(props.isFileUploaded);
@@ -148,8 +147,6 @@ function RenderFile(props) {
           let link = response.data.imageUrl;
           let fileId = response.data.fileId;
           allImagesLinks[name + fileId] = link;
-          // allImageName.unshift(image);
-          // setAllImageName(allImageName);
           setAllImageName(prevAllImageName => [image, ...prevAllImageName]);
         })
         .catch(error => {
@@ -161,7 +158,6 @@ function RenderFile(props) {
   }
 
   async function handleClick(e) {
-    // setLoading(true)
     let num = e.target.id;
     const imagetype = allImageName[num].format;
     const dir_ = allImageName[num].name.split('.')[0];
@@ -198,7 +194,6 @@ function RenderFile(props) {
       allImagesLinks[allImageName[num].name + allImageName[num].fileId],
     );
     setImageName(allImageName[num]);
-    // setLoading(false)
   }
 
   function handleDelete(event, file) {
@@ -208,85 +203,95 @@ function RenderFile(props) {
   }
 
   return (
-    <div className="render-file-container">
-      {showThumbnails ? (
-        <div className="button-container">
-          <div className="main-btn">
-            <div className="form-container">
-              <button
-                onClick={e => props.setShow(true)}
-                className="upload-button"
-              >
-                Upload Files
-              </button>
-              {props.displayProgressBar ? (
-                <ProgressBar progressValue={props.progressValue} />
-              ) : (
-                <></>
-              )}
-            </div>
-          </div>
+    <div className="main-viewer">
+      <div
+        className={`file-explorer ${
+          !showThumbnails ? 'file-explorer-collapsed' : ''
+        }`}
+      >
+        <div
+          className={`toggle-explorer ${
+            !showThumbnails ? 'toggle-explorer_open' : ''
+          }`}
+          onClick={() => setShowThumbnails(prev => !prev)}
+        >
+          {showThumbnails ? (
+            <FaChevronLeft
+              style={{ height: '30px', width: '30px', marginRight: '10px' }}
+            />
+          ) : (
+            <FaChevronRight
+              style={{ height: '30px', width: '30px', marginRight: '10px' }}
+            />
+          )}
+        </div>
+
+        <button onClick={() => props.setShow(true)} className="upload-button">
+          <svg
+            fill="#000"
+            width="20px"
+            height="20px"
+            viewBox="0  0  24  24"
+            id="plus"
+            data-name="Flat Line"
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon flat-line"
+          >
+            <path
+              id="primary"
+              d="M5,12H19M12,5V19"
+              style={{
+                fill: 'none',
+                stroke: 'white',
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                strokeWidth: 2,
+              }}
+            />
+          </svg>
+          <span style={{ display: 'inline-block' }}>New</span>
+        </button>
+        {props.displayProgressBar ? (
+          <ProgressBar progressValue={props.progressValue} />
+        ) : null}
+        <div className="file-container">
           {allImageName.map((file, i) => {
-            const buttonStyles = {
-              margin: '10px',
-              backgroundImage: allImagesLinks[file.name + file.fileId]
-                ? `url(${allImagesLinks[file.name + file.fileId]})`
-                : 'none',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              color: '#333',
-              objectFit: 'cover',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              height: '100px',
-              width: '100px',
-            };
             return (
               <div className="thumbnail-container">
                 <img
-                  className="thumnails"
+                  className="thumbnail"
                   onClick={handleClick}
-                  style={buttonStyles}
+                  style={{
+                    backgroundImage: allImagesLinks[file.name + file.fileId]
+                      ? `url(${allImagesLinks[file.name + file.fileId]})`
+                      : 'none',
+                  }}
                   key={i}
                   id={i}
                 />
-                <div className="name-del">
-                  <p className="image-name">{file.name + '.' + file.format}</p>
-                  <DeleteIcon
+                <div className="file-actions">
+                  <p className="thumbnail-filename">
+                    {file.name + '.' + file.format}
+                  </p>
+                  <RiDeleteBin6Fill
                     onClick={event => handleDelete(event, file)}
-                    style={{ color: 'red' }}
+                    style={{
+                      marginLeft: 'auto',
+                      position: 'relative',
+                      right: '0px',
+                    }}
                   />
                 </div>
               </div>
             );
           })}
         </div>
-      ) : (
-        <></>
-      )}
-      {showThumbnails ? (
-        <AiFillCloseCircle
-          title="Hide Thumbnails"
-          onClick={() => {
-            setShowThumbnails(!showThumbnails);
-          }}
-          style={{ height: '30px', width: '30px', marginRight: '10px' }}
-        />
-      ) : (
-        <FaRegImages
-          title="Show Thumbnails"
-          onClick={() => {
-            setShowThumbnails(!showThumbnails);
-          }}
-          style={{
-            height: '30px',
-            width: '30px',
-            marginRight: '10px',
-            marginLeft: '10px',
-          }}
-        />
-      )}
-      <div className="viewer-container">
+      </div>
+
+      <div
+        className="viewer-container"
+        style={{ marginLeft: showThumbnails ? undefined : '20px' }}
+      >
         <p id="viewer-image-name">
           {viewerImage ? imageName.name + '.' + imageName.format : ' '}
         </p>
