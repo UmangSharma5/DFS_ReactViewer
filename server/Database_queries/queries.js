@@ -25,8 +25,8 @@ const file_stats = async (user, bucketName, filename) => {
     return res;
   });
 };
-const file_uploaded = async (user, bucketName, filename) => {
-  let query = `UPDATE FileTypeMap SET is_uploaded = ${1}  where filename = '${filename}' AND bucket_name = '${bucketName}' AND user_name = '${user}';`;
+const file_uploaded = async (user, fileId) => {
+  let query = `UPDATE FileTypeMap SET is_uploaded = ${1}  where file_unique_id = '${fileId}' AND user_name = '${user}';`;
   return await execSql(query).then(res => {
     return res;
   });

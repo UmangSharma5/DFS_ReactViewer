@@ -31,8 +31,11 @@ function GetFiles(props) {
           },
         },
       );
+
+      if (response.data.status === 401) props.logout();
+
       const sortedData = response.data.temp.sort(sortFileNames);
-      if (response.status === 404) props.logout();
+
       setBackendData(sortedData);
     } catch (error) {
       console.error('here', error);

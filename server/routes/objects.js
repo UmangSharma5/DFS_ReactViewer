@@ -105,6 +105,7 @@ const handleUpload = async (
   socket_id,
   user,
   format,
+  fileId,
 ) => {
   let sock = sockets[socket_id];
   minioClient.fPutObject(
@@ -128,7 +129,7 @@ const handleUpload = async (
           });
         }
         if (obj.curr_count === obj.total_files) {
-          await file_uploaded(user, bucketName, obj.fileName, obj.format);
+          await file_uploaded(user, fileId);
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploaded',
@@ -204,6 +205,7 @@ const handleAllUpload = async (
                 token,
                 user,
                 format,
+                fileId,
               ),
             ),
           );
@@ -255,15 +257,6 @@ router.post('/:url', async function (req, res) {
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
         ) {
-          sockets[socket_id].emit('progress', {
-            Title: 'Upload Progress',
-            status: 'uploading',
-            Data: {
-              Total_Files: 1,
-              Uploaded_Files: 0,
-              format: parts[1],
-            },
-          });
           minioClient.fPutObject(
             bucketName,
             'hv/' + user + '/thumbnail/' + fileName + fileId,
@@ -278,7 +271,7 @@ router.post('/:url', async function (req, res) {
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
             },
           );
-          await file_uploaded(user, bucketName, tempName, parts[1]);
+          await file_uploaded(user, fileId);
           sockets[socket_id].emit('progress', {
             Title: 'Upload Progress',
             status: 'uploaded',

@@ -178,6 +178,9 @@ function RenderFile(props) {
           },
         })
         .then(response => {
+          if (response.data.status === 401) {
+            throw new Error('Invalid Token');
+          }
           setOuter(response.data.outer);
           return response.data.image;
         })
