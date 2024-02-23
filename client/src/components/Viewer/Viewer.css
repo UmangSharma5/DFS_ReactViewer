@@ -10,17 +10,7 @@
   width: 100%;
 }
 
-.form-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-
-.Viewer input[type=file] {
+.Viewer input[type='file'] {
   width: 350px;
   max-width: 100%;
   color: #444;
@@ -38,32 +28,14 @@
   border-radius: 10px;
   color: #fff;
   cursor: pointer;
-  transition: background .2s ease-in-out;
+  transition: background 0.2s ease-in-out;
 }
 
 .Viewer .input-file:hover::file-selector-button {
   background: #0d45a5;
 }
 
-.upload-button {
-  background-color: #003976;
-  border: 0;
-  border-radius: 4px;
-  box-shadow: rgba(0, 0, 0, .3) 0 5px 15px;
-  box-sizing: border-box;
-  color: #fff;
-  cursor: pointer;
-  font-family: Montserrat,sans-serif;
-  font-size: .9em;
-  margin: 5px;
-  padding: 10px 15px;
-  text-align: center;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
-
-.status{
+.status {
   position: absolute;
   /* overflow-x: hidden; */
   right: 3%;
