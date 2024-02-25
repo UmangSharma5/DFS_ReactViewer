@@ -18,7 +18,6 @@ router.post('/:url', async function (req, res) {
   let format = fileName.split('.')[1];
   let name = fileName.split('.')[0];
   let fileName_thumbnail = fileName.split('.')[0] + '.png' + fileId;
-  console.warn('__fiel', fileName_thumbnail);
   minioClient.removeObject(
     bucketName,
     miniopath + fileName_thumbnail,

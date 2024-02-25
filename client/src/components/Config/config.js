@@ -8,7 +8,7 @@ const config = {
   GET_URL_DEV: 'http://10.4.25.20:3001/api/detokn?token=',
   // BASE_URL : "http://datafoundation-dev.iiit.ac.in/hv",
   // SOCKET_URL:  "http://datafoundation-dev.iiit.ac.in",
-  REFRESH_TIME: 20000,
+  REFRESH_TIME: 2000,
 };
 
 export { config };

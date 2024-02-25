@@ -19,7 +19,7 @@ function GetFiles(props) {
     }
   }, [props.fileObj.count]);
 
-  async function getFiles() {
+  async function getFiles(cnt) {
     try {
       const response = await axios.get(
         `${config.BASE_URL}/objects/${props.email}`,
@@ -31,7 +31,11 @@ function GetFiles(props) {
           },
         },
       );
+
+      if (response.data.status === 401) props.logout();
+
       const sortedData = response.data.temp.sort(sortFileNames);
+
       setBackendData(sortedData);
     } catch (error) {
       console.error('here', error);
@@ -62,6 +66,7 @@ function GetFiles(props) {
               currFile.fileId !== file.fileId,
           );
           setBackendData(updatedData);
+
           setCurrFileName(null);
         })
         .catch(error => {
@@ -89,6 +94,7 @@ function GetFiles(props) {
           deletedFileName={deletedFileName}
           uploadPercentage={props.uploadPercentage}
           fileMap={props.fileMap}
+          isFileUploaded={props.isFileUploaded}
         />
       ) : null}
     </div>

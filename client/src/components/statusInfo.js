@@ -27,7 +27,7 @@ const StatusInfo = props => {
               <div key={`minio-progress-${key}`}>
                 <p>DZsave complete</p>
                 <p>Minio upload in progess... {key}</p>
-                {console.warn(props.uploadPercentage[key])}
+                {/* {console.warn(props.uploadPercentage[key])} */}
                 <BootstrapProgressBar
                   key={`minio-progress-${key}`}
                   percentage={props.uploadPercentage[key].minio}
