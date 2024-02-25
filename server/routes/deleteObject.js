@@ -57,8 +57,8 @@ router.post('/:url', async function (req, res) {
     });
   }
 
-  await delete_user_socket(user, fileName);
-  await delete_file(user,bucketName, name);
+  await delete_user_socket(user, fileId);
+  await delete_file(user, bucketName, name);
 });
 
 export default router;

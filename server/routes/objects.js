@@ -134,6 +134,7 @@ const handleUpload = async (
           emitMessage(sock, 'progress', data);
         }
         if (obj.curr_count === obj.total_files) {
+          await file_uploaded(user, fileId);
           const data = {
             Title: 'Upload Progress',
             status: 'uploaded',
@@ -243,7 +244,7 @@ router.post('/:url', async function (req, res) {
       .then(result => {
         len = result.length;
         if (len === 0) {
-          add_user(user, uuidv4(user));
+          add_user(user, uuidv4());
         }
       })
       .catch(error => {
@@ -258,20 +259,20 @@ router.post('/:url', async function (req, res) {
       }
       if (files.file) {
         let filePath = files.file[0].filepath;
-        let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
+        let user = await get_user_bucket(req.user.user_email);
         const bucketName = 'datadrive-dev';
         let fileName = files.file[0].originalFilename;
         const parts = fileName.split('.');
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
         let socket_id = req.query.socket_id;
-        let fileId = uuidv4();
+        let fileId = req.query.fileId;
+        // let fileId = uuidv4();
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
         await map_file_type(user, fileId, bucketName, tempName, parts[1]);
-        // let fileInfo = await file_stats(bucketName, tempName);
-        // let fileId = fileInfo[0].file_unique_id;
+
         if (
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
@@ -284,14 +285,13 @@ router.post('/:url', async function (req, res) {
               if (err) {
                 return res.status(400).json({ error: 'Failed to upload' });
               }
-              // await file_uploaded(user, bucketName, tempName, parts[1]);
               res
                 .status(200)
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
             },
           );
           await file_uploaded(user, fileId);
-          sockets[socket_id].emit('progress', {
+          const data = {
             Title: 'Upload Progress',
             status: 'uploaded',
             Data: {
@@ -299,7 +299,8 @@ router.post('/:url', async function (req, res) {
               Uploaded_Files: 1,
               format: parts[1],
             },
-          });
+          };
+          emitMessage(sockets[socket_id], 'progress', data);
           sockets[socket_id].disconnect();
           removeSocket(socket_id);
         } else {
@@ -314,7 +315,7 @@ router.post('/:url', async function (req, res) {
             // "--depth",
             // "onetile",
             // "--overlap=1",
-          ]; // Add any arguments your command requires
+          ];
 
           const childProcess = spawn(command, args);
 
@@ -338,21 +339,16 @@ router.post('/:url', async function (req, res) {
               lastPercentageValue >= 0 &&
               lastPercentageValue <= 100
             ) {
-              // sock.emit('dzsave-progress', {
-              //   progress: lastPercentageValue,
-              // });
               const data = { progress: lastPercentageValue };
               emitMessage(sock, 'dzsave-progress', data);
             }
           });
 
           childProcess.stderr.on('data', data => {
-            // Handle error output data
             console.error(`stderr: ${data}`);
           });
 
           childProcess.on('close', async () => {
-            // console.error(`stdout: ${code}`);
             handleAllUpload(
               bucketName,
               user,
@@ -378,7 +374,6 @@ router.post('/:url', async function (req, res) {
                 await sharp(tiffFilePath)
                   .resize(targetWidth, targetHeight)
                   .toFile(pngFilePath);
-                // console.error("Conversion completed successfully!");
                 await minioClient.fPutObject(
                   bucketName,
                   'hv/' + user + '/thumbnail/' + pngFileName + fileId,

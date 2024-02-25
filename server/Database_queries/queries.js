@@ -6,15 +6,12 @@ const map_user_to_bucket = async (user, bucket) => {
 
   return res;
 };
+
 const get_user_bucket = async user => {
   let query = `SELECT bucket_name FROM User_Bucket where user = '${user}';`;
   return await execSql(query).then(res => res[0]?.bucket_name);
 };
 
-// const remove_user_bucket = async (user) => {
-//     let query = `DELETE FROM User_Bucket where user = '${user}';`
-//     return await execSql(query)
-// }
 const map_file_type = async (user, fileId, bucketName, filename, file_type) => {
   let query = `INSERT INTO FileTypeMap (user_name,file_unique_id, bucket_name, filename, file_type, upload_date) VALUES ('${user}','${fileId}','${bucketName}','${filename}' ,'${file_type}',NOW());`;
   return await execSql(query);
@@ -26,6 +23,7 @@ const file_stats = async (user, bucketName, filename) => {
     return res;
   });
 };
+
 const file_uploaded = async (user, fileId) => {
   let query = `UPDATE FileTypeMap SET is_uploaded = ${1}  where file_unique_id = '${fileId}' AND user_name = '${user}';`;
   return await execSql(query).then(res => {
@@ -33,8 +31,8 @@ const file_uploaded = async (user, fileId) => {
   });
 };
 
-const delete_file = async (user, bucketName, fileId) => {
-  let query = `DELETE FROM FileTypeMap where file_unique_id = '${fileId}' AND bucket_name = '${bucketName}' AND user_name = '${user}';`;
+const delete_file = async (user, fileId) => {
+  let query = `DELETE FROM FileTypeMap where file_unique_id = '${fileId}' AND user_name = '${user}';`;
   return await execSql(query).then(res => {
     return res;
   });
@@ -52,7 +50,7 @@ const check_user = async user => {
     const res = await execSql(query);
     return res;
   } catch (error) {
-    throw error; // Propagate the error
+    throw error;
   }
 };
 
@@ -63,28 +61,28 @@ const get_userid = async user => {
   });
 };
 
-const add_user_socket = async (userid, filename, socketid, state) => {
-  let query = `INSERT INTO User_File_SocketMap (user_id, file_name, current_socket_id, current_state) VALUES ('${userid}', '${filename}', '${socketid}', '${state}');`;
+const add_user_socket = async (user, fileId, socketid, state) => {
+  let query = `INSERT INTO User_File_SocketMap (user_name, file_unique_id, current_socket_id, current_state) VALUES ('${user}', '${fileId}', '${socketid}', '${state}');`;
   const res = await execSql(query);
   return res;
 };
 
-const check_user_socket = async (userid, filename) => {
-  let query = `SELECT current_socket_id from User_File_SocketMap where user_id = '${userid}' AND file_name = '${filename}';`;
+const check_user_socket = async (user, fileId) => {
+  let query = `SELECT current_socket_id from User_File_SocketMap where user_name = '${user}' AND file_unique_id = '${fileId}';`;
   return await execSql(query).then(res => {
     return res;
   });
 };
 
-const update_user_socket = async (userid, filename, socketid, state) => {
-  let query = `UPDATE User_File_SocketMap set current_socket_id = '${socketid}' AND current_state = '${state}' where user_id = '${userid}' AND file_name = '${filename}';`;
+const update_user_socket = async (user, filename, socketid, state) => {
+  let query = `UPDATE User_File_SocketMap set current_socket_id = '${socketid}' AND current_state = '${state}' where user_name = '${user}' AND file_unique_id = '${fileId}';`;
   return await execSql(query).then(res => {
     return res;
   });
 };
 
-const delete_user_socket = async (userid, filename) => {
-  let query = `DELETE FROM User_File_SocketMap WHERE user_id = '${userid}' AND file_name = '${filename}';`;
+const delete_user_socket = async (user, fileId) => {
+  let query = `DELETE FROM User_File_SocketMap WHERE user_name = '${user}' AND file_unique_id = '${fileId}';`;
   return await execSql(query).then(res => {
     return res;
   });
