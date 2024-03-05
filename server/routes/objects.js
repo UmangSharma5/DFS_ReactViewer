@@ -15,6 +15,8 @@ import {
   map_file_type,
   file_stats,
   file_uploaded,
+  check_user,
+  add_user,
 } from '../Database_queries/queries.js';
 import { sockets, removeSocket } from '../SocketManager/socketmanager.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,6 +28,7 @@ import { minioClient } from '../minioConfig.js';
 import sharp from 'sharp';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { emitMessage } from '../SocketManager/socketmanager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // let convert_tiff_options = {
@@ -35,6 +38,7 @@ const __dirname = path.dirname(__filename);
 router.get('/:url', async (req, res) => {
   try {
     let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
+    // console.warn(uuidv4(user));
     let bucketName = 'datadrive-dev';
     if (user === undefined) {
       user = await map_user_to_bucket(req.user.user_email, req.params.url);
@@ -118,7 +122,7 @@ const handleUpload = async (
       } else {
         obj.curr_count++;
         if (sock !== 0 && obj.curr_count % 10 === 0) {
-          sock.emit('progress', {
+          const data = {
             Title: 'Upload Progress',
             status: 'uploading',
             Data: {
@@ -126,11 +130,12 @@ const handleUpload = async (
               Uploaded_Files: obj.curr_count,
               format: format,
             },
-          });
+          };
+          emitMessage(sock, 'progress', data);
         }
         if (obj.curr_count === obj.total_files) {
           await file_uploaded(user, fileId);
-          sock.emit('progress', {
+          const data = {
             Title: 'Upload Progress',
             status: 'uploaded',
             Data: {
@@ -138,7 +143,8 @@ const handleUpload = async (
               Uploaded_Files: obj.curr_count,
               format: format,
             },
-          });
+          };
+          emitMessage(sock, 'progress', data);
           sock.disconnect();
           removeSocket(socket_id);
           fs.rmdir(
@@ -231,6 +237,20 @@ router.post('/:url', async function (req, res) {
       maxTotalFileSize: 2000 * 1024 * 1024,
       maxFileSize: 2000 * 1024 * 1024,
     });
+
+    let user = await get_user_bucket(req.user.user_email);
+    let len = 0;
+    check_user(user)
+      .then(result => {
+        len = result.length;
+        if (len === 0) {
+          add_user(user, uuidv4());
+        }
+      })
+      .catch(error => {
+        console.error(error); // Handle errors here
+      });
+
     form.parse(req, async (err, fields, files) => {
       if (err) {
         console.error(err);
@@ -239,20 +259,20 @@ router.post('/:url', async function (req, res) {
       }
       if (files.file) {
         let filePath = files.file[0].filepath;
-        let user = await get_user_bucket(req.user.user_email); // get this from database (sql)
+        let user = await get_user_bucket(req.user.user_email);
         const bucketName = 'datadrive-dev';
         let fileName = files.file[0].originalFilename;
         const parts = fileName.split('.');
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
         let socket_id = req.query.socket_id;
-        let fileId = uuidv4();
+        let fileId = req.query.fileId;
+        // let fileId = uuidv4();
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
         await map_file_type(user, fileId, bucketName, tempName, parts[1]);
-        // let fileInfo = await file_stats(bucketName, tempName);
-        // let fileId = fileInfo[0].file_unique_id;
+
         if (
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
@@ -265,14 +285,13 @@ router.post('/:url', async function (req, res) {
               if (err) {
                 return res.status(400).json({ error: 'Failed to upload' });
               }
-              // await file_uploaded(user, bucketName, tempName, parts[1]);
               res
                 .status(200)
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
             },
           );
           await file_uploaded(user, fileId);
-          sockets[socket_id].emit('progress', {
+          const data = {
             Title: 'Upload Progress',
             status: 'uploaded',
             Data: {
@@ -280,7 +299,8 @@ router.post('/:url', async function (req, res) {
               Uploaded_Files: 1,
               format: parts[1],
             },
-          });
+          };
+          emitMessage(sockets[socket_id], 'progress', data);
           sockets[socket_id].disconnect();
           removeSocket(socket_id);
         } else {
@@ -295,7 +315,7 @@ router.post('/:url', async function (req, res) {
             // "--depth",
             // "onetile",
             // "--overlap=1",
-          ]; // Add any arguments your command requires
+          ];
 
           const childProcess = spawn(command, args);
 
@@ -319,19 +339,16 @@ router.post('/:url', async function (req, res) {
               lastPercentageValue >= 0 &&
               lastPercentageValue <= 100
             ) {
-              sock.emit('dzsave-progress', {
-                progress: lastPercentageValue,
-              });
+              const data = { progress: lastPercentageValue };
+              emitMessage(sock, 'dzsave-progress', data);
             }
           });
 
           childProcess.stderr.on('data', data => {
-            // Handle error output data
             console.error(`stderr: ${data}`);
           });
 
           childProcess.on('close', async () => {
-            // console.error(`stdout: ${code}`);
             handleAllUpload(
               bucketName,
               user,
@@ -357,7 +374,6 @@ router.post('/:url', async function (req, res) {
                 await sharp(tiffFilePath)
                   .resize(targetWidth, targetHeight)
                   .toFile(pngFilePath);
-                // console.error("Conversion completed successfully!");
                 await minioClient.fPutObject(
                   bucketName,
                   'hv/' + user + '/thumbnail/' + pngFileName + fileId,
