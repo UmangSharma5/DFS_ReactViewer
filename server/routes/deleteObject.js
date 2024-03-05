@@ -8,16 +8,17 @@ app.use(cors());
 app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import { get_user_bucket, delete_file } from '../Database_queries/queries.js';
+import { logger, log } from '../logger.js';
 
 router.post('/:url', async function (req, res) {
   let user = await get_user_bucket(req.user.user_email);
   let fileName = req.body.fileName;
-  let fileId = req.body.fileId;
   let miniopath = '/hv/' + user + '/thumbnail/';
   let bucketName = 'datadrive-dev';
   let format = fileName.split('.')[1];
   let name = fileName.split('.')[0];
-  let fileName_thumbnail = fileName.split('.')[0] + '.png' + fileId;
+  let fileName_thumbnail = fileName.split('.')[0] + '.png';
+
   minioClient.removeObject(
     bucketName,
     miniopath + fileName_thumbnail,
@@ -33,27 +34,29 @@ router.post('/:url', async function (req, res) {
     let objects = [];
     let stream = minioClient.listObjects(
       bucketName,
-      'hv/' + user + '/' + name + fileId,
+      'hv/' + user + '/' + name,
       true,
     );
     stream.on('data', async obj => {
       objects.push(obj.name);
     });
     stream.on('error', err => {
-      console.error('Error listing objects:', err);
+      log.error('Error listing objects:', err);
       res.status(500).json({ error: 'Failed to list objects' });
     });
     stream.on('end', async () => {
       minioClient.removeObjects(bucketName, objects, function (e) {
         if (e) {
-          return console.error('Unable to remove objects', e);
+          return log.error('Unable to remove objects', e);
         }
-        // console.error("removed the objects successfully")
+        log.info(
+          `Removed the object ${fileName} successfully for ${req.user.user_email}`,
+        );
       });
     });
   }
 
-  await delete_file(user, bucketName, fileId);
+  await delete_file(bucketName, name);
 });
 
 export default router;

@@ -8,22 +8,23 @@ app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import { get_user_bucket } from '../Database_queries/queries.js';
 import { bucketName } from '../constants.js';
+import { logger, log } from '../logger.js';
 
 router.get('/:url', async function (req, res) {
   try {
     const user = req.params.url;
-    const { imageName, imageFormat, imageId } = req.query;
+    const { imageName, imageFormat } = req.query;
     const imageUrl = `${
       process.env.BASE_URL
     }/link/thumbnail/${user}?imageName=${encodeURIComponent(
       imageName,
-    )}&fileId=${encodeURIComponent(imageId)}&imageFormat=${encodeURIComponent(
+    )}&imageFormat=${encodeURIComponent(
       imageFormat,
     )}&token=${encodeURIComponent(req.token)}`;
     const fullImageName = imageName + '.png';
-    res.json({ imageName: fullImageName, imageUrl: imageUrl, fileId: imageId });
+    res.json({ imageName: fullImageName, imageUrl: imageUrl });
   } catch (err) {
-    console.error(err.message);
+    log.error(err.message);
     res.send({ err });
   }
 });
@@ -100,12 +101,12 @@ router.get('/imagePyramid/:url', async (req, res) => {
         const imageURL = { image: data, outer: presignedURLs[0] };
         res.json(imageURL);
       } catch (err) {
-        console.error(err.message);
+        log.error(err.message);
         res.send({ err });
       }
     });
   } catch (error) {
-    console.error('Error generating presigned URLs:', error);
+    log.error('Error generating presigned URLs:', error);
     throw error;
   }
 });
