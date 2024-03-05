@@ -12,10 +12,10 @@ router.get('/thumbnail/:url', async function (req, res) {
   try {
     const user = req.params.url;
     let bucketName = 'datadrive-dev';
-    const { imageName } = req.query;
+    const { imageName, fileId } = req.query;
     minioClient.getObject(
       bucketName,
-      'hv/' + user + '/thumbnail/' + imageName + '.png',
+      'hv/' + user + '/thumbnail/' + imageName + '.png' + fileId,
       (err, dataStream) => {
         if (err) {
           log.error('Error getting object from Minio:', err);

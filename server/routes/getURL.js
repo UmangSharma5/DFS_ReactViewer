@@ -13,16 +13,16 @@ import { logger, log } from '../logger.js';
 router.get('/:url', async function (req, res) {
   try {
     const user = req.params.url;
-    const { imageName, imageFormat } = req.query;
+    const { imageName, imageFormat, imageId } = req.query;
     const imageUrl = `${
       process.env.BASE_URL
     }/link/thumbnail/${user}?imageName=${encodeURIComponent(
       imageName,
-    )}&imageFormat=${encodeURIComponent(
+    )}&fileId=${encodeURIComponent(imageId)}&imageFormat=${encodeURIComponent(
       imageFormat,
     )}&token=${encodeURIComponent(req.token)}`;
     const fullImageName = imageName + '.png';
-    res.json({ imageName: fullImageName, imageUrl: imageUrl });
+    res.json({ imageName: fullImageName, imageUrl: imageUrl, fileId: imageId });
   } catch (err) {
     log.error(err.message);
     res.send({ err });

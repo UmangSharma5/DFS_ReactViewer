@@ -17,6 +17,7 @@ import {
   file_uploaded,
 } from '../Database_queries/queries.js';
 import { logger, log } from '../logger.js';
+import { v4 as uuidv4 } from 'uuid';
 import {
   sockets,
   socket_user_map,
@@ -75,14 +76,20 @@ router.get('/:url', async (req, res) => {
         await Promise.all(
           objects.map(async name => {
             let tname = name.split('/')[3];
-            await file_stats(bucketName, tname.split('.')[0]).then(response => {
-              if (response[0]?.isUploaded)
-                temp.push({
-                  name: tname.split('.')[0],
-                  format: response[0]?.file_type,
-                  date: response[0]?.upload_date,
-                });
-            });
+            const uniqueId = name.split('png').pop();
+            await file_stats(user, bucketName, tname.split('.')[0]).then(
+              response => {
+                if (response.length > 0) {
+                  temp.push({
+                    name: tname.split('.')[0],
+                    format: response[0]?.file_type,
+                    date: response[0]?.upload_date,
+                    fileId: uniqueId,
+                    isUploaded: response[0]?.is_uploaded,
+                  });
+                }
+              },
+            );
           }),
         );
         // console.error('Listing objects completed.');
@@ -98,6 +105,8 @@ router.get('/:url', async (req, res) => {
 const handleUpload = async (
   bucketName,
   user,
+  format,
+  fileId,
   minioPath,
   filePath,
   obj,
@@ -122,10 +131,12 @@ const handleUpload = async (
             Data: {
               Total_Files: obj.total_files,
               Uploaded_Files: obj.curr_count,
+              format: format,
             },
           });
         }
         if (obj.curr_count === obj.total_files) {
+          await file_uploaded(user, fileId);
           log.info(
             `Upload to MinIO Completed ${fileName}, ${socket_user_map[socket_id]}`,
           );
@@ -135,11 +146,11 @@ const handleUpload = async (
             Data: {
               Total_Files: obj.total_files,
               Uploaded_Files: obj.curr_count,
+              format: format,
             },
           });
           sock.disconnect();
           removeSocket(socket_id);
-          await file_uploaded(bucketName, obj.fileName, obj.format);
           fs.rmdir(
             tempDirPath + '/' + fileName + '_files',
             { recursive: true, force: true },
@@ -167,6 +178,7 @@ const handleAllUpload = async (
   fileName,
   format,
   tempDirPath,
+  fileId
 ) => {
   let obj = {
     total_files: 0,
@@ -175,7 +187,7 @@ const handleAllUpload = async (
     format: format,
   };
   let walker = walk(`temp/${fileName}_files`);
-  const minioPath = `hv/${user}/${fileName}/`;
+  const minioPath = `hv/${user}/${fileName + fileId}/`;
   walker.on('file', async (root, fileStats, next) => {
     obj.total_files++;
     next();
@@ -193,6 +205,8 @@ const handleAllUpload = async (
               handleUpload(
                 bucketName,
                 user,
+                format,
+                fileId,
                 minioPath,
                 filePath,
                 obj,
@@ -239,20 +253,19 @@ router.post('/:url', async function (req, res) {
         let tempName = parts[0];
         let inProgress = req.query.inProgress;
         let socket_id = req.query.socket_id;
+        let fileId = uuidv4();
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
 
-        await map_file_type(bucketName, tempName, parts[1]);
+        await map_file_type(user, fileId, bucketName, tempName, parts[1]);
 
         if (
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
         ) {
-          sockets[socket_id].disconnect();
-          removeSocket(socket_id);
           minioClient.fPutObject(
             bucketName,
-            'hv/' + user + '/thumbnail/' + fileName,
+            'hv/' + user + '/thumbnail/' + fileName + fileId,
             filePath,
             async (err, objInfo) => {
               if (err) {
@@ -265,6 +278,18 @@ router.post('/:url', async function (req, res) {
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
             },
           );
+          await file_uploaded(user, fileId);
+          sockets[socket_id].emit('progress', {
+            Title: 'Upload Progress',
+            status: 'uploaded',
+            Data: {
+              Total_Files: 1,
+              Uploaded_Files: 1,
+              format: parts[1],
+            },
+          });
+          sockets[socket_id].disconnect();
+          removeSocket(socket_id);
         } else {
           const command = `vips`;
           const args = [
@@ -272,8 +297,8 @@ router.post('/:url', async function (req, res) {
             filePath,
             `./temp/${tempName}`,
             '--vips-progress',
-            // "--tile-size",
-            // "350"
+            '--tile-size',
+            '4096',
             // "--depth",
             // "onetile",
             // "--overlap=1",
@@ -323,6 +348,7 @@ router.post('/:url', async function (req, res) {
               `${tempName}`,
               parts[1],
               tempDirPath,
+              fileId
             );
             let tiffFilePath = filePath;
             let pngFilePath =
@@ -343,7 +369,7 @@ router.post('/:url', async function (req, res) {
                 // console.error("Conversion completed successfully!");
                 await minioClient.fPutObject(
                   bucketName,
-                  'hv/' + user + '/thumbnail/' + pngFileName,
+                  'hv/' + user + '/thumbnail/' + pngFileName + fileId,
                   pngFilePath,
                   function (err, objInfo) {
                     if (err) {
@@ -363,7 +389,7 @@ router.post('/:url', async function (req, res) {
                 log.error(`sharp error:  ${err}`);
                 await minioClient.fPutObject(
                   bucketName,
-                  'hv/' + user + '/thumbnail/' + pngFileName,
+                  'hv/' + user + '/thumbnail/' + pngFileName + fileId,
                   __dirname + '/../No-Preview-Available.jpg',
                   function (err, objInfo) {
                     if (err) {
