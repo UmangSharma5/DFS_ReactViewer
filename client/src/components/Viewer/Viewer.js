@@ -71,6 +71,9 @@ function Viewer() {
         setIsConnected(true);
         socket.emit('addUser', {
           token: JSON.parse(localStorage.getItem('dfs-user'))?.['token'],
+          user_id: JSON.parse(localStorage.getItem('dfs-user'))?.['user'][
+            'user_email'
+          ],
           socket_id: socket.id,
         });
         const fileName = file.name;

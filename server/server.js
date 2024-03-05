@@ -7,9 +7,12 @@ import http from 'http';
 import { fileURLToPath } from 'url';
 import require_auth from './middleware/Auth.js';
 import require_auth_proxylinks from './middleware/proxyLinksAuth.js';
-import { updateSocket } from './SocketManager/socketmanager.js';
+import {
+  socket_user_map,
+  updateSocket,
+} from './SocketManager/socketmanager.js';
 import { Server } from 'socket.io';
-import { logger } from './logger.js';
+import { logger, log } from './logger.js';
 const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 
@@ -51,19 +54,17 @@ const io = new Server(server, {
 // Add this
 // Listen for when the client connects via socket.io-client
 io.on('connection', socket => {
-  console.warn(`User connected ${socket.id}`);
-
   socket.on('addUser', user => {
     let usertoken = user.socket_id;
-    updateSocket(usertoken, socket);
+    updateSocket(usertoken, socket, user.user_id);
+    log.info(`User connected ${user.user_id}`);
     socket.emit('AddedUser', {
       user_added: true,
     });
   });
 
-  //when disconnect from client
   socket.on('disconnect', () => {
-    logger.info('a user disconnected!');
+    log.info(`User disconnected ${socket_user_map[socket.id]}`);
   });
 });
 
@@ -72,5 +73,5 @@ app.get('/*', function (req, res) {
 });
 
 server.listen(port, function () {
-  logger.info(`Server started on port ${port}`);
+  log.info(`Server started on port ${port}`);
 });

@@ -8,6 +8,7 @@ app.use(bodyParser.json());
 import { minioClient } from '../minioConfig.js';
 import { get_user_bucket } from '../Database_queries/queries.js';
 import { bucketName } from '../constants.js';
+import { logger, log } from '../logger.js';
 
 router.get('/:url', async function (req, res) {
   try {
@@ -23,7 +24,7 @@ router.get('/:url', async function (req, res) {
     const fullImageName = imageName + '.png';
     res.json({ imageName: fullImageName, imageUrl: imageUrl });
   } catch (err) {
-    console.error(err.message);
+    log.error(err.message);
     res.send({ err });
   }
 });
@@ -100,12 +101,12 @@ router.get('/imagePyramid/:url', async (req, res) => {
         const imageURL = { image: data, outer: presignedURLs[0] };
         res.json(imageURL);
       } catch (err) {
-        console.error(err.message);
+        log.error(err.message);
         res.send({ err });
       }
     });
   } catch (error) {
-    console.error('Error generating presigned URLs:', error);
+    log.error('Error generating presigned URLs:', error);
     throw error;
   }
 });
