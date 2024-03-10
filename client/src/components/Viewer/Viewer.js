@@ -110,6 +110,7 @@ function Viewer(props) {
         const formData = new FormData();
         setDisplayProgressBar(true);
         formData.append('file', file);
+        console.warn('file__', file);
         let bucketURL = config.BASE_URL + '/objects/' + shortEmail;
 
         try {

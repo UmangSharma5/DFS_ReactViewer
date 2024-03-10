@@ -40,8 +40,8 @@ function OpenSeadragonViewer({
         id: 'openseadragon-viewer',
         prefixUrl: `${constants.OSD_PREFIX_URL}`,
         tileSources: {
-          width: 29164,
-          height: 8592,
+          width: imageName.width,
+          height: imageName.height,
           tileSize: 4096,
           tileOverlap: 0,
           getTileUrl: function (level, x, y) {

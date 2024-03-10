@@ -14,13 +14,21 @@ const get_user_bucket = async user => {
 //     let query = `DELETE FROM User_Bucket where user = '${user}';`
 //     return await execSql(query)
 // }
-const map_file_type = async (user, fileId, bucketName, filename, file_type) => {
-  let query = `INSERT INTO FileTypeMap (user_name,file_unique_id, bucket_name, filename, file_type, upload_date) VALUES ('${user}','${fileId}','${bucketName}','${filename}' ,'${file_type}',NOW());`;
+const map_file_type = async (
+  user,
+  fileId,
+  bucketName,
+  filename,
+  file_type,
+  width,
+  height,
+) => {
+  let query = `INSERT INTO FileTypeMap (user_name,file_unique_id, bucket_name, filename, file_type, upload_date, width, height) VALUES ('${user}','${fileId}','${bucketName}','${filename}' ,'${file_type}',NOW(), '${width}', '${height}');`;
   return await execSql(query);
 };
 
 const file_stats = async (user, bucketName, filename) => {
-  let query = `SELECT file_unique_id, file_type, upload_date, is_uploaded from FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}' AND user_name = '${user}' AND is_uploaded=${1};`;
+  let query = `SELECT file_unique_id, file_type, upload_date, is_uploaded, width, height from FileTypeMap where filename = '${filename}' AND bucket_name = '${bucketName}' AND user_name = '${user}' AND is_uploaded=${1};`;
   return await execSql(query).then(res => {
     return res;
   });

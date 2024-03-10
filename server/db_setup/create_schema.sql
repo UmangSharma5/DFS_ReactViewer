@@ -16,5 +16,7 @@ CREATE TABLE FileTypeMap (
     filename varchar(255),
     file_type varchar(255),    
     upload_date DATETIME,
+    width int,
+    height int,
     is_uploaded boolean DEFAULT 0
 );

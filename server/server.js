@@ -35,6 +35,7 @@ app.use('/hv/link', require_auth_proxylinks, proxyLinks);
 // app.use('/hv/getURL',getURL);
 // app.use('/hv/deleteBucket',deleteBucket);
 // app.use('/hv/deleteObject',deleteObject);
+// app.use('/hv/link', proxyLinks);
 
 app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
