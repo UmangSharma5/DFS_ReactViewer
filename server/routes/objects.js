@@ -80,6 +80,8 @@ router.get('/:url', async (req, res) => {
                     date: response[0]?.upload_date,
                     fileId: uniqueId,
                     isUploaded: response[0]?.is_uploaded,
+                    width: response[0]?.width,
+                    height: response[0]?.height,
                   });
                 }
               },
@@ -228,8 +230,8 @@ router.post('/:url', async function (req, res) {
     // count = 0;
     const form = formidable({
       multiples: false,
-      maxTotalFileSize: 2000 * 1024 * 1024,
-      maxFileSize: 2000 * 1024 * 1024,
+      maxTotalFileSize: 10000 * 1024 * 1024,
+      maxFileSize: 10000 * 1024 * 1024,
     });
     form.parse(req, async (err, fields, files) => {
       if (err) {
@@ -249,14 +251,22 @@ router.post('/:url', async function (req, res) {
         let fileId = uuidv4();
         let pngFileName = tempName + '.png';
         let tempDirPath = path.resolve(__dirname, '../temp');
+        let height = 0,
+          width = 0;
 
-        await map_file_type(user, fileId, bucketName, tempName, parts[1]);
-        // let fileInfo = await file_stats(bucketName, tempName);
-        // let fileId = fileInfo[0].file_unique_id;
         if (
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
         ) {
+          await map_file_type(
+            user,
+            fileId,
+            bucketName,
+            tempName,
+            parts[1],
+            width,
+            height,
+          );
           minioClient.fPutObject(
             bucketName,
             'hv/' + user + '/thumbnail/' + fileName + fileId,
@@ -265,7 +275,6 @@ router.post('/:url', async function (req, res) {
               if (err) {
                 return res.status(400).json({ error: 'Failed to upload' });
               }
-              // await file_uploaded(user, bucketName, tempName, parts[1]);
               res
                 .status(200)
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
@@ -284,6 +293,37 @@ router.post('/:url', async function (req, res) {
           sockets[socket_id].disconnect();
           removeSocket(socket_id);
         } else {
+          const command1 = `vipsheader`;
+          const args1 = [`${filePath}`];
+
+          const childProcess1 = spawn(command1, args1);
+
+          childProcess1.stdout.on('data', data => {
+            const output = data.toString();
+            const dimensions = output.match(/(\d+)x(\d+)/);
+            if (dimensions) {
+              width = parseInt(dimensions[1]);
+              height = parseInt(dimensions[2]);
+            }
+            console.warn(width, height);
+          });
+
+          childProcess1.stderr.on('data', err => {
+            console.error('Error:', err.toString());
+          });
+
+          childProcess1.on('close', async () => {
+            await map_file_type(
+              user,
+              fileId,
+              bucketName,
+              tempName,
+              parts[1],
+              width,
+              height,
+            );
+          });
+
           const command = `vips`;
           const args = [
             'dzsave',
