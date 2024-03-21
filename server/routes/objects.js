@@ -16,8 +16,14 @@ import {
   file_stats,
   file_uploaded,
 } from '../Database_queries/queries.js';
-import { sockets, removeSocket } from '../SocketManager/socketmanager.js';
+import { logger, log } from '../logger.js';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  sockets,
+  socket_user_map,
+  removeSocket,
+} from '../SocketManager/socketmanager.js';
+
 const sem = semaphore(100);
 app.use(cors());
 app.use(bodyParser.json());
@@ -43,7 +49,7 @@ router.get('/:url', async (req, res) => {
 
     minioClient.bucketExists(bucketName, async err => {
       if (err) {
-        console.error(err);
+        log.error(err);
         res.send({
           error: true,
           message: 'Error in Checking if bucket Exists',
@@ -61,7 +67,7 @@ router.get('/:url', async (req, res) => {
       });
 
       stream.on('error', err => {
-        console.error('Error listing objects:', err);
+        log.error('Error listing objects:', err);
         res.status(500).json({ error: 'Failed to list objects' });
       });
 
@@ -86,26 +92,27 @@ router.get('/:url', async (req, res) => {
             );
           }),
         );
+        // console.error('Listing objects completed.');
         res.json({ temp });
       });
     });
   } catch (err) {
-    console.error(err.message);
+    log.error(err.message);
     res.send({ err });
   }
 });
 
 const handleUpload = async (
   bucketName,
+  user,
+  format,
+  fileId,
   minioPath,
   filePath,
   obj,
   tempDirPath,
   fileName,
   socket_id,
-  user,
-  format,
-  fileId,
 ) => {
   let sock = sockets[socket_id];
   minioClient.fPutObject(
@@ -114,7 +121,7 @@ const handleUpload = async (
     filePath,
     async err => {
       if (err) {
-        console.error(err);
+        log.error(err);
       } else {
         obj.curr_count++;
         if (sock !== 0 && obj.curr_count % 10 === 0) {
@@ -130,6 +137,9 @@ const handleUpload = async (
         }
         if (obj.curr_count === obj.total_files) {
           await file_uploaded(user, fileId);
+          log.info(
+            `Upload to MinIO Completed ${fileName}, ${socket_user_map[socket_id]}`,
+          );
           sock.emit('progress', {
             Title: 'Upload Progress',
             status: 'uploaded',
@@ -146,10 +156,7 @@ const handleUpload = async (
             { recursive: true, force: true },
             err => {
               if (err) {
-                console.error(
-                  'Directory delete from temp failed: ',
-                  err.message,
-                );
+                log.error(`Directory delete from temp failed: ${err.message}`);
                 return;
               }
             },
@@ -171,7 +178,7 @@ const handleAllUpload = async (
   fileName,
   format,
   tempDirPath,
-  fileId,
+  fileId
 ) => {
   let obj = {
     total_files: 0,
@@ -197,22 +204,22 @@ const handleAllUpload = async (
             resolve(
               handleUpload(
                 bucketName,
+                user,
+                format,
+                fileId,
                 minioPath,
                 filePath,
                 obj,
                 tempDirPath,
                 fileName,
                 token,
-                user,
-                format,
-                fileId,
               ),
             ),
           );
         });
       } catch (error) {
         // Handle any errors that occurred during handleUpload
-        console.error('Error during handleUpload:', error);
+        log.error('Error during handleUpload:', error);
       }
       next();
     });
@@ -233,7 +240,7 @@ router.post('/:url', async function (req, res) {
     });
     form.parse(req, async (err, fields, files) => {
       if (err) {
-        console.error(err);
+        log.error(err);
         res.status(400).json({ error: 'Failed to parse form data' });
         return;
       }
@@ -251,8 +258,7 @@ router.post('/:url', async function (req, res) {
         let tempDirPath = path.resolve(__dirname, '../temp');
 
         await map_file_type(user, fileId, bucketName, tempName, parts[1]);
-        // let fileInfo = await file_stats(bucketName, tempName);
-        // let fileId = fileInfo[0].file_unique_id;
+
         if (
           files.file[0].mimetype === 'image/jpeg' ||
           files.file[0].mimetype === 'image/png'
@@ -263,9 +269,10 @@ router.post('/:url', async function (req, res) {
             filePath,
             async (err, objInfo) => {
               if (err) {
+                log.error('Failed to Upload jpeg/png Thumbnail');
                 return res.status(400).json({ error: 'Failed to upload' });
               }
-              // await file_uploaded(user, bucketName, tempName, parts[1]);
+              await file_uploaded(bucketName, tempName, parts[1]);
               res
                 .status(200)
                 .json({ data: objInfo, filename: tempName, format: parts[1] });
@@ -327,11 +334,13 @@ router.post('/:url', async function (req, res) {
 
           childProcess.stderr.on('data', data => {
             // Handle error output data
-            console.error(`stderr: ${data}`);
+            log.error(`stderr: ${data}`);
           });
 
           childProcess.on('close', async () => {
-            // console.error(`stdout: ${code}`);
+            log.info(
+              `DZsave completed ${fileName}, ${socket_user_map[socket_id]}`,
+            );
             handleAllUpload(
               bucketName,
               user,
@@ -339,7 +348,7 @@ router.post('/:url', async function (req, res) {
               `${tempName}`,
               parts[1],
               tempDirPath,
-              fileId,
+              fileId
             );
             let tiffFilePath = filePath;
             let pngFilePath =
@@ -364,6 +373,7 @@ router.post('/:url', async function (req, res) {
                   pngFilePath,
                   function (err, objInfo) {
                     if (err) {
+                      log.error('Failed to Upload TIFF Thumbnail');
                       return res
                         .status(400)
                         .json({ error: 'Failed to upload' });
@@ -376,19 +386,19 @@ router.post('/:url', async function (req, res) {
                   },
                 );
               } catch (err) {
-                // console.error("sharp error->", err);
+                log.error(`sharp error:  ${err}`);
                 await minioClient.fPutObject(
                   bucketName,
                   'hv/' + user + '/thumbnail/' + pngFileName + fileId,
                   __dirname + '/../No-Preview-Available.jpg',
                   function (err, objInfo) {
                     if (err) {
-                      console.error(err);
+                      log.error(`No Preview Image upload error: ${err}`);
                       return res
                         .status(400)
                         .json({ error: 'Failed to upload' });
                     }
-                    // console.error("no preview upload");
+                    log.warn('No preview Image Uploaded');
                     res.status(200).json({
                       data: objInfo,
                       filename: tempName,
@@ -401,32 +411,31 @@ router.post('/:url', async function (req, res) {
               setTimeout(() => {
                 fs.rmdir(tmpDirPath, { recursive: true, force: true }, err => {
                   if (err) {
-                    console.error(
+                    log.error(
                       'Directory delete from tmp failed: ',
                       err.message,
                     );
                     return;
                   }
-                  // console.error("Directory delete successful", tmpDirPath);
                 });
               }, 1000 * 1000);
             } catch (err) {
-              console.error('An error occurred:', err);
+              log.error('An error occurred:', err);
               res.status(500).json({ error: 'Conversion failed' });
             }
           });
 
           childProcess.on('error', err => {
             // Handle process error event
-            console.error(`Error occurred: ${err.message}`);
+            log.error(`Error occurred: ${err.message}`);
           });
         }
       } else {
-        console.error('Invalid file');
+        log.error('Invalid file');
       }
     });
   } catch (err) {
-    console.error(err.message);
+    log.error(err.message);
     res.send({ err });
   }
 });

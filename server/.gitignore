@@ -4,3 +4,4 @@ temp*
 tmp*
 .DS_Store
 .env
+server.log
