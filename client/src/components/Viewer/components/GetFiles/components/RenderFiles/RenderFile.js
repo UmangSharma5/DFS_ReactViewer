@@ -2,8 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaPlus, FaAngleDoubleRight, FaMinusCircle } from 'react-icons/fa';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
+import { TiTick } from "react-icons/ti";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import JSZip from "jszip";
 
 // components
 import OpenSeadragonViewer from './components/OpenSeaDragon/OpenSeadragonViewer';
@@ -26,6 +30,8 @@ function RenderFile(props) {
   const isFirstRender = React.useRef(true);
   const [outer, setOuter] = useState();
   const [showThumbnails, setShowThumbnails] = useState(true);
+  const [selectedFiles, setFilesSelected] = useState([])
+  const [showDatasetModal, setShowDatasetModal] = useState(false)
 
   useEffect(() => {
     props.getFiles(props.isFileUploaded);
@@ -157,6 +163,8 @@ function RenderFile(props) {
     }
   }
 
+  
+
   async function handleClick(e) {
     let num = e.target.id;
     const imagetype = allImageName[num].format;
@@ -202,30 +210,119 @@ function RenderFile(props) {
     setViewerImage();
   }
 
+  const handleSelect = (e, idx) => {
+    console.log("selected")
+    e.currentTarget.parentNode.classList.toggle('green')
+    if(!e.currentTarget.parentNode.classList.contains('green')) {
+      setFilesSelected(selectedFiles.filter(index => index != idx))
+    }else {
+      setFilesSelected([...selectedFiles, idx])
+    }
+  }
+
+  const modalRemove = (i) => {
+    let file = document.querySelectorAll('.thumbnail-select')[i]
+    file.classList.toggle('green')
+    setFilesSelected(selectedFiles.filter(index => index != i))
+  }
+
+  const handleCreateDataset = (toggle) => {
+    if(toggle == 0){
+      document.querySelector('.dataset-button').style.display = "none";
+      document.querySelector('.proceed-button').style.display = "block";
+      document.querySelector('.cancel-button').style.display = "block";
+    }
+    else{
+      document.querySelector('.dataset-button').style.display = "block";
+      document.querySelector('.proceed-button').style.display = "none";
+      document.querySelector('.cancel-button').style.display = "none";
+    }
+    document.querySelector('.upload-button').classList.toggle('disabled');
+
+    let delete_btns = document.querySelectorAll('.file-delete')
+    for(let i = 0;i<delete_btns.length;i++) {
+      let element = delete_btns[i];
+      element.classList.toggle('disabled')
+    };
+
+    let selects = document.getElementsByClassName('thumbnail-select');
+    for(let i = 0;i<selects.length;i++) {
+      let element = selects[i];
+      if(element.style.display == "none") {
+        element.style.display = "flex";
+      } else {
+        element.style.display = "none";
+      }
+      element.classList.remove('green')
+    };
+    setFilesSelected([])
+  }
+
   return (
     <div className="main-viewer">
+    <Modal
+        show={showDatasetModal}
+        onHide={e => setShowDatasetModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Create New Dataset</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label for="NameDataset" className="form-label" style={{fontStyle: 'italic'}}>
+              Name of the dataset
+            </label>
+            <input
+              className="form-control"
+              type="text"
+              id="NameDataset"
+            />
+          </div>
+          <div className='mb-3'>
+            <span style={{fontStyle: 'italic'}}>Files in the Dataset</span>
+            <br></br>
+            {selectedFiles.map((i, idx) => {
+              return (
+                <div>
+                <div className='dataset-files' style={{fontWeight: 'bold'}}>
+                <span>{idx+1}</span>
+                <span style={{
+                  flex: 1,
+                  textAlign: 'center',
+                }}>{allImageName[i].name + '.' + allImageName[i].format}</span>
+                <FaMinusCircle style={{
+                  flex: 0.2,
+                  fontSize: '1.2rem',
+                  color: 'red'
+                }} onClick={e => modalRemove(i)}/>
+              </div>
+              <hr style={{margin: '10px'}}></hr>
+              </div>
+              )
+            })}
+          </div>
+        </Modal.Body>
+        <Modal.Footer style={{margin: "auto"}}>
+          <Button
+            className='upload-button'
+            onClick={e => {
+              setShowDatasetModal(false);
+            }}
+            disabled = {selectedFiles.length == 0}
+          >
+            Create
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <div
         className={`file-explorer ${
           !showThumbnails ? 'file-explorer-collapsed' : ''
         }`}
       >
-        <div
-          className={`toggle-explorer ${
-            !showThumbnails ? 'toggle-explorer_open' : ''
-          }`}
-          onClick={() => setShowThumbnails(prev => !prev)}
-        >
-          {showThumbnails ? (
-            <FaChevronLeft
-              style={{ height: '30px', width: '30px', marginRight: '10px' }}
-            />
-          ) : (
-            <FaChevronRight
-              style={{ height: '30px', width: '30px', marginRight: '10px' }}
-            />
-          )}
-        </div>
-
+        
+        
+        <div className='buttons'>
         <button onClick={() => props.setShow(true)} className="upload-button">
           <svg
             fill="#000"
@@ -250,7 +347,48 @@ function RenderFile(props) {
             />
           </svg>
           <span style={{ display: 'inline-block' }}>New</span>
-        </button>
+          </button>
+          <button className="upload-button dataset-button" style={{display: 'block'}}
+            onClick={e => handleCreateDataset(0)}
+          >
+          <span style={{ display: 'inline-block' }}>Create Dataset</span>
+          </button>
+          <button className="proceed-button" style={{display: 'none'}}
+            onClick={e => setShowDatasetModal(true)}
+          >
+          <span style={{ display: 'inline-block' }}>Proceed</span>
+          </button>
+          <button className="cancel-button" style={{display: 'none'}}
+            onClick={e => handleCreateDataset(1)}
+          >
+          <span style={{ display: 'inline-block' }}>Cancel</span>
+          </button>
+          <div
+          className={`toggle-explorer ${
+            !showThumbnails ? 'toggle-explorer_open' : ''
+          }`}
+          onClick={() => setShowThumbnails(prev => !prev)}
+        >
+          {showThumbnails ? (
+            <FaChevronLeft
+              style={{ height: '30px', width: '30px', marginRight: '10px' }}
+            />
+          ) : (
+            <FaChevronRight
+              style={{ height: '30px', width: '30px', marginRight: '10px' }}
+            />
+          )}
+        </div>
+        </div>
+        <div className='files-selected'>
+            <div className='number-files'>
+              {selectedFiles.length}
+            </div>
+            <span style={{color: 'white', fontWeight: 'bold'}}>Files Selected</span>
+            <FaAngleDoubleRight style={{color: 'white', fontSize: '1.5rem'}}
+              onClick={e => setShowDatasetModal(true)}
+            />
+        </div>
         {props.displayProgressBar ? (
           <ProgressBar progressValue={props.progressValue} />
         ) : null}
@@ -273,14 +411,24 @@ function RenderFile(props) {
                   <p className="thumbnail-filename">
                     {file.name + '.' + file.format}
                   </p>
-                  <RiDeleteBin6Fill
+                  <div className="thumbnail-select" style={{display: 'none'}}>
+                    <TiTick style={{color: 'white', opacity: 1}} onClick={e => handleSelect(e, i)} />
+                  </div>
+                  <div 
+                    className='file-delete'
                     onClick={event => handleDelete(event, file)}
                     style={{
                       marginLeft: 'auto',
-                      position: 'relative',
-                      right: '0px',
-                    }}
+                      // position: 'relative',
+                      // right: '0px',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                    }}            
+                  >
+                  <RiDeleteBin6Fill
+                    
                   />
+                  </div>
                 </div>
               </div>
             );
